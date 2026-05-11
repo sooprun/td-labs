@@ -88,11 +88,13 @@ export function AppSidebar({
                 {section.items?.length && isExpanded ? (
                   <SidebarMenuSub>
                     {section.items.map((item) => (
-                      <SidebarMenuSubItem key={item.path}>
+                      <SidebarMenuSubItem
+                        key={item.path}
+                        className={cn(activePath === item.path && "border-l-2 border-sidebar-primary")}
+                      >
                         <SidebarMenuSubButton
                           asChild
                           isActive={activePath === item.path}
-                          className={cn(activePath === item.path && "border-l-2 border-sidebar-primary")}
                         >
                           <a
                             href={item.path}
