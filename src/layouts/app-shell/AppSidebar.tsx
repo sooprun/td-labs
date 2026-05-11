@@ -73,7 +73,7 @@ export function AppSidebar({
                   tooltip={section.title}
                   type="button"
                 >
-                  <Icon />
+                  <Icon className="text-sidebar-primary" />
                   <span>{section.title}</span>
                   {hasChildren ? (
                     <IconChevronDown
@@ -92,6 +92,7 @@ export function AppSidebar({
                         <SidebarMenuSubButton
                           asChild
                           isActive={activePath === item.path}
+                          className={cn(activePath === item.path && "border-l-2 border-sidebar-primary")}
                         >
                           <a
                             href={item.path}

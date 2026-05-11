@@ -79,8 +79,8 @@
     --sidebar-foreground: #0F1A2A;
     --sidebar-primary: #1976D3;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #F1F4F9;
-    --sidebar-accent-foreground: #0F1A2A;
+    --sidebar-accent: #F2F9FF;
+    --sidebar-accent-foreground: #1976D3;
     --sidebar-border: #E2E8F0;
     --sidebar-ring: #1976D3;
 }
@@ -126,7 +126,6 @@
   }
   html {
     @apply font-sans;
-    font-size: 14px;
   }
   body {
     @apply bg-background text-foreground;

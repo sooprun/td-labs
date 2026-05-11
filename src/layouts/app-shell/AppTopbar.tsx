@@ -46,7 +46,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
           </Button>
           <div className="relative hidden w-48 lg:block xl:w-72">
             <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="border-0 pl-9 shadow-none" placeholder="Search" />
+            <Input className="pl-9" placeholder="Search" />
           </div>
         </div>
 
