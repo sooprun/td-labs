@@ -59,7 +59,7 @@ export function AppSidebar({
             return (
               <SidebarMenuItem key={section.title}>
                 <SidebarMenuButton
-                  className={cn(hasChildren && "font-semibold")}
+                  className="font-semibold"
                   isActive={isSectionActive}
                   onClick={() => {
                     if (hasChildren) {
@@ -89,7 +89,6 @@ export function AppSidebar({
                   <SidebarMenuSub>
                     {section.items.map((item) => (
                       <SidebarMenuSubItem key={item.path}>
-                        <span className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border" />
                         {activePath === item.path && (
                           <span className="absolute left-[7px] top-1 bottom-1 w-0.5 rounded-full bg-sidebar-primary" />
                         )}
