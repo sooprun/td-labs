@@ -86,7 +86,7 @@ export function AppSidebar({
                 </SidebarMenuButton>
 
                 {section.items?.length && isExpanded ? (
-                  <SidebarMenuSub>
+                  <SidebarMenuSub className="border-l-0 px-0">
                     {section.items.map((item) => (
                       <SidebarMenuSubItem
                         key={item.path}
