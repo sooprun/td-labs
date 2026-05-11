@@ -92,7 +92,6 @@ export function AppSidebar({
                         <SidebarMenuSubButton
                           asChild
                           isActive={activePath === item.path}
-                          className={cn(activePath === item.path && "rounded-l-none border-l-2 border-sidebar-primary")}
                         >
                           <a
                             href={item.path}

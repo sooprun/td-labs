@@ -133,4 +133,8 @@
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+
+  [data-sidebar="menu-sub-button"][data-active="true"] {
+    box-shadow: inset 2px 0 0 var(--sidebar-primary);
+  }
 }
