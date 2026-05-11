@@ -33,10 +33,10 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         onClick={() => onNavigate("/app/insights")}
         type="button"
       >
-        <span className="flex size-9 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
           TD
         </span>
-        <span className="sr-only">TaxDome Sandbox</span>
+        <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Sandbox</span>
       </button>
 
       <div className="flex min-w-0 flex-1 items-center gap-4 px-8">

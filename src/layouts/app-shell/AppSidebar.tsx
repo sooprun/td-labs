@@ -59,7 +59,7 @@ export function AppSidebar({
             return (
               <SidebarMenuItem key={section.title}>
                 <SidebarMenuButton
-                  className={cn(hasChildren && "font-medium")}
+                  className={cn(hasChildren && "font-semibold")}
                   isActive={isSectionActive}
                   onClick={() => {
                     if (hasChildren) {
