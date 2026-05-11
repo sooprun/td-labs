@@ -81,7 +81,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-48 xl:justify-start xl:px-2">
+            <button className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-auto xl:justify-start xl:px-2">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 AS
               </span>
