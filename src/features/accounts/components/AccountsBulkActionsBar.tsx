@@ -6,8 +6,8 @@ import {
   IconUsers,
   IconX,
 } from "@tabler/icons-react"
-
 import { Button } from "@/components/ui/button"
+import { protoAction } from "@/lib/proto"
 import {
   DataTableToolbarGroup,
   DataTableToolbarSlot,
@@ -37,15 +37,15 @@ export function AccountsBulkActionsBar({
         </Button>
       </DataTableToolbarGroup>
       <DataTableToolbarGroup className="hidden shrink-0 md:flex">
-        <Button variant="ghost" className="text-primary hover:bg-[#F2F9FF] hover:text-primary">
+        <Button variant="ghost" className="text-primary hover:bg-[#F2F9FF] hover:text-primary" onClick={protoAction("Organizer sent")}>
           <IconListDetails className="size-4" />
           Send organizer
         </Button>
-        <Button variant="ghost" className="text-primary hover:bg-[#F2F9FF] hover:text-primary">
+        <Button variant="ghost" className="text-primary hover:bg-[#F2F9FF] hover:text-primary" onClick={protoAction("Job added")}>
           <IconClipboardPlus className="size-4" />
           Add job
         </Button>
-        <Button className="hidden lg:inline-flex text-primary hover:bg-[#F2F9FF] hover:text-primary" variant="ghost">
+        <Button className="hidden lg:inline-flex text-primary hover:bg-[#F2F9FF] hover:text-primary" variant="ghost" onClick={protoAction("Team updated")}>
           <IconUsers className="size-4" />
           Manage team
         </Button>
@@ -53,7 +53,7 @@ export function AccountsBulkActionsBar({
           <IconAt className="size-4" />
           Send email
         </Button>
-        <Button className="hidden xl:inline-flex text-primary hover:bg-[#F2F9FF] hover:text-primary" variant="ghost">
+        <Button className="hidden xl:inline-flex text-primary hover:bg-[#F2F9FF] hover:text-primary" variant="ghost" onClick={protoAction("Tags updated")}>
           <IconTags className="size-4" />
           Manage tags
         </Button>

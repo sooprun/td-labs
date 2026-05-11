@@ -1,4 +1,5 @@
 import { IconEyeOff, IconRosetteDiscountCheck } from "@tabler/icons-react"
+import { protoAction } from "@/lib/proto"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -70,7 +71,7 @@ export function AccountsTable({
                 />
               </TableCell>
               <TableCell>
-                <button className="font-medium text-primary hover:underline">
+                <button className="font-medium text-primary hover:underline" onClick={protoAction(account.name)}>
                   {account.name}
                 </button>
               </TableCell>

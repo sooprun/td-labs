@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { protoAction } from "@/lib/proto"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,9 +37,9 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Prototype</span>
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2 px-8">
+      <div className="flex min-w-0 flex-1 items-center gap-2 pl-6 pr-8">
         <div className="flex shrink-0 items-center gap-5">
-          <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button">
+          <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button" onClick={protoAction("New")}>
             New
           </Button>
           <div className="relative hidden w-48 lg:block xl:w-72">
@@ -50,24 +51,24 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         <div className="min-w-6 flex-1" />
 
         <div className="flex shrink-0 items-center text-sm font-medium text-foreground">
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex" onClick={protoAction("Time entry")}>
             <IconClockHour3 className="size-4 text-primary" />
             Time entry
           </button>
           <div className="mx-2 hidden h-5 w-px shrink-0 bg-border xl:block" />
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex" onClick={protoAction("Help")}>
             <IconHelpCircle className="size-4 text-primary" />
             Help
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex" onClick={protoAction("Community")}>
             <IconUsersGroup className="size-4 text-primary" />
             Community
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex" onClick={protoAction("What's new")}>
             <IconGift className="size-4 text-primary" />
             What&apos;s new
           </button>
-          <button type="button" className="flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-accent hover:text-foreground xl:hidden">
+          <button type="button" className="flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-accent hover:text-foreground xl:hidden" onClick={protoAction("More")}>
             <IconDotsVertical className="size-5" />
           </button>
         </div>
@@ -107,11 +108,11 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
               </div>
             </div>
             <div className="p-1.5">
-              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary">
+              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary" onSelect={protoAction("Account settings")}>
                 <IconSettings className="size-4 text-primary" />
                 Account settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary">
+              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary" onSelect={protoAction("Team & plans")}>
                 <IconUsersGroup className="size-4 text-primary" />
                 Team &amp; plans
               </DropdownMenuItem>
@@ -121,6 +122,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
               <DropdownMenuItem
                 className="h-10 gap-3 rounded-lg px-3 text-sm font-medium"
                 variant="destructive"
+                onSelect={protoAction("Log out")}
               >
                 <IconLogout className="size-4" />
                 Log out

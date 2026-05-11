@@ -16,6 +16,7 @@ import {
   DataTableToolbarSpacer,
 } from "@/components/data-table/DataTableToolbar"
 import { Button } from "@/components/ui/button"
+import { protoAction } from "@/lib/proto"
 import { Input } from "@/components/ui/input"
 import { AccountsBulkActionsBar } from "@/features/accounts/components/AccountsBulkActionsBar"
 import { AccountsTable } from "@/features/accounts/components/AccountsTable"
@@ -84,28 +85,28 @@ function AccountsToolbar() {
   return (
     <DataTableToolbarSlot>
       <DataTableToolbarGroup className="shrink-0">
-        <Button size="sm" variant="ghost">
+        <Button size="sm" variant="ghost" onClick={protoAction("Favorites")}>
           <IconStar className="size-4" />
           Favorites
         </Button>
-        <Button size="sm" variant="ghost">
+        <Button size="sm" variant="ghost" onClick={protoAction("Filter")}>
           <IconFilter className="size-4" />
           Filter
         </Button>
       </DataTableToolbarGroup>
       <DataTableToolbarSpacer />
       <DataTableToolbarGroup className="shrink-0">
-        <Button className="hidden md:inline-flex">New account</Button>
-        <Button className="hidden md:inline-flex" variant="outline">
+        <Button className="hidden md:inline-flex" onClick={protoAction("New account")}>New account</Button>
+        <Button className="hidden md:inline-flex" variant="outline" onClick={protoAction("Import")}>
           Import
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost">
+        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Export")}>
           <IconUpload className="size-4" />
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost">
+        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Print")}>
           <IconPrinter className="size-4" />
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost">
+        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Download")}>
           <IconDownload className="size-4" />
         </Button>
         <div className="relative hidden w-64 lg:block">

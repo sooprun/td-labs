@@ -1,13 +1,14 @@
 import { IconCalendar, IconChevronDown, IconUserCircle } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { protoAction } from "@/lib/proto"
 import { PageHeader, PageLayout, PageSection } from "@/components/page/PageLayout"
 import { InsightMetricGrid } from "@/features/insights/components/InsightMetricGrid"
 import { jobMetrics, pendingClientActivityMetrics } from "@/mock/data/insights"
 
 function AssigneeFilter() {
   return (
-    <button className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
+    <button className="flex items-center gap-1 text-sm font-semibold text-muted-foreground" onClick={protoAction("Assignee filter")}>
       <IconUserCircle className="size-4" />
       Alex Suprun
       <IconChevronDown className="size-4" />
@@ -20,7 +21,7 @@ export function InsightsPage() {
     <PageLayout>
       <PageHeader
         action={
-          <Button size="sm" variant="link">
+          <Button size="sm" variant="link" onClick={protoAction("Edit widgets")}>
             Edit widgets
           </Button>
         }
@@ -40,14 +41,14 @@ export function InsightsPage() {
 
       <PageSection
         action={
-          <Button size="sm" variant="link">
+          <Button size="sm" variant="link" onClick={protoAction("Calendar view")}>
             <IconCalendar className="size-4" />
             Calendar view
           </Button>
         }
         meta={
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
+            <button className="flex items-center gap-1 text-sm font-semibold text-muted-foreground" onClick={protoAction("Date filter")}>
               <IconCalendar className="size-4" />
               May-11-2026
               <IconChevronDown className="size-4" />
