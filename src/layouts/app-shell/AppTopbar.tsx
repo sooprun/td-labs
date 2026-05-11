@@ -27,7 +27,7 @@ type AppTopbarProps = {
 
 export function AppTopbar({ onNavigate }: AppTopbarProps) {
   return (
-    <header className="flex h-16 shrink-0 items-center border-b bg-background">
+    <header className="flex h-14 shrink-0 items-center border-b bg-background">
       <button
         className="flex h-full w-64 shrink-0 items-center px-5 text-left"
         onClick={() => onNavigate("/app/insights")}
@@ -41,12 +41,12 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
       <div className="flex min-w-0 flex-1 items-center gap-4 px-8">
         <div className="flex shrink-0 items-center gap-5">
-          <Button className="h-10 px-6" type="button">
+          <Button className="h-10 rounded-full px-6" type="button">
             New
           </Button>
           <div className="relative hidden w-48 lg:block xl:w-72">
             <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Search" />
+            <Input className="border-0 bg-transparent pl-9 shadow-none" placeholder="Search" />
           </div>
         </div>
 
@@ -81,8 +81,8 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="ml-2 flex h-12 w-12 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-52 xl:justify-start xl:px-2">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+            <button className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-48 xl:justify-start xl:px-2">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 AS
               </span>
               <div className="hidden min-w-0 leading-tight xl:block">
