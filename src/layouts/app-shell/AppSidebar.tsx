@@ -88,10 +88,11 @@ export function AppSidebar({
                 {section.items?.length && isExpanded ? (
                   <SidebarMenuSub>
                     {section.items.map((item) => (
-                      <SidebarMenuSubItem
-                        key={item.path}
-                        className={cn(activePath === item.path && "border-l-2 border-sidebar-primary")}
-                      >
+                      <SidebarMenuSubItem key={item.path}>
+                        <span className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border" />
+                        {activePath === item.path && (
+                          <span className="absolute left-[7px] top-1 bottom-1 w-0.5 rounded-full bg-sidebar-primary" />
+                        )}
                         <SidebarMenuSubButton
                           asChild
                           isActive={activePath === item.path}
