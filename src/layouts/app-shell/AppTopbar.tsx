@@ -34,10 +34,8 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         onClick={() => onNavigate("/app/insights")}
         type="button"
       >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-          TD
-        </span>
-        <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Sandbox</span>
+        <img src="/taxdome-logo.svg" alt="TaxDome" className="size-9 shrink-0" />
+        <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Prototype</span>
       </button>
 
       <div className="flex min-w-0 flex-1 items-center gap-2 px-8">
