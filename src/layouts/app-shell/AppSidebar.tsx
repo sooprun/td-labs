@@ -89,11 +89,6 @@ export function AppSidebar({
                   <SidebarMenuSub>
                     {section.items.map((item) => (
                       <SidebarMenuSubItem key={item.path}>
-                        <span className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border">
-                          {activePath === item.path && (
-                            <span className="absolute inset-x-0 top-1 bottom-1 rounded-full bg-sidebar-primary" />
-                          )}
-                        </span>
                         <SidebarMenuSubButton
                           asChild
                           isActive={activePath === item.path}
@@ -108,6 +103,11 @@ export function AppSidebar({
                             <span>{item.title}</span>
                           </a>
                         </SidebarMenuSubButton>
+                        <span className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border">
+                          {activePath === item.path && (
+                            <span className="absolute inset-x-0 top-1 bottom-1 rounded-full bg-sidebar-primary" />
+                          )}
+                        </span>
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>
