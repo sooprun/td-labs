@@ -1,5 +1,4 @@
 import {
-  IconBell,
   IconChevronDown,
   IconDotsVertical,
   IconLogout,
@@ -20,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 
 type AppTopbarProps = {
   onNavigate: (path: string) => void
