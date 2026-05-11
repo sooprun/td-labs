@@ -48,6 +48,7 @@ export function App() {
 
   const page = pageMap[activeRoute.path] ?? (
     <PrototypePage
+      icon={activeRoute.section.icon}
       path={activeRoute.path}
       sectionTitle={activeRoute.section.title}
       title={activeRoute.title}

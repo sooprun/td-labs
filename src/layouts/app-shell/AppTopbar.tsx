@@ -49,21 +49,21 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
         <div className="min-w-6 flex-1" />
 
-        <div className="flex shrink-0 items-center text-sm font-medium text-muted-foreground">
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+        <div className="flex shrink-0 items-center text-sm font-medium text-foreground">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
             <IconClockHour3 className="size-4 text-primary" />
             Time entry
           </button>
-          <div className="mx-2 hidden h-5 w-px shrink-0 bg-border 2xl:block" />
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex 2xl:px-3">
+          <div className="mx-2 hidden h-5 w-px shrink-0 bg-border xl:block" />
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
             <IconHelpCircle className="size-4 text-primary" />
             Help
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
             <IconUsersGroup className="size-4 text-primary" />
             Community
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex">
             <IconGift className="size-4 text-primary" />
             What&apos;s new
           </button>
