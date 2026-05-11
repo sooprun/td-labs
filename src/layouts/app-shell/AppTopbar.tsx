@@ -8,6 +8,7 @@ import {
   IconHelpCircle,
   IconSearch,
   IconUsersGroup,
+  IconClockHour3,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
@@ -39,7 +40,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Sandbox</span>
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-4 px-8">
+      <div className="flex min-w-0 flex-1 items-center gap-2 px-8">
         <div className="flex shrink-0 items-center gap-5">
           <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button">
             New
@@ -53,36 +54,33 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         <div className="min-w-6 flex-1" />
 
         <div className="flex shrink-0 items-center text-sm font-medium text-muted-foreground">
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 px-2 hover:text-foreground 2xl:flex">
-            <IconHelpCircle className="size-4" />
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+            <IconClockHour3 className="size-4 text-primary" />
             Time entry
           </button>
-          <Separator orientation="vertical" className="mx-2 hidden h-8 2xl:block" />
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 px-2 hover:text-foreground xl:flex 2xl:px-3">
-            <IconHelpCircle className="size-4" />
+          <div className="mx-2 hidden h-5 w-px shrink-0 bg-border 2xl:block" />
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex 2xl:px-3">
+            <IconHelpCircle className="size-4 text-primary" />
             Help
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 px-2 hover:text-foreground 2xl:flex">
-            <IconUsersGroup className="size-4" />
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+            <IconUsersGroup className="size-4 text-primary" />
             Community
           </button>
-          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 px-2 hover:text-foreground 2xl:flex">
-            <IconGift className="size-4" />
+          <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground 2xl:flex">
+            <IconGift className="size-4 text-primary" />
             What&apos;s new
-          </button>
-          <Separator orientation="vertical" className="mx-2 hidden h-8 xl:block" />
-          <button type="button" className="flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-accent hover:text-foreground">
-            <IconBell className="size-5" />
           </button>
           <button type="button" className="flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-accent hover:text-foreground xl:hidden">
             <IconDotsVertical className="size-5" />
           </button>
         </div>
+        <div className="h-5 w-px shrink-0 bg-border" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-auto xl:justify-start xl:px-2">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+            <button className="flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-auto xl:justify-start xl:px-2">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#E8813A] text-xs font-semibold text-white">
                 AS
               </span>
               <div className="hidden min-w-0 leading-tight xl:block">
@@ -96,39 +94,39 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-80 overflow-hidden rounded-xl p-0 shadow-lg"
+            className="w-64 overflow-hidden rounded-xl p-0 shadow-lg"
             sideOffset={8}
           >
-            <div className="flex items-center gap-3 border-b bg-muted/50 p-4">
-              <span className="flex size-12 items-center justify-center rounded-full bg-primary text-base font-semibold text-primary-foreground">
+            <div className="flex items-center gap-3 border-b p-4">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#E8813A] text-sm font-semibold text-white">
                 AS
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">
+                <p className="truncate text-sm font-semibold text-foreground">
                   Alex Suprun
                 </p>
-                <p className="truncate text-sm text-muted-foreground">
+                <p className="truncate text-xs text-muted-foreground">
                   asuprun@taxdome.com
                 </p>
               </div>
             </div>
             <div className="p-1.5">
-              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium">
-                <IconSettings className="size-5" />
+              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary">
+                <IconSettings className="size-4 text-primary" />
                 Account settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium">
-                <IconUsersGroup className="size-5" />
+              <DropdownMenuItem className="h-10 gap-3 rounded-lg px-3 text-sm font-medium text-primary hover:bg-[#F2F9FF] focus:bg-[#F2F9FF] focus:text-primary">
+                <IconUsersGroup className="size-4 text-primary" />
                 Team &amp; plans
               </DropdownMenuItem>
             </div>
             <DropdownMenuSeparator className="m-0" />
             <div className="p-1.5">
               <DropdownMenuItem
-                className="h-10 gap-3 rounded-lg px-3 text-sm font-semibold"
+                className="h-10 gap-3 rounded-lg px-3 text-sm font-medium"
                 variant="destructive"
               >
-                <IconLogout className="size-5" />
+                <IconLogout className="size-4" />
                 Log out
               </DropdownMenuItem>
             </div>

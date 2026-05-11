@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconChevronDown, IconMoon, IconSun } from "@tabler/icons-react"
+import { IconChevronDown, IconMoon, IconPin, IconSun } from "@tabler/icons-react"
 
 import { productNavigation } from "@/app/navigation"
 import { useTheme } from "@/components/theme-provider"
@@ -117,32 +117,40 @@ export function AppSidebar({
           })}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t group-data-[collapsible=icon]:items-center">
-        <div className="flex items-center gap-2 rounded-lg bg-muted p-1 group-data-[collapsible=icon]:hidden">
+      <SidebarFooter className="border-t">
+        <div className="flex items-center justify-between px-1 py-1">
           <button
             type="button"
-            onClick={() => setTheme("light")}
-            className={cn(
-              "flex flex-1 items-center justify-center rounded-md py-1.5",
-              theme === "light"
-                ? "bg-background text-primary shadow-sm"
-                : "text-muted-foreground"
-            )}
+            className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <IconSun className="size-4" />
+            <IconPin className="size-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => setTheme("dark")}
-            className={cn(
-              "flex flex-1 items-center justify-center rounded-md py-1.5",
-              theme === "dark"
-                ? "bg-background text-primary shadow-sm"
-                : "text-muted-foreground"
-            )}
-          >
-            <IconMoon className="size-4" />
-          </button>
+          <div className="flex items-center rounded-lg bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setTheme("light")}
+              className={cn(
+                "flex size-8 items-center justify-center rounded-md",
+                theme === "light"
+                  ? "bg-background text-primary shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <IconSun className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme("dark")}
+              className={cn(
+                "flex size-8 items-center justify-center rounded-md",
+                theme === "dark"
+                  ? "bg-background text-primary shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <IconMoon className="size-4" />
+            </button>
+          </div>
         </div>
       </SidebarFooter>
       <SidebarRail />

@@ -1,19 +1,18 @@
 import {
-  IconActivity,
-  IconBellRinging,
-  IconBook,
-  IconChartInfographic,
-  IconChecklist,
-  IconCreditCard,
-  IconFolder,
-  IconGrowth,
+  IconActivityHeartbeat,
+  IconApps,
+  IconChartDonut,
+  IconClipboard,
+  IconFileDescription,
   IconInbox,
-  IconLayoutDashboard,
-  IconMessageCircle,
-  IconReportAnalytics,
+  IconMessages,
+  IconMessageUser,
+  IconReceiptDollar,
+  IconRosetteDiscount,
   IconSettings,
+  IconStack2,
   IconTemplate,
-  IconUsers,
+  IconUsersGroup,
 } from "@tabler/icons-react"
 
 import type { ProductNavSection } from "@/types/navigation"
@@ -22,7 +21,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Insights",
     path: "/app/insights",
-    icon: IconLayoutDashboard,
+    icon: IconApps,
   },
   {
     title: "Inbox+",
@@ -32,7 +31,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Clients",
     path: "/app/clients",
-    icon: IconUsers,
+    icon: IconUsersGroup,
     items: [
       { title: "Accounts", path: "/app/clients" },
       { title: "Contacts", path: "/app/clients/contacts" },
@@ -41,7 +40,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Reporting",
     path: "/app/reporting",
-    icon: IconReportAnalytics,
+    icon: IconChartDonut,
     items: [
       { title: "Overview", path: "/app/reporting" },
       { title: "Reports", path: "/app/reporting/reports" },
@@ -54,7 +53,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Reporting (Legacy)",
     path: "/app/reporting-legacy",
-    icon: IconChartInfographic,
+    icon: IconChartDonut,
     items: [
       { title: "Overview", path: "/app/reporting-legacy" },
       { title: "Reports", path: "/app/reporting-legacy/reports" },
@@ -70,17 +69,17 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Team chat",
     path: "/app/team-chat",
-    icon: IconMessageCircle,
+    icon: IconMessageUser,
   },
   {
     title: "Communications",
     path: "/app/communications",
-    icon: IconBellRinging,
+    icon: IconMessages,
   },
   {
     title: "Workflow",
     path: "/app/workflow",
-    icon: IconChecklist,
+    icon: IconStack2,
     items: [
       { title: "Tasks", path: "/app/workflow" },
       { title: "Jobs", path: "/app/workflow/jobs" },
@@ -92,7 +91,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Documents",
     path: "/app/documents",
-    icon: IconFolder,
+    icon: IconFileDescription,
     items: [
       { title: "Clients docs", path: "/app/documents" },
       { title: "Wiki", path: "/app/documents/wiki" },
@@ -101,12 +100,12 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Organizers",
     path: "/app/organizers",
-    icon: IconBook,
+    icon: IconClipboard,
   },
   {
     title: "Billing",
     path: "/app/billing",
-    icon: IconCreditCard,
+    icon: IconReceiptDollar,
     items: [
       { title: "Invoices", path: "/app/billing" },
       { title: "Recurring invoices", path: "/app/billing/recurring-invoices" },
@@ -120,7 +119,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Activity feed",
     path: "/app/activity-feed",
-    icon: IconActivity,
+    icon: IconActivityHeartbeat,
   },
   {
     title: "Templates",
@@ -138,7 +137,7 @@ export const productNavigation: ProductNavSection[] = [
   {
     title: "Growth solutions",
     path: "/app/growth-solutions",
-    icon: IconGrowth,
+    icon: IconRosetteDiscount,
     items: [
       { title: "Support plans", path: "/app/growth-solutions" },
       { title: "Insurance", path: "/app/growth-solutions/insurance" },

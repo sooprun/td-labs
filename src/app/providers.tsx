@@ -9,7 +9,7 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="light">
       <TooltipProvider>{children}</TooltipProvider>
     </ThemeProvider>
   )
