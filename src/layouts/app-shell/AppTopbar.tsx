@@ -41,7 +41,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
       <div className="flex min-w-0 flex-1 items-center gap-4 px-8">
         <div className="flex shrink-0 items-center gap-5">
-          <Button className="h-10 rounded-full px-6" type="button">
+          <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button">
             New
           </Button>
           <div className="relative hidden w-48 lg:block xl:w-72">
