@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "sonner"
 
 import { ThemeProvider } from "@/components/theme-provider"
@@ -15,7 +14,6 @@ export function AppProviders({ children }: AppProvidersProps) {
       <TooltipProvider>
         {children}
         <Toaster position="top-right" richColors />
-        <Analytics />
       </TooltipProvider>
     </ThemeProvider>
   )
