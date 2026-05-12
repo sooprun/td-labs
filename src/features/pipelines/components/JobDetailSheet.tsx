@@ -15,11 +15,11 @@ type JobDetailSheetProps = {
   onClose: () => void
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="mb-1 text-xs text-muted-foreground">{label}</p>
-      {children}
+      <p className="mb-0.5 text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold">{value}</p>
     </div>
   )
 }
@@ -31,45 +31,24 @@ export function JobDetailSheet({ job, open, onClose }: JobDetailSheetProps) {
         {job && (
           <>
             <SheetHeader className="pb-2">
-              <SheetTitle className="text-xl">{job.jobTitle}</SheetTitle>
-              <p className="text-sm text-muted-foreground">
-                {job.clientName} · 2024
-              </p>
+              <SheetTitle className="text-xl">{job.name}</SheetTitle>
+              <p className="text-sm text-muted-foreground">2024 Tax Season</p>
             </SheetHeader>
 
             <div className="flex flex-col gap-4 px-4 py-2">
-              <Field label="Client">
-                <p className="text-sm font-semibold text-[#1976D3]">
-                  {job.clientName}
-                </p>
-              </Field>
-
-              <Field label="Job">
-                <p className="text-sm font-semibold">{job.jobTitle}</p>
-              </Field>
-
-              <Field label="Priority">
-                <p className="text-sm font-semibold">{job.priority ?? "—"}</p>
-              </Field>
-
-              <Field label="Assignees">
-                <div className="flex gap-1.5 pt-0.5">
-                  {job.assignees.map((initials) => (
-                    <span
-                      key={initials}
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
-                    >
-                      {initials}
-                    </span>
-                  ))}
+              <Field label="Due date" value={job.dueDate ?? "—"} />
+              <Field label="Time budget" value={job.timeBudget} />
+              <Field label="Time variance" value={job.timeVariance} />
+              <Field label="Time budget spent" value={job.timeBudgetSpent} />
+              <Field label="Time in stage" value={job.timeAgo} />
+              {job.overdueText && (
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">Status</p>
+                  <p className="text-sm font-semibold text-[#DE463C]">
+                    {job.overdueText}
+                  </p>
                 </div>
-              </Field>
-
-              <Field label="Days in stage">
-                <p className="text-sm font-semibold">
-                  {job.daysInStage} {job.daysInStage === 1 ? "day" : "days"}
-                </p>
-              </Field>
+              )}
             </div>
 
             <SheetFooter className="flex-col gap-2">

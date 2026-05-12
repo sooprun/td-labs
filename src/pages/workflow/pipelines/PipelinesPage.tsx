@@ -1,10 +1,11 @@
 import * as React from "react"
 import {
+  IconArrowsSort,
   IconChevronDown,
   IconFilter,
   IconPencil,
   IconPlus,
-  IconSortAZ,
+  IconRepeat,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,18 +36,16 @@ export function PipelinesPage() {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          <div className="-ml-2 flex items-center gap-1">
             <Button
-              size="sm"
               variant="ghost"
               className="text-primary hover:bg-[#F2F9FF] hover:text-primary"
               onClick={protoAction("Sort")}
             >
-              <IconSortAZ className="size-4" />
-              Account name, A to Z
+              <IconArrowsSort className="size-4" />
+              Time in stage, shortest first
             </Button>
             <Button
-              size="sm"
               variant="ghost"
               className="text-primary hover:bg-[#F2F9FF] hover:text-primary"
               onClick={protoAction("Filter")}
@@ -57,15 +56,15 @@ export function PipelinesPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={protoAction("Add job")}>
+            <Button onClick={protoAction("Add job")}>
               <IconPlus className="size-4" />
               Add job
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={protoAction("Edit pipeline")}
-            >
+            <Button variant="outline" onClick={protoAction("Manage recurrence")}>
+              <IconRepeat className="size-4" />
+              Manage recurrence
+            </Button>
+            <Button variant="outline" onClick={protoAction("Edit pipeline")}>
               <IconPencil className="size-4" />
               Edit
             </Button>
