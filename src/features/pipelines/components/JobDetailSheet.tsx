@@ -7,7 +7,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { protoAction } from "@/lib/proto"
-import type { Job } from "@/mock/data/pipelines"
+import type { Job } from "@/mock/pipelines"
 
 type JobDetailSheetProps = {
   job: Job | null

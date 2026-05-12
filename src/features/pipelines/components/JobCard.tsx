@@ -2,7 +2,7 @@ import { useDraggable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@/lib/utils"
-import type { Job } from "@/mock/data/pipelines"
+import type { Job } from "@/mock/pipelines"
 
 type JobCardProps = {
   job: Job

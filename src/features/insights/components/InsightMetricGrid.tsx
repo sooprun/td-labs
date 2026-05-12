@@ -1,6 +1,6 @@
 import { InsightMetricCard } from "@/features/insights/components/InsightMetricCard"
 import { cn } from "@/lib/utils"
-import type { InsightMetric } from "@/mock/data/insights"
+import type { InsightMetric } from "@/mock/insights"
 
 type InsightMetricGridProps = {
   metrics: InsightMetric[]

@@ -20,7 +20,7 @@ import { protoAction } from "@/lib/proto"
 import { Input } from "@/components/ui/input"
 import { AccountsBulkActionsBar } from "@/features/accounts/components/AccountsBulkActionsBar"
 import { AccountsTable } from "@/features/accounts/components/AccountsTable"
-import { accounts } from "@/mock/data/accounts"
+import { accounts } from "@/mock/accounts"
 
 type AccountsPageProps = {
   onNavigate: (path: string) => void

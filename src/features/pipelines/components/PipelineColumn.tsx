@@ -3,7 +3,7 @@ import { IconBolt, IconChevronsLeft } from "@tabler/icons-react"
 
 import { cn } from "@/lib/utils"
 import { protoAction } from "@/lib/proto"
-import type { Job, Stage } from "@/mock/data/pipelines"
+import type { Job, Stage } from "@/mock/pipelines"
 
 import { JobCard } from "./JobCard"
 

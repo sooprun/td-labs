@@ -9,8 +9,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { protoAction } from "@/lib/proto"
-import { initialStages, pipelineName } from "@/mock/data/pipelines"
-import type { Job, Stage } from "@/mock/data/pipelines"
+import { initialStages, pipelineName, type Job, type Stage } from "@/mock/pipelines"
 import { PipelineBoard } from "@/features/pipelines/components/PipelineBoard"
 import { JobDetailSheet } from "@/features/pipelines/components/JobDetailSheet"
 

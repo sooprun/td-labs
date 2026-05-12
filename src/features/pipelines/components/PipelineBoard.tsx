@@ -8,7 +8,7 @@ import {
 } from "@dnd-kit/core"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 
-import type { Job, Stage } from "@/mock/data/pipelines"
+import type { Job, Stage } from "@/mock/pipelines"
 
 import { JobCard } from "./JobCard"
 import { PipelineColumn } from "./PipelineColumn"

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { protoAction } from "@/lib/proto"
 import { PageHeader, PageLayout, PageSection } from "@/components/page/PageLayout"
 import { InsightMetricGrid } from "@/features/insights/components/InsightMetricGrid"
-import { jobMetrics, pendingClientActivityMetrics } from "@/mock/data/insights"
+import { jobMetrics, pendingClientActivityMetrics } from "@/mock/insights"
 
 function AssigneeFilter() {
   return (

@@ -1,6 +1,6 @@
 import { IconChevronDown } from "@tabler/icons-react"
 
-import type { InsightMetric } from "@/mock/data/insights"
+import type { InsightMetric } from "@/mock/insights"
 
 type InsightMetricCardProps = {
   metric: InsightMetric

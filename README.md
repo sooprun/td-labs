@@ -1,20 +1,25 @@
-# React + TypeScript + Vite + shadcn/ui
+# TaxDome Sandbox Prototype
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+Clickable SaaS prototype sandbox for TaxDome-like UX and product experiments.
+
+## Project Docs
+
+- [Prototype architecture](docs/prototype-architecture.md)
+- [UI contracts](docs/ui-contracts.md)
 
 ## Adding components
 
-To add components to your app, run the following command:
+This project uses shadcn/ui source components. Add new primitives only when a shared component is missing:
 
 ```bash
 npx shadcn@latest add button
 ```
 
-This will place the ui components in the `src/components` directory.
+This places UI primitives in `src/components/ui`.
 
 ## Using components
 
-To use the components in your app, import them as follows:
+Import local primitives through the configured alias:
 
 ```tsx
 import { Button } from "@/components/ui/button"

@@ -45,12 +45,9 @@ export function App() {
     : null
   if (accountIdSegment && accountIdSegment.startsWith("acct-")) {
     const accountId = activePath.replace("/app/clients/", "")
-    const accountsRoute = resolveProductRoute("/app/clients")!
     return (
       <AppShell
         activePath="/app/clients"
-        activeSection={accountsRoute.section}
-        activeTitle={accountsRoute.title}
         onNavigate={handleNavigate}
       >
         <AccountDetailPage
@@ -83,8 +80,6 @@ export function App() {
   return (
     <AppShell
       activePath={activeRoute.path}
-      activeSection={activeRoute.section}
-      activeTitle={activeRoute.title}
       onNavigate={handleNavigate}
     >
       {page}

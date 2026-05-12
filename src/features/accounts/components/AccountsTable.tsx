@@ -7,7 +7,6 @@ import {
   IconMailOff,
   IconRosetteDiscountCheck,
 } from "@tabler/icons-react"
-import { protoAction } from "@/lib/proto"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -18,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { Account } from "@/mock/data/accounts"
+import type { Account } from "@/mock/accounts"
 import { formatCurrency } from "@/lib/formatters"
 
 type AccountsTableProps = {

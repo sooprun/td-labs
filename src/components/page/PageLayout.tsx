@@ -9,9 +9,9 @@ type PageLayoutProps = {
 
 export function PageLayout({ children, className }: PageLayoutProps) {
   return (
-    <main className={cn("min-h-full bg-workspace p-6", className)}>
+    <div className={cn("min-h-full w-full bg-workspace p-6", className)}>
       {children}
-    </main>
+    </div>
   )
 }
 

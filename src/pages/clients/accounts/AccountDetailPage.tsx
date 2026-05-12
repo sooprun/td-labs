@@ -9,9 +9,14 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { protoAction } from "@/lib/proto"
-import { accounts } from "@/mock/data/accounts"
-import { accountJobsMap, type Job, type Task } from "@/mock/data/account-jobs"
-import { getAccountLeftPanel, teamMemberNames } from "@/mock/data/account-left-panel"
+import {
+  accountJobsMap,
+  accounts,
+  getAccountLeftPanel,
+  teamMemberNames,
+  type Job,
+  type Task,
+} from "@/mock/accounts"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
