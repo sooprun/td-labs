@@ -95,12 +95,16 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
               <div key={o.accountId} className="flex items-center gap-3">
                 <span className="flex-1 truncate text-sm">{o.accountName}</span>
                 {pct !== null && (
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                    pct > 0
-                      ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                      : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                  }`}>
-                    {pct > 0 ? "+" : ""}{Math.round(pct)}%
+                  <span className="inline-flex w-14 shrink-0 justify-center">
+                    {Math.round(pct) !== 0 && (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        pct > 0
+                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                      }`}>
+                        {pct > 0 ? "+" : ""}{Math.round(pct)}%
+                      </span>
+                    )}
                   </span>
                 )}
                 <div className="relative w-28 shrink-0">

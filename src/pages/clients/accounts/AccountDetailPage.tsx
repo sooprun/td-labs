@@ -951,13 +951,18 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                       )}
                       {editingId !== svc.id && (() => {
                         const pct = ((override.rate - svc.defaultRate) / svc.defaultRate) * 100
+                        const rounded = Math.round(pct)
                         const sign = pct > 0 ? "+" : ""
                         const color = pct > 0
                           ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                           : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
                         return (
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
-                            {sign}{Math.round(pct)}%
+                          <span className="inline-flex w-14 justify-center">
+                            {rounded !== 0 && (
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
+                                {sign}{rounded}%
+                              </span>
+                            )}
                           </span>
                         )
                       })()}
