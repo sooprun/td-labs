@@ -71,7 +71,7 @@ export function DataTableBulkActionsBar({
   selectAllLabel = "Select all items",
 }: DataTableBulkActionsBarProps) {
   return (
-    <DataTableToolbarSlot className="overflow-hidden">
+    <DataTableToolbarSlot>
       <DataTableToolbarGroup className="shrink-0">
         <span className="text-lg font-semibold">{selectedCount} selected</span>
         <Button onClick={onClearSelection} size="icon-xl" variant="ghost">
@@ -82,7 +82,7 @@ export function DataTableBulkActionsBar({
         </Button>
       </DataTableToolbarGroup>
 
-      <DataTableToolbarGroup className="hidden min-w-0 flex-1 md:flex">
+      <DataTableToolbarGroup className="hidden shrink-0 md:flex">
         {actions.map((action) => {
           const Icon = action.icon
 
