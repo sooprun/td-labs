@@ -27,7 +27,7 @@ export function AccountsMoreActionsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="text-primary hover:bg-[#F2F9FF] hover:text-primary aria-expanded:bg-[#F2F9FF] aria-expanded:text-primary">
+        <Button size="xl" variant="ghost">
           <IconDotsVertical className="size-4" />
           More actions
         </Button>
