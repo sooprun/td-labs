@@ -5,6 +5,7 @@ import { resolveProductRoute } from "@/app/routes"
 import { AppShell } from "@/layouts/app-shell/AppShell"
 import { AccountsPage } from "@/pages/clients/accounts/AccountsPage"
 import { InsightsPage } from "@/pages/insights/InsightsPage"
+import { PipelinesPage } from "@/pages/workflow/pipelines/PipelinesPage"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
 
 export function App() {
@@ -44,6 +45,7 @@ export function App() {
   const pageMap: Partial<Record<string, React.ReactElement>> = {
     "/app/insights": <InsightsPage />,
     "/app/clients": <AccountsPage />,
+    "/app/workflow/pipelines": <PipelinesPage />,
   }
 
   const page = pageMap[activeRoute.path] ?? (
