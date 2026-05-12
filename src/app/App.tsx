@@ -40,10 +40,10 @@ export function App() {
   }, [])
 
   // Handle dynamic account detail route before pageMap lookup
-  if (
-    activePath.startsWith("/app/clients/") &&
-    activePath !== "/app/clients"
-  ) {
+  const accountIdSegment = activePath.startsWith("/app/clients/")
+    ? activePath.slice("/app/clients/".length)
+    : null
+  if (accountIdSegment && accountIdSegment.startsWith("acct-")) {
     const accountId = activePath.replace("/app/clients/", "")
     const accountsRoute = resolveProductRoute("/app/clients")!
     return (
