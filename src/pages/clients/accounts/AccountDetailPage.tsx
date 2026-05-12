@@ -5,9 +5,16 @@ import {
   IconChevronRight,
   IconCirclePlus,
   IconCopy,
+  IconReceiptDollar,
+  IconStar,
+  IconFilter,
+  IconPrinter,
+  IconSearch,
+  IconDownload,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { DataTableBulkActionsBar, DataTableToolbarSlot, DataTableToolbarGroup, DataTableToolbarSpacer } from "@/components/data-table/DataTableToolbar"
 import { protoAction } from "@/lib/proto"
 import {
   accountJobsMap,
@@ -17,12 +24,25 @@ import {
   type Job,
   type Task,
 } from "@/mock/accounts"
+import { invoices, type InvoiceStatus } from "@/mock/data/invoices"
+import type { ServiceItem } from "@/mock/services"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { IconDotsVertical, IconSettings, IconTrash } from "@tabler/icons-react"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type AccountDetailPageProps = {
   accountId: string
   onBack: () => void
+  services: ServiceItem[]
+  onServicesChange: (items: ServiceItem[]) => void
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -377,7 +397,7 @@ function JobsTable({ jobs }: { jobs: Job[] }) {
           <tr key={job.id} className="border-b last:border-0">
             <td className="py-2.5 pr-4">
               <button
-                className="text-primary hover:underline"
+                className="text-left text-primary hover:underline"
                 onClick={protoAction(job.name)}
               >
                 {job.name}
@@ -385,7 +405,7 @@ function JobsTable({ jobs }: { jobs: Job[] }) {
             </td>
             <td className="py-2.5 pr-4 text-muted-foreground">
               <button
-                className="hover:underline hover:text-foreground transition-colors"
+                className="text-left hover:underline hover:text-foreground transition-colors"
                 onClick={protoAction(job.pipeline)}
               >
                 {job.pipeline}
@@ -433,7 +453,7 @@ function TasksTable({ tasks }: { tasks: Task[] }) {
           <tr key={task.id} className="border-b last:border-0">
             <td className="py-2.5 pr-4">
               <button
-                className="text-primary hover:underline"
+                className="text-left text-primary hover:underline"
                 onClick={protoAction(task.name)}
               >
                 {task.name}
@@ -441,7 +461,7 @@ function TasksTable({ tasks }: { tasks: Task[] }) {
             </td>
             <td className="py-2.5 pr-4 text-muted-foreground">
               <button
-                className="hover:underline hover:text-foreground transition-colors"
+                className="text-left hover:underline hover:text-foreground transition-colors"
                 onClick={protoAction(task.job)}
               >
                 {task.job}
@@ -568,6 +588,293 @@ function RightPanel({ accountId }: { accountId: string }) {
 
 // ─── Main page ───────────────────────────────────────────────────────────────
 
+// ─── Invoices tab ────────────────────────────────────────────────────────────
+
+const INVOICE_STATUS_STYLES: Record<InvoiceStatus, string> = {
+  Paid:    "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400",
+  Unpaid:  "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400",
+  Overdue: "bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400",
+  Draft:   "bg-muted text-muted-foreground",
+}
+
+type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Custom rates"
+
+function InvoicesTabContent({ accountId, services }: { accountId: string; services: ServiceItem[] }) {
+  const [subTab, setSubTab] = React.useState<InvoicesSubTab>("Invoices")
+
+  const accountInvoices = invoices.filter((inv) => inv.accountId === accountId)
+  const paid = accountInvoices.filter((i) => i.status === "Paid").reduce((s, i) => s + i.amountPaid, 0)
+  const unpaid = accountInvoices.filter((i) => i.status !== "Paid").reduce((s, i) => s + i.balanceDue, 0)
+
+  const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Sub-tabs */}
+      <div className="flex border-b">
+        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Custom rates"] as InvoicesSubTab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setSubTab(t)}
+            className={`mr-6 shrink-0 whitespace-nowrap border-b-2 pb-2.5 pt-1 text-sm font-medium transition-colors ${
+              subTab === t
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "Invoices" ? (
+        <>
+          {/* Summary */}
+          <div className="flex min-h-11 items-center gap-4 text-sm text-muted-foreground">
+            <span>Invoices: <strong className="text-foreground">{accountInvoices.length}</strong></span>
+            <div className="h-4 w-px bg-border" />
+            <span>Paid: <strong className="text-foreground">{fmt(paid)}</strong></span>
+            <div className="h-4 w-px bg-border" />
+            <span>Unpaid: <strong className="text-foreground">{fmt(unpaid)}</strong></span>
+          </div>
+
+          {/* Toolbar */}
+          <div className="flex min-h-11 items-center gap-2">
+            <Button size="xl" variant="ghost" onClick={protoAction("Favorites")}>
+              <IconStar className="size-4" />
+              Favorites
+              <IconChevronDown className="size-3.5" />
+            </Button>
+            <Button size="xl" variant="ghost" onClick={protoAction("Filter")}>
+              <IconFilter className="size-4" />
+              Filter
+              <IconChevronDown className="size-3.5" />
+            </Button>
+            <div className="flex-1" />
+            <Button size="xl" onClick={protoAction("New invoice")}>New invoice</Button>
+            <Button size="xl" variant="outline" onClick={protoAction("Export invoices")}>
+              <IconDownload className="size-4" />
+              Export invoices
+            </Button>
+            <Button size="icon-xl" variant="ghost" onClick={protoAction("Print")}>
+              <IconPrinter className="size-4" />
+            </Button>
+            <div className="relative w-48">
+              <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
+            </div>
+          </div>
+
+          {accountInvoices.length === 0 ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No invoices yet</p>
+          ) : (
+            <div className="table-striped overflow-x-auto rounded-lg border bg-background">
+              <Table>
+                <TableHeader className="sticky top-0 z-40 bg-background">
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <input type="checkbox" className="table-checkbox" />
+                    </TableHead>
+                    <TableHead>Invoice number</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Assignee</TableHead>
+                    <TableHead>Posted</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead className="text-right">Amount paid</TableHead>
+                    <TableHead className="text-right">Balance due</TableHead>
+                    <TableHead>Last paid</TableHead>
+                    <TableHead className="w-10 px-0">
+                      <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
+                        <IconSettings className="size-4" />
+                      </Button>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {accountInvoices.map((inv) => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="w-12">
+                        <input type="checkbox" className="table-checkbox" />
+                      </TableCell>
+                      <TableCell>
+                        <button className="font-medium text-primary hover:underline" onClick={protoAction("Open invoice")}>
+                          {inv.number}
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${INVOICE_STATUS_STYLES[inv.status]}`}>
+                          {inv.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{inv.assignee}</TableCell>
+                      <TableCell className="text-muted-foreground">{inv.postedAt ?? "—"}</TableCell>
+                      <TableCell className="text-right font-medium">{fmt(inv.total)}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{fmt(inv.amountPaid)}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {inv.balanceDue > 0 ? fmt(inv.balanceDue) : <span className="text-muted-foreground">{fmt(0)}</span>}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{inv.lastPaidAt ?? "—"}</TableCell>
+                      <TableCell className="w-10 px-0">
+                        <Button size="icon-xl" variant="ghost" onClick={protoAction("Invoice actions")}>
+                          <IconDotsVertical className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </>
+      ) : subTab === "Custom rates" ? (
+        <CustomRatesTabContent accountId={accountId} services={services} />
+      ) : (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-muted-foreground">{subTab} — coming soon</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CustomRatesTabContent({ accountId, services }: { accountId: string; services: ServiceItem[] }) {
+  const servicesWithOverride = services
+    .filter((s) => s.clientOverridesList.some((o) => o.accountId === accountId))
+
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const allSelected = servicesWithOverride.length > 0 && selectedIds.length === servicesWithOverride.length
+  const toggleAll = () => setSelectedIds(allSelected ? [] : servicesWithOverride.map((s) => s.id))
+  const toggleOne = (id: string) => setSelectedIds((prev) =>
+    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  )
+
+  const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  if (servicesWithOverride.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-16 text-center">
+        <IconReceiptDollar className="mb-5 size-14 text-muted-foreground/40" strokeWidth={1.25} />
+        <h3 className="text-lg font-semibold">No custom rates yet</h3>
+        <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+          This client uses your default service rates. Add a custom rate to override the price for any specific service.
+        </p>
+        <button
+          className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          onClick={protoAction("Add custom rate")}
+        >
+          <IconCirclePlus className="size-4" />
+          Add custom rate
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col">
+      {/* Toolbar */}
+      {selectedIds.length > 0 ? (
+        <DataTableBulkActionsBar
+          selectedCount={selectedIds.length}
+          onClearSelection={() => setSelectedIds([])}
+          onSelectAll={() => setSelectedIds(servicesWithOverride.map((s) => s.id))}
+          selectAllLabel="Select all custom rates"
+          actions={[
+            {
+              icon: IconTrash,
+              label: "Delete",
+              onClick: protoAction("Custom rates deleted"),
+            },
+          ]}
+        />
+      ) : (
+        <DataTableToolbarSlot>
+          <DataTableToolbarGroup className="shrink-0">
+            <Button size="xl" variant="ghost" onClick={protoAction("Filter")}>
+              <IconFilter className="size-4" />
+              Filter
+              <IconChevronDown className="size-3.5" />
+            </Button>
+          </DataTableToolbarGroup>
+          <DataTableToolbarSpacer />
+          <DataTableToolbarGroup className="shrink-0">
+            <Button size="xl" onClick={protoAction("Add custom rate")}>
+              <IconCirclePlus className="size-4" />
+              Add custom rate
+            </Button>
+            <div className="relative w-48">
+              <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
+            </div>
+          </DataTableToolbarGroup>
+        </DataTableToolbarSlot>
+      )}
+
+      <div className="table-striped overflow-x-auto rounded-lg border bg-background">
+        <Table>
+          <TableHeader className="sticky top-0 z-40 bg-background">
+            <TableRow>
+              <TableHead className="w-12">
+                <input type="checkbox" className="table-checkbox" checked={allSelected} onChange={toggleAll} />
+              </TableHead>
+              <TableHead>Service</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Rate type</TableHead>
+              <TableHead className="text-right">Default rate</TableHead>
+              <TableHead className="text-right">Custom rate</TableHead>
+              <TableHead className="w-10 px-0" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {servicesWithOverride.map((svc) => {
+              const override = svc.clientOverridesList.find((o) => o.accountId === accountId)!
+              return (
+                <TableRow key={svc.id} data-state={selectedIds.includes(svc.id) ? "selected" : undefined}>
+                  <TableCell className="w-12">
+                    <input type="checkbox" className="table-checkbox" checked={selectedIds.includes(svc.id)} onChange={() => toggleOne(svc.id)} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{svc.name}</div>
+                    {svc.description && (
+                      <div className="text-xs text-muted-foreground">{svc.description}</div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{svc.category}</TableCell>
+                  <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{fmt(svc.defaultRate)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="inline-flex items-center justify-end gap-2">
+                      <span className="font-medium text-primary">{fmt(override.rate)}</span>
+                      {(() => {
+                        const pct = ((override.rate - svc.defaultRate) / svc.defaultRate) * 100
+                        const sign = pct > 0 ? "+" : ""
+                        const color = pct > 0
+                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                        return (
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
+                            {sign}{Math.round(pct)}%
+                          </span>
+                        )
+                      })()}
+                    </div>
+                  </TableCell>
+                  <TableCell className="w-10 px-0">
+                    <Button size="icon-xl" variant="ghost" onClick={protoAction("Custom rate actions")}>
+                      <IconDotsVertical className="size-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+// ─── Top tabs ─────────────────────────────────────────────────────────────────
+
 const TOP_TABS = [
   { label: "Overview", badge: undefined },
   { label: "Info", badge: undefined },
@@ -584,7 +891,7 @@ const TOP_TABS = [
 
 type TopTabLabel = (typeof TOP_TABS)[number]["label"]
 
-export function AccountDetailPage({ accountId, onBack }: AccountDetailPageProps) {
+export function AccountDetailPage({ accountId, onBack, services, onServicesChange }: AccountDetailPageProps) {
   const [activeTopTab, setActiveTopTab] =
     React.useState<TopTabLabel>("Overview")
 
@@ -619,9 +926,9 @@ export function AccountDetailPage({ accountId, onBack }: AccountDetailPageProps)
         <div className="flex min-w-0 overflow-x-auto">
           <ul className="flex">
             {TOP_TABS.map((tab) => (
-              <li key={tab.label}>
+              <li key={tab.label} className="shrink-0">
                 <button
-                  className={`flex h-[49px] items-center px-4 text-sm transition-colors ${
+                  className={`flex h-[49px] items-center whitespace-nowrap px-4 text-sm transition-colors ${
                     activeTopTab === tab.label
                       ? "border-b-2 border-primary font-medium text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -646,6 +953,8 @@ export function AccountDetailPage({ accountId, onBack }: AccountDetailPageProps)
             <LeftPanel account={account} />
             <RightPanel accountId={accountId} />
           </div>
+        ) : activeTopTab === "Invoices" ? (
+          <InvoicesTabContent accountId={accountId} services={services} />
         ) : (
           <div className="flex items-center justify-center py-20">
             <p className="text-muted-foreground">

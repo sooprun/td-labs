@@ -59,6 +59,8 @@ export function App() {
         <AccountDetailPage
           accountId={accountId}
           onBack={() => handleNavigate("/app/clients")}
+          services={services}
+          onServicesChange={setServices}
         />
       </AppShell>
     )
