@@ -31,24 +31,22 @@ export function JobDetailSheet({ job, open, onClose }: JobDetailSheetProps) {
         {job && (
           <>
             <SheetHeader className="pb-2">
-              <SheetTitle className="text-xl">{job.name}</SheetTitle>
-              <p className="text-sm text-muted-foreground">2024 Tax Season</p>
+              <SheetTitle className="text-xl">{job.jobTitle}</SheetTitle>
+              <p className="text-sm text-muted-foreground">
+                {job.clientName} · 2024 Tax Season
+              </p>
             </SheetHeader>
 
             <div className="flex flex-col gap-4 px-4 py-2">
-              <Field label="Due date" value={job.dueDate ?? "—"} />
-              <Field label="Time budget" value={job.timeBudget} />
-              <Field label="Time variance" value={job.timeVariance} />
-              <Field label="Time budget spent" value={job.timeBudgetSpent} />
-              <Field label="Time in stage" value={job.timeAgo} />
-              {job.overdueText && (
-                <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">Status</p>
-                  <p className="text-sm font-semibold text-[#DE463C]">
-                    {job.overdueText}
-                  </p>
-                </div>
+              <Field label="Client" value={job.clientName} />
+              <Field label="Job" value={job.jobTitle} />
+              {job.priority && (
+                <Field label="Priority" value={job.priority} />
               )}
+              <Field
+                label="Days in stage"
+                value={`${job.daysInStage} ${job.daysInStage === 1 ? "day" : "days"}`}
+              />
             </div>
 
             <SheetFooter className="flex-col gap-2">

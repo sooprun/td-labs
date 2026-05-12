@@ -136,3 +136,8 @@
     cursor: pointer;
   }
 }
+
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+}

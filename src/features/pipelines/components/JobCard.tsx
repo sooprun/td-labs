@@ -1,6 +1,5 @@
 import { useDraggable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
-import { IconCircleCheckFilled } from "@tabler/icons-react"
 
 import { cn } from "@/lib/utils"
 import type { Job } from "@/mock/data/pipelines"
@@ -10,30 +9,10 @@ type JobCardProps = {
   onClick: () => void
 }
 
-function StatusBadge({ badge }: { badge: Job["badge"] }) {
-  if (!badge) return null
-  if (badge.type === "check") {
-    return <IconCircleCheckFilled className="size-5 shrink-0 text-[#24C875]" />
-  }
-  return (
-    <span
-      className={cn(
-        "flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white",
-        badge.color === "red" ? "bg-[#DE463C]" : "bg-[#FD993C]"
-      )}
-    >
-      {badge.value}
-    </span>
-  )
-}
-
-function MetaRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline gap-1 text-[12px]">
-      <span className="text-muted-foreground">{label}:</span>
-      <span className="text-foreground">{value}</span>
-    </div>
-  )
+const priorityColors: Record<string, string> = {
+  High: "border-red-200 bg-red-50 text-red-700",
+  Medium: "border-orange-200 bg-orange-50 text-orange-600",
+  Low: "border-green-200 bg-green-50 text-green-700",
 }
 
 export function JobCard({ job, onClick }: JobCardProps) {
@@ -45,35 +24,61 @@ export function JobCard({ job, onClick }: JobCardProps) {
       ref={setNodeRef}
       style={transform ? { transform: CSS.Translate.toString(transform) } : undefined}
       className={cn(
-        "cursor-grab rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing",
-        isDragging && "opacity-40"
+        "cursor-pointer rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md",
+        isDragging && "cursor-grabbing opacity-40"
       )}
       onClick={onClick}
+      onMouseDown={() => { document.body.classList.add("is-dragging") }}
+      onMouseUp={() => { document.body.classList.remove("is-dragging") }}
       {...listeners}
       {...attributes}
     >
-      <div className="mb-2.5 flex items-start justify-between gap-2">
-        <span className="text-sm font-semibold leading-snug text-foreground">
-          {job.name}
+      <div className="mb-2">
+        <span className="inline-flex size-8 items-center justify-center rounded-full bg-[#24C875] text-xs font-bold text-white">
+          {job.clientInitials}
         </span>
-        <StatusBadge badge={job.badge} />
       </div>
 
-      <div className="mb-2.5 flex flex-col gap-0.5">
-        {job.dueDate && <MetaRow label="Due" value={job.dueDate} />}
-        <MetaRow label="Time budget" value={job.timeBudget} />
-        <MetaRow label="Time variance" value={job.timeVariance} />
-        <MetaRow label="Time budget spent" value={job.timeBudgetSpent} />
-      </div>
+      <p className="mb-2 text-sm font-semibold text-foreground">{job.clientName}</p>
 
-      <div className="flex items-center gap-1 text-[11px]">
-        <span className="text-muted-foreground">{job.timeAgo}</span>
-        {job.overdueText && (
-          <>
-            <span className="text-muted-foreground">/</span>
-            <span className="font-semibold text-[#DE463C]">{job.overdueText}</span>
-          </>
+      <div className="mb-1.5 flex flex-wrap gap-1">
+        {job.tags.map((tag) => (
+          <span
+            key={tag}
+            className="inline-flex h-[20px] items-center rounded px-1.5 text-[12px] font-medium bg-muted text-muted-foreground"
+          >
+            {tag}
+          </span>
+        ))}
+        {job.priority && (
+          <span
+            className={cn(
+              "inline-flex h-[20px] items-center rounded-full border px-2 text-[12px] font-medium",
+              priorityColors[job.priority]
+            )}
+          >
+            {job.priority}
+          </span>
         )}
+      </div>
+
+      <p className="mb-3 text-sm font-semibold text-foreground">{job.jobTitle}</p>
+
+      <div className="flex items-center justify-between">
+        <div className="flex">
+          {job.assignees.map((initials, i) => (
+            <span
+              key={initials}
+              style={{ marginLeft: i > 0 ? -4 : 0 }}
+              className="flex size-[26px] items-center justify-center rounded-full border-2 border-background bg-primary text-[10px] font-bold text-primary-foreground"
+            >
+              {initials}
+            </span>
+          ))}
+        </div>
+        <span className="text-xs font-semibold text-muted-foreground">
+          {job.daysInStage} {job.daysInStage === 1 ? "day" : "days"}
+        </span>
       </div>
     </div>
   )

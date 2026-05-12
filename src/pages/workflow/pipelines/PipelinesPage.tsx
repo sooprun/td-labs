@@ -5,7 +5,6 @@ import {
   IconFilter,
   IconPencil,
   IconPlus,
-  IconRepeat,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
@@ -59,10 +58,6 @@ export function PipelinesPage() {
             <Button onClick={protoAction("Add job")}>
               <IconPlus className="size-4" />
               Add job
-            </Button>
-            <Button variant="outline" onClick={protoAction("Manage recurrence")}>
-              <IconRepeat className="size-4" />
-              Manage recurrence
             </Button>
             <Button variant="outline" onClick={protoAction("Edit pipeline")}>
               <IconPencil className="size-4" />

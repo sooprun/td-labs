@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core"
-import { IconBolt, IconChevronsLeft, IconClock } from "@tabler/icons-react"
+import { IconBolt, IconChevronsLeft } from "@tabler/icons-react"
 
 import { cn } from "@/lib/utils"
 import { protoAction } from "@/lib/proto"
@@ -39,31 +39,15 @@ export function PipelineColumn({ stage, onJobClick }: PipelineColumnProps) {
         <div className="size-4 shrink-0 rounded border-2 border-border bg-background" />
       </div>
 
-      {/* Automation + time row */}
-      <div className="flex items-center justify-between border-b border-border px-3 py-1">
+      {/* Automation indicator */}
+      <div className="flex items-center gap-1 border-b border-border px-3 py-1 text-[#1976D3]">
         <button
-          className={cn(
-            "flex items-center gap-1 transition-colors",
-            stage.automationCount > 0
-              ? "text-[#1976D3] hover:opacity-75"
-              : "cursor-default text-muted-foreground"
-          )}
-          onClick={
-            stage.automationCount > 0
-              ? protoAction("Pipeline automation")
-              : undefined
-          }
+          className="flex items-center gap-1 hover:opacity-75"
+          onClick={protoAction("Set up automations")}
         >
           <IconBolt className="size-3 shrink-0" />
           <span className="text-xs font-semibold">{stage.automationCount}</span>
         </button>
-
-        {stage.avgTimeInStage && (
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <IconClock className="size-3 shrink-0" />
-            <span className="text-xs font-semibold">{stage.avgTimeInStage}</span>
-          </div>
-        )}
       </div>
 
       {/* Cards */}
@@ -78,18 +62,8 @@ export function PipelineColumn({ stage, onJobClick }: PipelineColumnProps) {
 
       {/* Set up automations */}
       <button
-        className={cn(
-          "w-full rounded-b-xl border-t border-border px-3.5 py-2.5 text-xs font-semibold transition-colors",
-          stage.automationCount > 0
-            ? "text-[#1976D3] hover:bg-[#F2F9FF]"
-            : "cursor-not-allowed text-muted-foreground"
-        )}
-        disabled={!stage.automationCount}
-        onClick={
-          stage.automationCount > 0
-            ? protoAction("Pipeline automation")
-            : undefined
-        }
+        className="w-full rounded-b-xl border-t border-border px-3.5 py-2.5 text-xs font-semibold text-[#1976D3] transition-colors hover:bg-[#F2F9FF]"
+        onClick={protoAction("Set up automations")}
       >
         Set up automations
       </button>
