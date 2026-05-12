@@ -3,12 +3,15 @@ import {
   IconArrowLeft,
   IconChevronDown,
   IconChevronRight,
+  IconCirclePlus,
+  IconCopy,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
 import { protoAction } from "@/lib/proto"
 import { accounts } from "@/mock/data/accounts"
 import { accountJobsMap, type Job, type Task } from "@/mock/data/account-jobs"
+import { getAccountLeftPanel, teamMemberNames } from "@/mock/data/account-left-panel"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -76,6 +79,7 @@ type CollapsibleSectionProps = {
   title: string
   count?: number
   actions: React.ReactNode
+  defaultOpen?: boolean
   children?: React.ReactNode
 }
 
@@ -83,15 +87,16 @@ function CollapsibleSection({
   title,
   count,
   actions,
+  defaultOpen = false,
   children,
 }: CollapsibleSectionProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(defaultOpen)
 
   return (
     <div className="border-t px-5 py-4">
       <div className="flex items-center gap-2">
         <button
-          className="flex items-center gap-1.5 text-sm font-medium"
+          className="flex items-center gap-1.5 text-sm font-semibold"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? (
@@ -111,11 +116,9 @@ function CollapsibleSection({
         </div>
       </div>
       {open && (
-        <div className="mt-3 pl-5">
+        <div className="mt-3">
           {children ?? (
-            <p className="text-sm text-muted-foreground">
-              No {title.toLowerCase()} yet
-            </p>
+            <p className="pl-5 text-sm text-muted-foreground">None yet</p>
           )}
         </div>
       )}
@@ -128,8 +131,13 @@ function LeftPanel({
 }: {
   account: NonNullable<ReturnType<typeof accounts.find>>
 }) {
-  const contactsCount = account.linkedAccounts.length
-  const rolesCount = account.team.length
+  const panelData = getAccountLeftPanel(account.id)
+
+  const teamMembers = account.team.map(
+    (initials) => teamMemberNames[initials] ?? initials
+  )
+  const overflowCount = Math.max(0, teamMembers.length - 3)
+  const visibleMembers = teamMembers.slice(0, 3)
 
   return (
     <div className="w-72 shrink-0 rounded-xl border bg-background">
@@ -147,9 +155,15 @@ function LeftPanel({
       {/* Notes */}
       <CollapsibleSection
         title="Notes"
+        count={panelData.notes.length || undefined}
+        defaultOpen={panelData.notes.length > 0}
         actions={
           <>
-            <button className="hover:underline" onClick={protoAction("Create note")}>
+            <button
+              className="flex items-center gap-1 hover:underline"
+              onClick={protoAction("Create note")}
+            >
+              <IconCirclePlus className="size-4" />
               Create
             </button>
             <button className="hover:underline" onClick={protoAction("View all notes")}>
@@ -157,46 +171,109 @@ function LeftPanel({
             </button>
           </>
         }
-      />
+      >
+        {panelData.notes.length > 0 ? (
+          <div className="-mx-5">
+            {panelData.notes.map((note) => (
+              <button
+                key={note.id}
+                className="w-full border-t px-5 py-3 text-left hover:bg-muted/50"
+                onClick={protoAction(note.title)}
+              >
+                <p className="truncate text-sm font-medium">{note.title}</p>
+                <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                  {note.body}
+                </p>
+              </button>
+            ))}
+          </div>
+        ) : undefined}
+      </CollapsibleSection>
 
       {/* Tags & custom fields */}
       <CollapsibleSection
-        title="Tags &amp; custom fields"
-        count={account.tags.length}
+        title="Tags & custom fields"
+        count={(account.tags.length + (account.team.length > 0 ? 1 : 0)) || undefined}
         actions={
           <button className="hover:underline" onClick={protoAction("View tags")}>
             View
           </button>
         }
       >
-        {account.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {account.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-              >
-                {tag}
-              </span>
-            ))}
+        <div className="space-y-3 pl-5">
+          {/* Tags */}
+          <div>
+            <p className="mb-1.5 text-xs text-muted-foreground">Tags</p>
+            {account.tags.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {account.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full bg-[#1D6B43] px-2.5 py-1 text-xs font-medium text-white"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No tags</p>
+            )}
           </div>
-        ) : undefined}
+
+          {/* Team members */}
+          <div>
+            <p className="mb-1.5 text-xs text-muted-foreground">Team members</p>
+            {teamMembers.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {visibleMembers.map((name) => (
+                  <span
+                    key={name}
+                    className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+                  >
+                    {name}
+                  </span>
+                ))}
+                {overflowCount > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    +{overflowCount}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No team members</p>
+            )}
+          </div>
+        </div>
       </CollapsibleSection>
 
       {/* Account roles */}
       <CollapsibleSection
         title="Account roles"
-        count={rolesCount}
+        count={panelData.roles.length || undefined}
         actions={
           <button className="hover:underline" onClick={protoAction("View all roles")}>
             View all
           </button>
         }
       >
-        {rolesCount > 0 ? (
-          <div className="flex items-center gap-1">
-            {account.team.map((member) => (
-              <AssigneeAvatar key={member} initials={member} />
+        {panelData.roles.length > 0 ? (
+          <div className="space-y-3 pl-5">
+            {panelData.roles.map((role) => (
+              <div key={role.roleName}>
+                <p className="mb-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                  {role.roleName}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {role.members.map((member) => (
+                    <span
+                      key={member}
+                      className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+                    >
+                      {member}
+                    </span>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : undefined}
@@ -205,26 +282,67 @@ function LeftPanel({
       {/* Contacts */}
       <CollapsibleSection
         title="Contacts"
-        count={contactsCount > 0 ? Math.min(contactsCount, 3) : undefined}
+        count={panelData.contacts.length || undefined}
         actions={
           <button className="hover:underline" onClick={protoAction("View all contacts")}>
             View all
           </button>
         }
       >
-        {contactsCount > 0 ? (
-          <ul className="space-y-1">
-            {account.linkedAccounts.slice(0, 3).map((name) => (
-              <li key={name}>
+        {panelData.contacts.length > 0 ? (
+          <div className="space-y-3 pl-5 pr-1">
+            {panelData.contacts.map((contact) => (
+              <div
+                key={contact.id}
+                className="rounded-xl border bg-background p-3 shadow-sm"
+              >
                 <button
-                  className="text-sm text-primary hover:underline"
-                  onClick={protoAction(name)}
+                  className="mb-2 text-sm font-semibold text-primary hover:underline"
+                  onClick={protoAction(contact.name)}
                 >
-                  {name}
+                  {contact.name}
                 </button>
-              </li>
+
+                {contact.phone && (
+                  <div className="mb-1.5">
+                    <p className="text-xs text-muted-foreground">Primary phone</p>
+                    <div className="flex items-center gap-1.5">
+                      <a className="text-sm text-primary hover:underline">
+                        {contact.phone}
+                      </a>
+                      <button
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={protoAction("Copy phone")}
+                      >
+                        <IconCopy className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {contact.email && (
+                  <div className="mb-1.5">
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <a className="text-sm text-primary hover:underline">
+                      {contact.email}
+                    </a>
+                  </div>
+                )}
+
+                {contact.lastLogin && (
+                  <div className="mb-1.5">
+                    <p className="text-xs text-muted-foreground">Last login</p>
+                    <p className="text-sm">{contact.lastLogin}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Permissions</p>
+                  <p className="text-sm">{contact.permissions}</p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : undefined}
       </CollapsibleSection>
     </div>
