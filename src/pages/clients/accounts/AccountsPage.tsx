@@ -1,6 +1,6 @@
 import * as React from "react"
 import {
-  IconDownload,
+  IconChevronDown,
   IconFilter,
   IconPrinter,
   IconSearch,
@@ -85,13 +85,15 @@ function AccountsToolbar() {
   return (
     <DataTableToolbarSlot>
       <DataTableToolbarGroup className="shrink-0">
-        <Button size="sm" variant="ghost" onClick={protoAction("Favorites")}>
+        <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={protoAction("Favorites")}>
           <IconStar className="size-4" />
           Favorites
+          <IconChevronDown className="size-3.5" />
         </Button>
-        <Button size="sm" variant="ghost" onClick={protoAction("Filter")}>
+        <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={protoAction("Filter")}>
           <IconFilter className="size-4" />
           Filter
+          <IconChevronDown className="size-3.5" />
         </Button>
       </DataTableToolbarGroup>
       <DataTableToolbarSpacer />
@@ -100,18 +102,15 @@ function AccountsToolbar() {
         <Button className="hidden md:inline-flex" variant="outline" onClick={protoAction("Import")}>
           Import
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Export")}>
+        <Button className="hidden sm:inline-flex text-muted-foreground hover:text-foreground" size="icon" variant="ghost" onClick={protoAction("Export")}>
           <IconUpload className="size-4" />
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Print")}>
+        <Button className="hidden sm:inline-flex text-muted-foreground hover:text-foreground" size="icon" variant="ghost" onClick={protoAction("Print")}>
           <IconPrinter className="size-4" />
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon" variant="ghost" onClick={protoAction("Download")}>
-          <IconDownload className="size-4" />
-        </Button>
-        <div className="relative hidden w-64 lg:block">
+        <div className="relative hidden w-56 lg:block">
           <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search" />
+          <Input className="pl-9" style={{ backgroundColor: 'var(--background)' }} placeholder="Search" />
         </div>
       </DataTableToolbarGroup>
     </DataTableToolbarSlot>
