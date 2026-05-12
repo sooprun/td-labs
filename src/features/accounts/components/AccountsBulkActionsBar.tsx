@@ -40,13 +40,13 @@ export function AccountsBulkActionsBar({
           onClick: protoAction("Team updated"),
         },
         {
-          className: "hidden xl:inline-flex",
+          className: "hidden 2xl:inline-flex",
           disabled: true,
           icon: IconAt,
           label: "Send email",
         },
         {
-          className: "hidden xl:inline-flex",
+          className: "hidden 2xl:inline-flex",
           icon: IconTags,
           label: "Manage tags",
           onClick: protoAction("Tags updated"),

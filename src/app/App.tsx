@@ -7,6 +7,7 @@ import { AccountsPage } from "@/pages/clients/accounts/AccountsPage"
 import { AccountDetailPage } from "@/pages/clients/accounts/AccountDetailPage"
 import { InsightsPage } from "@/pages/insights/InsightsPage"
 import { PipelinesPage } from "@/pages/workflow/pipelines/PipelinesPage"
+import { ServicesPage } from "@/pages/billing/services/ServicesPage"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
 
 export function App() {
@@ -66,6 +67,7 @@ export function App() {
     "/app/insights": <InsightsPage />,
     "/app/clients": <AccountsPage onNavigate={handleNavigate} />,
     "/app/workflow/pipelines": <PipelinesPage />,
+    "/app/billing/services": <ServicesPage />,
   }
 
   const page = pageMap[activeRoute.path] ?? (

@@ -103,14 +103,14 @@ function AccountsToolbar() {
       </DataTableToolbarGroup>
       <DataTableToolbarSpacer />
       <DataTableToolbarGroup className="shrink-0">
-        <Button size="xl" className="hidden md:inline-flex" onClick={protoAction("New account")}>New account</Button>
-        <Button size="xl" className="hidden md:inline-flex" variant="outline" onClick={protoAction("Import")}>
+        <Button size="xl" className="hidden lg:inline-flex" onClick={protoAction("New account")}>New account</Button>
+        <Button size="xl" className="hidden lg:inline-flex" variant="outline" onClick={protoAction("Import")}>
           Import
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon-xl" variant="ghost" onClick={protoAction("Export")}>
+        <Button className="hidden lg:inline-flex" size="icon-xl" variant="ghost" onClick={protoAction("Export")}>
           <IconUpload className="size-4" />
         </Button>
-        <Button className="hidden sm:inline-flex" size="icon-xl" variant="ghost" onClick={protoAction("Print")}>
+        <Button className="hidden lg:inline-flex" size="icon-xl" variant="ghost" onClick={protoAction("Print")}>
           <IconPrinter className="size-4" />
         </Button>
         <div className="relative hidden w-56 lg:block">
