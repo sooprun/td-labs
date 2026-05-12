@@ -1,4 +1,12 @@
-import { IconEyeOff, IconRosetteDiscountCheck } from "@tabler/icons-react"
+import {
+  IconBell,
+  IconBellOff,
+  IconCheck,
+  IconEyeOff,
+  IconMail,
+  IconMailOff,
+  IconRosetteDiscountCheck,
+} from "@tabler/icons-react"
 import { protoAction } from "@/lib/proto"
 
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +28,9 @@ type AccountsTableProps = {
   onToggleAll: () => void
 }
 
+const stickyCheckbox = "col-sticky-cb w-12"
+const stickyName = "col-sticky-name min-w-52"
+
 export function AccountsTable({
   accounts,
   selectedIds,
@@ -30,11 +41,11 @@ export function AccountsTable({
     accounts.length > 0 && selectedIds.length === accounts.length
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-background">
+    <div className="table-striped overflow-x-auto rounded-lg border bg-background">
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-40 bg-background">
           <TableRow>
-            <TableHead className="w-12">
+            <TableHead className={stickyCheckbox}>
               <input
                 checked={allSelected}
                 className="size-4 rounded border-border"
@@ -42,16 +53,29 @@ export function AccountsTable({
                 type="checkbox"
               />
             </TableHead>
-            <TableHead className="min-w-52">Name</TableHead>
-            <TableHead>Mobile app</TableHead>
+            <TableHead className={stickyName}>Name</TableHead>
+            <TableHead className="whitespace-nowrap">Mobile app</TableHead>
             <TableHead>Follow</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Balance due</TableHead>
-            <TableHead>Net due</TableHead>
+            <TableHead className="whitespace-nowrap">Balance due</TableHead>
+            <TableHead className="whitespace-nowrap">Net due</TableHead>
             <TableHead>Credit</TableHead>
-            <TableHead>Linked accounts</TableHead>
+            <TableHead className="whitespace-nowrap">Linked accounts</TableHead>
             <TableHead>Tasks</TableHead>
-            <TableHead>General ledger</TableHead>
+            <TableHead className="whitespace-nowrap">General ledger</TableHead>
+            <TableHead className="whitespace-nowrap">Transactions responded</TableHead>
+            <TableHead className="whitespace-nowrap">Transactions awaiting</TableHead>
+            <TableHead>Team</TableHead>
+            <TableHead>Tags</TableHead>
+            <TableHead>Proposals</TableHead>
+            <TableHead className="whitespace-nowrap">Unread chats</TableHead>
+            <TableHead className="whitespace-nowrap">Pending organizers</TableHead>
+            <TableHead className="whitespace-nowrap">Pending signatures</TableHead>
+            <TableHead className="whitespace-nowrap">Pending client requests</TableHead>
+            <TableHead>Notify</TableHead>
+            <TableHead className="whitespace-nowrap">Email sync</TableHead>
+            <TableHead className="whitespace-nowrap">Last login</TableHead>
+            <TableHead>Checklist</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -62,7 +86,7 @@ export function AccountsTable({
               }
               key={account.id}
             >
-              <TableCell>
+              <TableCell className={stickyCheckbox}>
                 <input
                   checked={selectedIds.includes(account.id)}
                   className="size-4 rounded border-border"
@@ -70,7 +94,7 @@ export function AccountsTable({
                   type="checkbox"
                 />
               </TableCell>
-              <TableCell>
+              <TableCell className={stickyName}>
                 <button className="font-medium text-primary hover:underline" onClick={protoAction(account.name)}>
                   {account.name}
                 </button>
@@ -106,6 +130,57 @@ export function AccountsTable({
               <TableCell>{account.tasks || ""}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{account.ledgerSyncStatus}</Badge>
+              </TableCell>
+              <TableCell>{account.transactionsResponded || ""}</TableCell>
+              <TableCell>{account.transactionsAwaiting || ""}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-0.5">
+                  {account.team.map((member) => (
+                    <span
+                      key={member}
+                      className="flex size-[26px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground"
+                    >
+                      {member}
+                    </span>
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  {account.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell>{account.proposals || ""}</TableCell>
+              <TableCell>{account.unreadChats || ""}</TableCell>
+              <TableCell>{account.pendingOrganizers || ""}</TableCell>
+              <TableCell>{account.pendingSignatures || ""}</TableCell>
+              <TableCell>{account.pendingClientRequests || ""}</TableCell>
+              <TableCell>
+                {account.notify ? (
+                  <IconBell className="size-5 text-primary" />
+                ) : (
+                  <IconBellOff className="size-5 text-muted-foreground" />
+                )}
+              </TableCell>
+              <TableCell>
+                {account.emailSync ? (
+                  <IconMail className="size-5 text-primary" />
+                ) : (
+                  <IconMailOff className="size-5 text-muted-foreground" />
+                )}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-muted-foreground">
+                {account.lastLogin ?? "—"}
+              </TableCell>
+              <TableCell>
+                {account.checklist ? (
+                  <span className="flex items-center gap-1 text-sm">
+                    <IconCheck className="size-4 text-[#24C875]" />
+                    {account.checklist}
+                  </span>
+                ) : ""}
               </TableCell>
             </TableRow>
           ))}

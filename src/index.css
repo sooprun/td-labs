@@ -141,3 +141,58 @@ body.is-dragging,
 body.is-dragging * {
   cursor: grabbing !important;
 }
+
+/* Striped table */
+.table-striped tbody tr:nth-child(even) td,
+.table-striped tbody tr:nth-child(even) th {
+  background-color: var(--workspace);
+}
+
+/* Header column dividers — short, centered, skip checkbox col */
+.table-striped thead th {
+  position: relative;
+}
+.table-striped thead th:not(.col-sticky-cb):not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 16px;
+  width: 1px;
+  background-color: var(--border);
+}
+
+/* Sticky columns — !important to beat .table-striped thead th { position: relative } */
+.col-sticky-cb {
+  position: sticky !important;
+  left: 0;
+  z-index: 20;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+}
+.col-sticky-name {
+  position: sticky !important;
+  left: 48px;
+  z-index: 20;
+  box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.1);
+}
+thead .col-sticky-cb,
+thead .col-sticky-name {
+  z-index: 30;
+}
+
+/* Sticky cell backgrounds — must be opaque to cover scrolling content */
+.col-sticky-cb,
+.col-sticky-name {
+  background-color: var(--background);
+}
+.table-striped tbody tr:nth-child(even) .col-sticky-cb,
+.table-striped tbody tr:nth-child(even) .col-sticky-name {
+  background-color: var(--workspace);
+}
+tr[data-state="selected"] .col-sticky-cb,
+tr[data-state="selected"] .col-sticky-name {
+  background-color: var(--muted);
+}
