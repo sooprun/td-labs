@@ -23,12 +23,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { protoAction } from "@/lib/proto"
-import { serviceItems, type ServiceItem } from "@/mock/services"
+import { toast } from "sonner"
+import type { ServiceItem } from "@/mock/services"
 import { ServicesBulkActionsBar } from "@/features/billing/components/ServicesBulkActionsBar"
+import { EditServicePanel } from "@/features/billing/components/EditServicePanel"
+import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRatesPanel"
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-type TopTab = "Service items" | "Custom rates"
+type TopTab = "Service items" | "Team member custom rates"
 
 function TopTabs({
   active,
@@ -39,7 +42,7 @@ function TopTabs({
 }) {
   return (
     <div className="flex border-b">
-      {(["Service items", "Custom rates"] as TopTab[]).map((tab) => (
+      {(["Service items", "Team member custom rates"] as TopTab[]).map((tab) => (
         <button
           key={tab}
           onClick={() => onChange(tab)}
@@ -50,7 +53,7 @@ function TopTabs({
           }`}
         >
           {tab}
-          {tab === "Custom rates" && (
+          {tab === "Team member custom rates" && (
             <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
               New
             </span>
@@ -65,7 +68,7 @@ function TopTabs({
 
 type SortKey = keyof Pick<
   ServiceItem,
-  "name" | "description" | "category" | "defaultRate" | "rateType"
+  "name" | "category" | "defaultRate" | "rateType"
 >
 
 // ─── Format ──────────────────────────────────────────────────────────────────
@@ -78,12 +81,19 @@ function formatRate(rate: number) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export function ServicesPage() {
+type ServicesPageProps = {
+  items: ServiceItem[]
+  onItemsChange: (items: ServiceItem[]) => void
+}
+
+export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
   const [topTab, setTopTab] = React.useState<TopTab>("Service items")
   const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
   const [sortKey, setSortKey] = React.useState<SortKey>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const [editingService, setEditingService] = React.useState<ServiceItem | null>(null)
+  const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -94,7 +104,7 @@ export function ServicesPage() {
     }
   }
 
-  const filtered = serviceItems
+  const filtered = items
     .filter((s) => (status === "Active" ? !s.archived : s.archived))
     .sort((a, b) => {
       const av = a[sortKey]
@@ -138,6 +148,7 @@ export function ServicesPage() {
               selectedCount={selectedIds.length}
               onClearSelection={() => setSelectedIds([])}
               onSelectAll={() => setSelectedIds(filtered.map((s) => s.id))}
+              onBulkUpdateRates={() => setBulkUpdateOpen(true)}
             />
           ) : (
             <DataTableToolbarSlot>
@@ -186,15 +197,6 @@ export function ServicesPage() {
                   </TableHead>
                   <TableHead
                     className="cursor-pointer select-none hover:text-foreground"
-                    onClick={() => handleSort("description")}
-                  >
-                    <span className="inline-flex items-center">
-                      Description
-                      <DataTableSortIcon col="description" sortKey={sortKey} sortDir={sortDir} />
-                    </span>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("category")}
                   >
                     <span className="inline-flex items-center">
@@ -221,13 +223,10 @@ export function ServicesPage() {
                       <DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
                     </span>
                   </TableHead>
-                  <TableHead className="w-12 text-right">
-                    <button
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={protoAction("Table settings")}
-                    >
+                  <TableHead className="w-10 px-0">
+                    <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
                       <IconSettings className="size-4" />
-                    </button>
+                    </Button>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -246,8 +245,17 @@ export function ServicesPage() {
                         onChange={() => handleToggle(svc.id)}
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{svc.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{svc.description}</TableCell>
+                    <TableCell>
+                      <button
+                        className="font-medium text-primary hover:underline"
+                        onClick={() => setEditingService(svc)}
+                      >
+                        {svc.name}
+                      </button>
+                      {svc.description && (
+                        <div className="text-xs text-muted-foreground">{svc.description}</div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{svc.category}</TableCell>
                     <TableCell>{formatRate(svc.defaultRate)}</TableCell>
                     <TableCell>
@@ -261,13 +269,10 @@ export function ServicesPage() {
                       ) : null}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
-                    <TableCell className="w-12 text-right">
-                      <button
-                        className="invisible text-muted-foreground hover:text-foreground group-hover:visible"
-                        onClick={protoAction("Service actions")}
-                      >
+                    <TableCell className="w-10 px-0">
+                      <Button size="icon-xl" variant="ghost" onClick={protoAction("Service actions")}>
                         <IconDotsVertical className="size-4" />
-                      </button>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -288,6 +293,30 @@ export function ServicesPage() {
           </div>
         </div>
       )}
+
+      <EditServicePanel
+        service={editingService}
+        onClose={() => setEditingService(null)}
+        onSave={(updated) => {
+          onItemsChange(items.map((s) => s.id === updated.id ? updated : s))
+          setEditingService(null)
+          toast.success(`"${updated.name}" saved`)
+        }}
+      />
+
+      <BulkUpdateRatesPanel
+        open={bulkUpdateOpen}
+        services={items.filter((s) => selectedIds.includes(s.id))}
+        onClose={() => setBulkUpdateOpen(false)}
+        onConfirm={(updates) => {
+          onItemsChange(items.map((svc) => {
+            const upd = updates.find((u) => u.id === svc.id)
+            return upd ? { ...svc, defaultRate: upd.defaultRate, clientOverridesList: upd.clientOverridesList } : svc
+          }))
+          setSelectedIds([])
+          setBulkUpdateOpen(false)
+        }}
+      />
     </PageLayout>
   )
 }

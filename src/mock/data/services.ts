@@ -1,5 +1,11 @@
 export type RateType = "Hour" | "Item" | ""
 
+export type ClientOverride = {
+  accountId: string
+  accountName: string
+  rate: number
+}
+
 export type ServiceItem = {
   id: string
   name: string
@@ -7,6 +13,7 @@ export type ServiceItem = {
   category: string
   defaultRate: number
   customRates: number
+  clientOverridesList: ClientOverride[]
   rateType: RateType
   archived: boolean
 }
@@ -19,6 +26,12 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 350,
     customRates: 4,
+    clientOverridesList: [
+      { accountId: "acct-murphy-trust", accountName: "Murphy Family Trust", rate: 300 },
+      { accountId: "acct-johnson-co", accountName: "Johnson & Co.", rate: 275 },
+      { accountId: "acct-smith-holdings", accountName: "Smith Holdings LLC", rate: 320 },
+      { accountId: "acct-green-valley", accountName: "Green Valley Enterprises", rate: 295 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -29,6 +42,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 450,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -39,6 +53,10 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 850,
     customRates: 2,
+    clientOverridesList: [
+      { accountId: "acct-acme-corp", accountName: "Acme Corp", rate: 750 },
+      { accountId: "acct-blue-horizon", accountName: "Blue Horizon Consulting", rate: 800 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -49,6 +67,9 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 950,
     customRates: 1,
+    clientOverridesList: [
+      { accountId: "acct-doe-family-llc", accountName: "Doe Family LLC", rate: 875 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -59,6 +80,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 900,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -69,6 +91,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 650,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -79,6 +102,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 225,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -89,6 +113,11 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 275,
     customRates: 3,
+    clientOverridesList: [
+      { accountId: "acct-acme-corp", accountName: "Acme Corp", rate: 250 },
+      { accountId: "acct-johnson-co", accountName: "Johnson & Co.", rate: 240 },
+      { accountId: "acct-blue-horizon", accountName: "Blue Horizon Consulting", rate: 260 },
+    ],
     rateType: "Hour",
     archived: false,
   },
@@ -99,6 +128,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 350,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Hour",
     archived: false,
   },
@@ -109,6 +139,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 150,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -119,6 +150,13 @@ export const serviceItems: ServiceItem[] = [
     category: "Bookkeeping",
     defaultRate: 400,
     customRates: 5,
+    clientOverridesList: [
+      { accountId: "acct-acme-corp", accountName: "Acme Corp", rate: 350 },
+      { accountId: "acct-green-valley", accountName: "Green Valley Enterprises", rate: 375 },
+      { accountId: "acct-blue-horizon", accountName: "Blue Horizon Consulting", rate: 425 },
+      { accountId: "acct-johnson-co", accountName: "Johnson & Co.", rate: 360 },
+      { accountId: "acct-smith-holdings", accountName: "Smith Holdings LLC", rate: 390 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -129,6 +167,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Bookkeeping",
     defaultRate: 125,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Hour",
     archived: false,
   },
@@ -139,6 +178,9 @@ export const serviceItems: ServiceItem[] = [
     category: "Bookkeeping",
     defaultRate: 550,
     customRates: 1,
+    clientOverridesList: [
+      { accountId: "acct-acme-corp", accountName: "Acme Corp", rate: 500 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -149,6 +191,10 @@ export const serviceItems: ServiceItem[] = [
     category: "Payroll",
     defaultRate: 250,
     customRates: 2,
+    clientOverridesList: [
+      { accountId: "acct-acme-corp", accountName: "Acme Corp", rate: 225 },
+      { accountId: "acct-green-valley", accountName: "Green Valley Enterprises", rate: 235 },
+    ],
     rateType: "Item",
     archived: false,
   },
@@ -159,6 +205,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Payroll",
     defaultRate: 500,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -169,6 +216,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Payroll",
     defaultRate: 75,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -179,6 +227,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Advisory",
     defaultRate: 850,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: false,
   },
@@ -189,6 +238,10 @@ export const serviceItems: ServiceItem[] = [
     category: "Advisory",
     defaultRate: 300,
     customRates: 2,
+    clientOverridesList: [
+      { accountId: "acct-johnson-co", accountName: "Johnson & Co.", rate: 275 },
+      { accountId: "acct-smith-holdings", accountName: "Smith Holdings LLC", rate: 280 },
+    ],
     rateType: "Hour",
     archived: false,
   },
@@ -199,6 +252,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Tax",
     defaultRate: 175,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: true,
   },
@@ -209,6 +263,7 @@ export const serviceItems: ServiceItem[] = [
     category: "Advisory",
     defaultRate: 1200,
     customRates: 0,
+    clientOverridesList: [],
     rateType: "Item",
     archived: true,
   },

@@ -8,9 +8,14 @@ import { AccountDetailPage } from "@/pages/clients/accounts/AccountDetailPage"
 import { InsightsPage } from "@/pages/insights/InsightsPage"
 import { PipelinesPage } from "@/pages/workflow/pipelines/PipelinesPage"
 import { ServicesPage } from "@/pages/billing/services/ServicesPage"
+import { InvoicesPage } from "@/pages/billing/invoices/InvoicesPage"
+import { serviceItems } from "@/mock/services"
+import type { ServiceItem } from "@/mock/services"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
 
 export function App() {
+  const [services, setServices] = React.useState<ServiceItem[]>(serviceItems)
+
   const [activePath, setActivePath] = React.useState(() => {
     const pathname = window.location.pathname
 
@@ -67,7 +72,8 @@ export function App() {
     "/app/insights": <InsightsPage />,
     "/app/clients": <AccountsPage onNavigate={handleNavigate} />,
     "/app/workflow/pipelines": <PipelinesPage />,
-    "/app/billing/services": <ServicesPage />,
+    "/app/billing": <InvoicesPage />,
+    "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} />,
   }
 
   const page = pageMap[activeRoute.path] ?? (
