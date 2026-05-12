@@ -22,7 +22,11 @@ import { AccountsBulkActionsBar } from "@/features/accounts/components/AccountsB
 import { AccountsTable } from "@/features/accounts/components/AccountsTable"
 import { accounts } from "@/mock/data/accounts"
 
-export function AccountsPage() {
+type AccountsPageProps = {
+  onNavigate: (path: string) => void
+}
+
+export function AccountsPage({ onNavigate }: AccountsPageProps) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
 
   const toggleAccount = React.useCallback((accountId: string) => {
@@ -73,6 +77,7 @@ export function AccountsPage() {
 
       <AccountsTable
         accounts={accounts}
+        onNavigate={onNavigate}
         onToggleAccount={toggleAccount}
         onToggleAll={toggleAll}
         selectedIds={selectedIds}

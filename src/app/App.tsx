@@ -4,6 +4,7 @@ import { getDefaultPath } from "@/app/navigation"
 import { resolveProductRoute } from "@/app/routes"
 import { AppShell } from "@/layouts/app-shell/AppShell"
 import { AccountsPage } from "@/pages/clients/accounts/AccountsPage"
+import { AccountDetailPage } from "@/pages/clients/accounts/AccountDetailPage"
 import { InsightsPage } from "@/pages/insights/InsightsPage"
 import { PipelinesPage } from "@/pages/workflow/pipelines/PipelinesPage"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
@@ -38,13 +39,35 @@ export function App() {
     setActivePath(path)
   }, [])
 
+  // Handle dynamic account detail route before pageMap lookup
+  if (
+    activePath.startsWith("/app/clients/") &&
+    activePath !== "/app/clients"
+  ) {
+    const accountId = activePath.replace("/app/clients/", "")
+    const accountsRoute = resolveProductRoute("/app/clients")!
+    return (
+      <AppShell
+        activePath="/app/clients"
+        activeSection={accountsRoute.section}
+        activeTitle={accountsRoute.title}
+        onNavigate={handleNavigate}
+      >
+        <AccountDetailPage
+          accountId={accountId}
+          onBack={() => handleNavigate("/app/clients")}
+        />
+      </AppShell>
+    )
+  }
+
   if (!activeRoute) {
     return null
   }
 
   const pageMap: Partial<Record<string, React.ReactElement>> = {
     "/app/insights": <InsightsPage />,
-    "/app/clients": <AccountsPage />,
+    "/app/clients": <AccountsPage onNavigate={handleNavigate} />,
     "/app/workflow/pipelines": <PipelinesPage />,
   }
 

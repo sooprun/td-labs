@@ -26,6 +26,7 @@ type AccountsTableProps = {
   selectedIds: string[]
   onToggleAccount: (accountId: string) => void
   onToggleAll: () => void
+  onNavigate: (path: string) => void
 }
 
 const stickyCheckbox = "col-sticky-cb w-12"
@@ -36,6 +37,7 @@ export function AccountsTable({
   selectedIds,
   onToggleAccount,
   onToggleAll,
+  onNavigate,
 }: AccountsTableProps) {
   const allSelected =
     accounts.length > 0 && selectedIds.length === accounts.length
@@ -95,7 +97,7 @@ export function AccountsTable({
                 />
               </TableCell>
               <TableCell className={stickyName}>
-                <button className="font-medium text-primary hover:underline" onClick={protoAction(account.name)}>
+                <button className="font-medium text-primary hover:underline" onClick={() => onNavigate(`/app/clients/${account.id}`)}>
                   {account.name}
                 </button>
               </TableCell>
