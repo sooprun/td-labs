@@ -26,6 +26,7 @@ import { protoAction } from "@/lib/proto"
 import { toast } from "sonner"
 import type { ServiceItem } from "@/mock/services"
 import { ServicesBulkActionsBar } from "@/features/billing/components/ServicesBulkActionsBar"
+import { ClientRatesModal } from "@/features/billing/components/ClientRatesModal"
 import { EditServicePanel } from "@/features/billing/components/EditServicePanel"
 import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRatesPanel"
 
@@ -94,6 +95,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [editingService, setEditingService] = React.useState<ServiceItem | null>(null)
   const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
+  const [viewingRates, setViewingRates] = React.useState<ServiceItem | null>(null)
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -261,8 +263,8 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                     <TableCell>
                       {svc.customRates > 0 ? (
                         <button
-                          className="text-primary hover:underline"
-                          onClick={protoAction("View custom rates")}
+                          className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                          onClick={() => setViewingRates(svc)}
                         >
                           {svc.customRates}
                         </button>
@@ -315,6 +317,15 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           }))
           setSelectedIds([])
           setBulkUpdateOpen(false)
+        }}
+      />
+      <ClientRatesModal
+        service={viewingRates}
+        onClose={() => setViewingRates(null)}
+        onSave={(updated) => {
+          onItemsChange(items.map((s) => s.id === updated.id ? updated : s))
+          setViewingRates(null)
+          toast.success(`"${updated.name}" saved`)
         }}
       />
     </PageLayout>

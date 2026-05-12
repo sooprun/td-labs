@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconTrash, IconPlus } from "@tabler/icons-react"
+import { IconX, IconTrash, IconChevronDown, IconChevronRight } from "@tabler/icons-react"
 
 import {
   Sheet,
@@ -39,11 +39,9 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
   const [rateType, setRateType] = React.useState<RateType>("")
   const [tax, setTax] = React.useState(false)
   const [updateTemplates, setUpdateTemplates] = React.useState(false)
+  const [overridesOpen, setOverridesOpen] = React.useState(false)
   const [originalRate, setOriginalRate] = React.useState("")
   const [overrides, setOverrides] = React.useState<(ClientOverride & { rateInput: string })[]>([])
-  const [addingOverride, setAddingOverride] = React.useState(false)
-  const [newAccountId, setNewAccountId] = React.useState("")
-  const [newRate, setNewRate] = React.useState("")
 
   // Sync form when service changes
   React.useEffect(() => {
@@ -58,9 +56,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
       setTax(false)
       setUpdateTemplates(false)
       setOverrides(service.clientOverridesList.map((o) => ({ ...o, rateInput: String(o.rate) })))
-      setAddingOverride(false)
-      setNewAccountId("")
-      setNewRate("")
+      setOverridesOpen(false)
     }
   }, [service])
 
@@ -69,18 +65,16 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
   const usedAccountIds = overrides.map((o) => o.accountId)
   const availableAccounts = accounts.filter((a) => !usedAccountIds.includes(a.id))
 
-  const handleAddOverride = () => {
-    const account = accounts.find((a) => a.id === newAccountId)
-    if (!account || !newRate) return
+  const handleSelectAccount = (accountId: string) => {
+    const account = accounts.find((a) => a.id === accountId)
+    if (!account) return
+    const defaultRate = parseFloat(rate) || 0
     setOverrides((prev) => [...prev, {
       accountId: account.id,
       accountName: account.name,
-      rate: parseFloat(newRate) || 0,
-      rateInput: newRate,
+      rate: defaultRate,
+      rateInput: defaultRate > 0 ? String(defaultRate) : "",
     }])
-    setAddingOverride(false)
-    setNewAccountId("")
-    setNewRate("")
   }
 
   const handleRemoveOverride = (accountId: string) => {
@@ -189,6 +183,77 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             </div>
           </div>
 
+          {/* Client custom rates (collapsible) */}
+          <div className="flex flex-col">
+            <button
+              className="flex min-w-0 items-center gap-2 text-left"
+              onClick={() => setOverridesOpen((o) => !o)}
+            >
+              {overridesOpen
+                ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              }
+              <span className="text-sm font-medium">Client custom rates</span>
+              {overrides.length > 0 && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                  {overrides.length}
+                </span>
+              )}
+            </button>
+
+            {/* Animated content */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateRows: overridesOpen ? "1fr" : "0fr",
+                transition: "grid-template-rows 200ms ease",
+              }}
+            >
+              <div className="flex flex-col gap-3 overflow-hidden pt-3">
+                {overrides.length === 0 && (
+                  <p className="pl-6 text-sm text-muted-foreground">No client-specific rates set</p>
+                )}
+
+                {overrides.map((o) => (
+                  <div key={o.accountId} className="flex items-center gap-3">
+                    <span className="flex-1 truncate text-sm">{o.accountName}</span>
+                    <div className="relative w-28 shrink-0">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                      <Input
+                        className="pl-6 h-8 text-sm"
+                        value={o.rateInput}
+                        onChange={(e) => handleOverrideRateChange(o.accountId, e.target.value)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleRemoveOverride(o.accountId)}
+                    >
+                      <IconTrash className="size-3.5" />
+                    </Button>
+                  </div>
+                ))}
+
+                {/* Persistent add row */}
+                {availableAccounts.length > 0 && (
+                  <Select value="" onValueChange={handleSelectAccount}>
+                    <SelectTrigger className="h-8 text-sm text-muted-foreground">
+                      <SelectValue placeholder="Add client…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableAccounts.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Update templates checkbox */}
           <label className="flex cursor-pointer items-start gap-3">
             <input
@@ -212,98 +277,6 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
               Your changes will apply to new invoices, proposals, and time entries
             </div>
           )}
-
-          {/* Divider */}
-          <div className="-mx-6 border-t" />
-
-          {/* Client overrides */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Client overrides</span>
-                {overrides.length > 0 && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                    {overrides.length}
-                  </span>
-                )}
-              </div>
-              {!addingOverride && availableAccounts.length > 0 && (
-                <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => setAddingOverride(true)}>
-                  <IconPlus className="size-3" />
-                  Add
-                </Button>
-              )}
-            </div>
-
-            {overrides.length === 0 && !addingOverride && (
-              <p className="text-sm text-muted-foreground">No client-specific rates set</p>
-            )}
-
-            {overrides.map((o) => (
-              <div key={o.accountId} className="flex items-center gap-3">
-                <span className="flex-1 truncate text-sm">{o.accountName}</span>
-                <div className="relative w-28 shrink-0">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                  <Input
-                    className="pl-6 h-8 text-sm"
-                    value={o.rateInput}
-                    onChange={(e) => handleOverrideRateChange(o.accountId, e.target.value)}
-                    placeholder="0.00"
-                  />
-                </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleRemoveOverride(o.accountId)}
-                >
-                  <IconTrash className="size-3.5" />
-                </Button>
-              </div>
-            ))}
-
-            {addingOverride && (
-              <div className="flex items-center gap-3">
-                <Select value={newAccountId} onValueChange={setNewAccountId}>
-                  <SelectTrigger className="h-8 flex-1 text-sm">
-                    <SelectValue placeholder="Select client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableAccounts.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="relative w-28 shrink-0">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                  <Input
-                    className="pl-6 h-8 text-sm"
-                    value={newRate}
-                    onChange={(e) => setNewRate(e.target.value)}
-                    placeholder="0.00"
-                    autoFocus
-                  />
-                </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-8 shrink-0"
-                  disabled={!newAccountId || !newRate}
-                  onClick={handleAddOverride}
-                >
-                  <IconPlus className="size-3.5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-8 shrink-0 text-muted-foreground"
-                  onClick={() => { setAddingOverride(false); setNewAccountId(""); setNewRate("") }}
-                >
-                  <IconX className="size-3.5" />
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Footer */}
