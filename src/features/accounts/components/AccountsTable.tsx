@@ -17,8 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 import type { Account } from "@/mock/accounts"
 import { formatCurrency } from "@/lib/formatters"
+
+export type AccountSortKey = "name" | "type" | "balanceDue" | "netDue" | "tasks" | "lastLogin"
 
 type AccountsTableProps = {
   accounts: Account[]
@@ -26,6 +29,9 @@ type AccountsTableProps = {
   onToggleAccount: (accountId: string) => void
   onToggleAll: () => void
   onNavigate: (path: string) => void
+  sortKey: AccountSortKey
+  sortDir: SortDir
+  onSort: (key: AccountSortKey) => void
 }
 
 const stickyCheckbox = "col-sticky-cb w-12"
@@ -37,6 +43,9 @@ export function AccountsTable({
   onToggleAccount,
   onToggleAll,
   onNavigate,
+  sortKey,
+  sortDir,
+  onSort,
 }: AccountsTableProps) {
   const allSelected =
     accounts.length > 0 && selectedIds.length === accounts.length
@@ -54,15 +63,25 @@ export function AccountsTable({
                 type="checkbox"
               />
             </TableHead>
-            <TableHead className={stickyName}>Name</TableHead>
+            <TableHead className={`${stickyName} cursor-pointer select-none hover:text-foreground`} onClick={() => onSort("name")}>
+              <span className="inline-flex items-center">Name <DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
             <TableHead className="whitespace-nowrap">Mobile app</TableHead>
             <TableHead>Follow</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead className="whitespace-nowrap">Balance due</TableHead>
-            <TableHead className="whitespace-nowrap">Net due</TableHead>
+            <TableHead className="cursor-pointer select-none hover:text-foreground" onClick={() => onSort("type")}>
+              <span className="inline-flex items-center">Type <DataTableSortIcon col="type" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
+            <TableHead className="cursor-pointer select-none whitespace-nowrap hover:text-foreground" onClick={() => onSort("balanceDue")}>
+              <span className="inline-flex items-center">Balance due <DataTableSortIcon col="balanceDue" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
+            <TableHead className="cursor-pointer select-none whitespace-nowrap hover:text-foreground" onClick={() => onSort("netDue")}>
+              <span className="inline-flex items-center">Net due <DataTableSortIcon col="netDue" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
             <TableHead>Credit</TableHead>
             <TableHead className="whitespace-nowrap">Linked accounts</TableHead>
-            <TableHead>Tasks</TableHead>
+            <TableHead className="cursor-pointer select-none hover:text-foreground" onClick={() => onSort("tasks")}>
+              <span className="inline-flex items-center">Tasks <DataTableSortIcon col="tasks" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
             <TableHead className="whitespace-nowrap">General ledger</TableHead>
             <TableHead className="whitespace-nowrap">Transactions responded</TableHead>
             <TableHead className="whitespace-nowrap">Transactions awaiting</TableHead>
@@ -75,7 +94,9 @@ export function AccountsTable({
             <TableHead className="whitespace-nowrap">Pending client requests</TableHead>
             <TableHead>Notify</TableHead>
             <TableHead className="whitespace-nowrap">Email sync</TableHead>
-            <TableHead className="whitespace-nowrap">Last login</TableHead>
+            <TableHead className="cursor-pointer select-none whitespace-nowrap hover:text-foreground" onClick={() => onSort("lastLogin")}>
+              <span className="inline-flex items-center">Last login <DataTableSortIcon col="lastLogin" sortKey={sortKey} sortDir={sortDir} /></span>
+            </TableHead>
             <TableHead>Checklist</TableHead>
           </TableRow>
         </TableHeader>

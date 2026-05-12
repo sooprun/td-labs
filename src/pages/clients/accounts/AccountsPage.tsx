@@ -19,8 +19,9 @@ import { Button } from "@/components/ui/button"
 import { protoAction } from "@/lib/proto"
 import { Input } from "@/components/ui/input"
 import { AccountsBulkActionsBar } from "@/features/accounts/components/AccountsBulkActionsBar"
-import { AccountsTable } from "@/features/accounts/components/AccountsTable"
+import { AccountsTable, type AccountSortKey } from "@/features/accounts/components/AccountsTable"
 import { accounts } from "@/mock/accounts"
+import type { SortDir } from "@/components/data-table/DataTableSortIcon"
 
 type AccountsPageProps = {
   onNavigate: (path: string) => void
@@ -28,6 +29,31 @@ type AccountsPageProps = {
 
 export function AccountsPage({ onNavigate }: AccountsPageProps) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const [sortKey, setSortKey] = React.useState<AccountSortKey>("name")
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc")
+
+  const handleSort = React.useCallback((key: AccountSortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+    } else {
+      setSortKey(key)
+      setSortDir("asc")
+    }
+  }, [sortKey])
+
+  const sorted = React.useMemo(() => {
+    return [...accounts].sort((a, b) => {
+      const av = a[sortKey]
+      const bv = b[sortKey]
+      let cmp: number
+      if (av === null && bv === null) cmp = 0
+      else if (av === null) cmp = 1
+      else if (bv === null) cmp = -1
+      else if (typeof av === "number" && typeof bv === "number") cmp = av - bv
+      else cmp = String(av).localeCompare(String(bv))
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [sortKey, sortDir])
 
   const toggleAccount = React.useCallback((accountId: string) => {
     setSelectedIds((current) =>
@@ -76,11 +102,14 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
       )}
 
       <AccountsTable
-        accounts={accounts}
+        accounts={sorted}
         onNavigate={onNavigate}
         onToggleAccount={toggleAccount}
         onToggleAll={toggleAll}
+        onSort={handleSort}
         selectedIds={selectedIds}
+        sortDir={sortDir}
+        sortKey={sortKey}
       />
     </PageLayout>
   )

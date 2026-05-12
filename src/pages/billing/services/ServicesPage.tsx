@@ -1,7 +1,5 @@
 import * as React from "react"
 import {
-  IconChevronUp,
-  IconChevronDown,
   IconDotsVertical,
   IconSettings,
   IconReceiptDollar,
@@ -15,8 +13,18 @@ import {
   DataTableToolbarSpacer,
 } from "@/components/data-table/DataTableToolbar"
 import { Button } from "@/components/ui/button"
+import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { protoAction } from "@/lib/proto"
 import { serviceItems, type ServiceItem } from "@/mock/services"
+import { ServicesBulkActionsBar } from "@/features/billing/components/ServicesBulkActionsBar"
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
@@ -59,21 +67,6 @@ type SortKey = keyof Pick<
   ServiceItem,
   "name" | "description" | "category" | "defaultRate" | "rateType"
 >
-type SortDir = "asc" | "desc"
-
-function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
-  if (col !== sortKey) {
-    return (
-      <span className="ml-1 inline-flex flex-col opacity-30">
-        <IconChevronUp className="size-3 -mb-0.5" />
-        <IconChevronDown className="size-3" />
-      </span>
-    )
-  }
-  return sortDir === "asc"
-    ? <IconChevronUp className="ml-1 size-3.5 text-primary" />
-    : <IconChevronDown className="ml-1 size-3.5 text-primary" />
-}
 
 // ─── Format ──────────────────────────────────────────────────────────────────
 
@@ -90,6 +83,7 @@ export function ServicesPage() {
   const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
   const [sortKey, setSortKey] = React.useState<SortKey>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -112,105 +106,151 @@ export function ServicesPage() {
       return sortDir === "asc" ? cmp : -cmp
     })
 
+  const allSelected = filtered.length > 0 && selectedIds.length === filtered.length
+
+  const handleToggleAll = () => {
+    setSelectedIds(allSelected ? [] : filtered.map((s) => s.id))
+  }
+
+  const handleToggle = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
+
+  // Reset selection when switching tabs/status
+  React.useEffect(() => { setSelectedIds([]) }, [topTab, status])
+
   return (
     <PageLayout>
       <PageHeader title="Services" />
 
-      <TopTabs active={topTab} onChange={setTopTab} />
+      <TopTabs
+        active={topTab}
+        onChange={setTopTab}
+      />
 
       {topTab === "Service items" ? (
         <div className="mt-5">
           {/* Toolbar */}
-          <DataTableToolbarSlot>
-            <DataTableToolbarGroup>
-              <StatusTabs
-                tabs={[
-                  { label: "Active", active: status === "Active", onClick: () => setStatus("Active") },
-                  { label: "Archived", active: status === "Archived", onClick: () => setStatus("Archived") },
-                ]}
-              />
-            </DataTableToolbarGroup>
-            <DataTableToolbarSpacer />
-            <DataTableToolbarGroup className="shrink-0">
-              <Button size="xl" onClick={protoAction("New service")}>New service</Button>
-              <Button size="xl" variant="outline" onClick={protoAction("Copy from library")}>
-                Copy from library
-              </Button>
-              <Button size="xl" variant="outline" disabled>
-                Copy from QuickBooks
-              </Button>
-            </DataTableToolbarGroup>
-          </DataTableToolbarSlot>
+          {selectedIds.length > 0 ? (
+            <ServicesBulkActionsBar
+              selectedCount={selectedIds.length}
+              onClearSelection={() => setSelectedIds([])}
+              onSelectAll={() => setSelectedIds(filtered.map((s) => s.id))}
+            />
+          ) : (
+            <DataTableToolbarSlot>
+              <DataTableToolbarGroup className="shrink-0">
+                <StatusTabs
+                  tabs={[
+                    { label: "Active", active: status === "Active", onClick: () => setStatus("Active") },
+                    { label: "Archived", active: status === "Archived", onClick: () => setStatus("Archived") },
+                  ]}
+                />
+              </DataTableToolbarGroup>
+              <DataTableToolbarSpacer />
+              <DataTableToolbarGroup className="shrink-0">
+                <Button size="xl" onClick={protoAction("New service")}>New service</Button>
+                <Button size="xl" variant="outline" onClick={protoAction("Copy from library")}>
+                  Copy from library
+                </Button>
+                <Button size="xl" variant="outline" disabled>
+                  Copy from QuickBooks
+                </Button>
+              </DataTableToolbarGroup>
+            </DataTableToolbarSlot>
+          )}
 
           {/* Table */}
-          <div className="overflow-x-auto rounded-xl border bg-background">
-            <table className="w-full text-sm table-striped">
-              <thead>
-                <tr className="border-b text-left text-xs font-medium text-muted-foreground">
-                  <th
-                    className="h-10 cursor-pointer select-none px-4 font-medium hover:text-foreground"
+          <div className="table-striped overflow-x-auto rounded-lg border bg-background">
+            <Table>
+              <TableHeader className="sticky top-0 z-40 bg-background">
+                <TableRow>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      className="table-checkbox"
+                      checked={allSelected}
+                      onChange={handleToggleAll}
+                    />
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("name")}
                   >
                     <span className="inline-flex items-center">
                       Name
-                      <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
+                      <DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
                     </span>
-                  </th>
-                  <th
-                    className="h-10 cursor-pointer select-none px-4 font-medium hover:text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("description")}
                   >
                     <span className="inline-flex items-center">
                       Description
-                      <SortIcon col="description" sortKey={sortKey} sortDir={sortDir} />
+                      <DataTableSortIcon col="description" sortKey={sortKey} sortDir={sortDir} />
                     </span>
-                  </th>
-                  <th
-                    className="h-10 cursor-pointer select-none px-4 font-medium hover:text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("category")}
                   >
                     <span className="inline-flex items-center">
                       Category
-                      <SortIcon col="category" sortKey={sortKey} sortDir={sortDir} />
+                      <DataTableSortIcon col="category" sortKey={sortKey} sortDir={sortDir} />
                     </span>
-                  </th>
-                  <th
-                    className="h-10 cursor-pointer select-none px-4 font-medium hover:text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("defaultRate")}
                   >
                     <span className="inline-flex items-center">
                       Default rate
-                      <SortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
+                      <DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
                     </span>
-                  </th>
-                  <th className="h-10 px-4 font-medium">Custom rate</th>
-                  <th
-                    className="h-10 cursor-pointer select-none px-4 font-medium hover:text-foreground"
+                  </TableHead>
+                  <TableHead>Custom rate</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("rateType")}
                   >
                     <span className="inline-flex items-center">
                       Rate type
-                      <SortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
+                      <DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
                     </span>
-                  </th>
-                  <th className="h-10 w-12 px-2 text-right">
+                  </TableHead>
+                  <TableHead className="w-12 text-right">
                     <button
                       className="text-muted-foreground hover:text-foreground"
                       onClick={protoAction("Table settings")}
                     >
                       <IconSettings className="size-4" />
                     </button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filtered.map((svc) => (
-                  <tr key={svc.id} className="border-b last:border-0 hover:bg-muted/40 group">
-                    <td className="px-4 py-2.5 font-medium">{svc.name}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{svc.description}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{svc.category}</td>
-                    <td className="px-4 py-2.5">{formatRate(svc.defaultRate)}</td>
-                    <td className="px-4 py-2.5">
+                  <TableRow
+                    key={svc.id}
+                    className="group"
+                    data-state={selectedIds.includes(svc.id) ? "selected" : undefined}
+                  >
+                    <TableCell className="w-12">
+                      <input
+                        type="checkbox"
+                        className="table-checkbox"
+                        checked={selectedIds.includes(svc.id)}
+                        onChange={() => handleToggle(svc.id)}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{svc.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{svc.description}</TableCell>
+                    <TableCell className="text-muted-foreground">{svc.category}</TableCell>
+                    <TableCell>{formatRate(svc.defaultRate)}</TableCell>
+                    <TableCell>
                       {svc.customRates > 0 ? (
                         <button
                           className="text-primary hover:underline"
@@ -219,20 +259,20 @@ export function ServicesPage() {
                           {svc.customRates}
                         </button>
                       ) : null}
-                    </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{svc.rateType}</td>
-                    <td className="w-12 px-2 py-2.5 text-right">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
+                    <TableCell className="w-12 text-right">
                       <button
                         className="invisible text-muted-foreground hover:text-foreground group-hover:visible"
                         onClick={protoAction("Service actions")}
                       >
                         <IconDotsVertical className="size-4" />
                       </button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       ) : (
