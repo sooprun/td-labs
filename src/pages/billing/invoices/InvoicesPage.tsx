@@ -98,9 +98,11 @@ export function InvoicesPage() {
       <PageHeader title="Invoices" />
 
       {/* Summary bar */}
-      <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="mb-4 flex min-h-11 items-center gap-4 text-sm text-muted-foreground">
         <span>Number of invoices: <strong className="text-foreground">{invoiceSummary.total.toLocaleString()}</strong></span>
+        <div className="h-4 w-px bg-border" />
         <span>Paid: <strong className="text-foreground">{formatMoney(invoiceSummary.paid)}</strong></span>
+        <div className="h-4 w-px bg-border" />
         <span>Unpaid: <strong className="text-foreground">{formatMoney(invoiceSummary.unpaid)}</strong></span>
       </div>
 

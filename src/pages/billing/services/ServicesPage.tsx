@@ -41,12 +41,12 @@ function TopTabs({
   onChange: (tab: TopTab) => void
 }) {
   return (
-    <div className="flex border-b">
+    <div className="flex min-h-11 items-end border-b">
       {(["Service items", "Team member custom rates"] as TopTab[]).map((tab) => (
         <button
           key={tab}
           onClick={() => onChange(tab)}
-          className={`flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-medium mr-6 transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-1 pb-2.5 pt-1 text-sm font-medium mr-6 transition-colors ${
             active === tab
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -141,7 +141,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
       />
 
       {topTab === "Service items" ? (
-        <div className="mt-5">
+        <div className="mt-4">
           {/* Toolbar */}
           {selectedIds.length > 0 ? (
             <ServicesBulkActionsBar

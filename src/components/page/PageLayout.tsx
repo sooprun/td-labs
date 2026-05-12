@@ -23,7 +23,7 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, action, children }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4">
+    <div className="mb-4 flex flex-col gap-4">
       <div className="flex min-w-0 items-center gap-3">
         <h1 className="truncate text-3xl font-semibold tracking-normal">
           {title}
