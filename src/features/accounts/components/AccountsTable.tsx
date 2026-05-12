@@ -48,7 +48,7 @@ export function AccountsTable({
             <TableHead className={stickyCheckbox}>
               <input
                 checked={allSelected}
-                className="size-4 rounded border-border"
+                className="table-checkbox"
                 onChange={onToggleAll}
                 type="checkbox"
               />
@@ -89,7 +89,7 @@ export function AccountsTable({
               <TableCell className={stickyCheckbox}>
                 <input
                   checked={selectedIds.includes(account.id)}
-                  className="size-4 rounded border-border"
+                  className="table-checkbox"
                   onChange={() => onToggleAccount(account.id)}
                   type="checkbox"
                 />

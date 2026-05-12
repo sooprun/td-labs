@@ -137,6 +137,33 @@
   }
 }
 
+/* Table checkbox */
+.table-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 1.5px solid #C4CDD9;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  background-color: var(--background);
+  transition: border-color 0.15s, background-color 0.15s;
+  display: block;
+}
+.table-checkbox:hover {
+  border-color: var(--primary);
+}
+.table-checkbox:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='2.5,8.5 6,12 13.5,4' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-size: 13px 13px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 body.is-dragging,
 body.is-dragging * {
   cursor: grabbing !important;
@@ -152,7 +179,7 @@ body.is-dragging * {
 .table-striped thead th {
   position: relative;
 }
-.table-striped thead th:not(.col-sticky-cb):not(:last-child)::after {
+.table-striped thead th:not(.col-sticky-cb):not(.col-sticky-name):not(:last-child)::after {
   content: '';
   position: absolute;
   right: 0;
@@ -176,11 +203,26 @@ body.is-dragging * {
   position: sticky !important;
   left: 48px;
   z-index: 20;
-  box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.1);
+}
+.col-sticky-name::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -8px;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+  pointer-events: none;
 }
 thead .col-sticky-cb,
 thead .col-sticky-name {
   z-index: 30;
+}
+
+/* Selected row overrides zebra — must come after zebra rule */
+.table-striped tbody tr[data-state="selected"] td,
+.table-striped tbody tr[data-state="selected"] th {
+  background-color: color-mix(in srgb, var(--primary) 8%, var(--background));
 }
 
 /* Sticky cell backgrounds — must be opaque to cover scrolling content */
@@ -192,7 +234,7 @@ thead .col-sticky-name {
 .table-striped tbody tr:nth-child(even) .col-sticky-name {
   background-color: var(--workspace);
 }
-tr[data-state="selected"] .col-sticky-cb,
-tr[data-state="selected"] .col-sticky-name {
-  background-color: var(--muted);
+.table-striped tbody tr[data-state="selected"] .col-sticky-cb,
+.table-striped tbody tr[data-state="selected"] .col-sticky-name {
+  background-color: color-mix(in srgb, var(--primary) 8%, var(--background));
 }
