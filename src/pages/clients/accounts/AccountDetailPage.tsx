@@ -834,7 +834,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           onClick={() => setAddPanelOpen(true)}
         >
           <IconCirclePlus className="size-4" />
-          Add custom rate
+          Set custom rates
         </button>
       </div>
     )
@@ -882,7 +882,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           <DataTableToolbarGroup className="shrink-0">
             <Button size="xl" onClick={() => setAddPanelOpen(true)}>
               <IconCirclePlus className="size-4" />
-              Add custom rate
+              Set custom rates
             </Button>
             <div className="relative w-48">
               <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

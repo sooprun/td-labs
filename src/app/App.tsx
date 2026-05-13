@@ -72,7 +72,7 @@ export function App() {
 
   const pageMap: Partial<Record<string, React.ReactElement>> = {
     "/app/insights": <InsightsPage />,
-    "/app/clients": <AccountsPage onNavigate={handleNavigate} />,
+    "/app/clients": <AccountsPage onNavigate={handleNavigate} services={services} onServicesChange={setServices} />,
     "/app/workflow/pipelines": <PipelinesPage />,
     "/app/billing": <InvoicesPage />,
     "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} />,

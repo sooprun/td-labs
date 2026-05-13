@@ -22,15 +22,21 @@ import { AccountsBulkActionsBar } from "@/features/accounts/components/AccountsB
 import { AccountsTable, type AccountSortKey } from "@/features/accounts/components/AccountsTable"
 import { accounts } from "@/mock/accounts"
 import type { SortDir } from "@/components/data-table/DataTableSortIcon"
+import type { ServiceItem } from "@/mock/services"
+import { SetCustomRatesPanel } from "@/features/billing/components/SetCustomRatesPanel"
+import { toast } from "sonner"
 
 type AccountsPageProps = {
   onNavigate: (path: string) => void
+  services: ServiceItem[]
+  onServicesChange: (items: ServiceItem[]) => void
 }
 
-export function AccountsPage({ onNavigate }: AccountsPageProps) {
+export function AccountsPage({ onNavigate, services, onServicesChange }: AccountsPageProps) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [sortKey, setSortKey] = React.useState<AccountSortKey>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
+  const [customRatesPanelOpen, setCustomRatesPanelOpen] = React.useState(false)
 
   const handleSort = React.useCallback((key: AccountSortKey) => {
     if (key === sortKey) {
@@ -96,6 +102,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
           onClearSelection={clearSelection}
           onSelectAll={selectAll}
           selectedCount={selectedIds.length}
+          onSetCustomRates={() => setCustomRatesPanelOpen(true)}
         />
       ) : (
         <AccountsToolbar />
@@ -110,6 +117,18 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
         selectedIds={selectedIds}
         sortDir={sortDir}
         sortKey={sortKey}
+      />
+
+      <SetCustomRatesPanel
+        open={customRatesPanelOpen}
+        selectedAccounts={accounts.filter((a) => selectedIds.includes(a.id))}
+        services={services}
+        onClose={() => setCustomRatesPanelOpen(false)}
+        onSave={(updated) => {
+          onServicesChange(updated)
+          setCustomRatesPanelOpen(false)
+          toast.success("Custom rates saved")
+        }}
       />
     </PageLayout>
   )

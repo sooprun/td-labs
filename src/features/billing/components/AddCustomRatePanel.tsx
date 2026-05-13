@@ -156,7 +156,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-muted/40 px-4 py-0">
-          <SheetTitle className="text-base">Add custom rate</SheetTitle>
+          <SheetTitle className="text-base">Set custom rates</SheetTitle>
           <Button size="icon-xl" variant="ghost" onClick={onClose}>
             <IconX className="size-4" />
           </Button>
@@ -193,7 +193,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
         {/* Footer */}
         <div className="flex items-center gap-3 border-t px-6 py-4">
           <Button size="xl" disabled={!canSave} onClick={handleSave}>
-            {selectedCount > 0 ? `Add ${selectedCount} custom rate${selectedCount === 1 ? "" : "s"}` : "Add custom rate"}
+            {selectedCount > 0 ? `Set ${selectedCount} custom rate${selectedCount === 1 ? "" : "s"}` : "Set custom rates"}
           </Button>
           <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
         </div>

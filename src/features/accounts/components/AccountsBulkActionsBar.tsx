@@ -2,6 +2,7 @@ import {
   IconAt,
   IconClipboardPlus,
   IconListDetails,
+  IconReceiptDollar,
   IconTags,
   IconUsers,
 } from "@tabler/icons-react"
@@ -13,16 +14,23 @@ type AccountsBulkActionsBarProps = {
   selectedCount: number
   onClearSelection: () => void
   onSelectAll: () => void
+  onSetCustomRates: () => void
 }
 
 export function AccountsBulkActionsBar({
   selectedCount,
   onClearSelection,
   onSelectAll,
+  onSetCustomRates,
 }: AccountsBulkActionsBarProps) {
   return (
     <DataTableBulkActionsBar
       actions={[
+        {
+          icon: IconReceiptDollar,
+          label: "Set custom rates",
+          onClick: onSetCustomRates,
+        },
         {
           icon: IconListDetails,
           label: "Send organizer",
