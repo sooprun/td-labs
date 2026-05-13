@@ -838,7 +838,6 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   }
 
   const openEdit = (svc: ServiceItem) => {
-    const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
     setPendingService(svc)
     setRateMode("percent")
     setRateValue("")
