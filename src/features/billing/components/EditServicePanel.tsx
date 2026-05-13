@@ -156,11 +156,14 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                 <Input
                   id="svc-rate"
-                  className="pl-6 w-40"
+                  className={`pl-6 w-40 ${rateType === "Hour" ? "pr-8" : ""}`}
                   value={rate}
                   onChange={(e) => setRate(e.target.value)}
                   placeholder="0.00"
                 />
+                {rateType === "Hour" && (
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
