@@ -141,11 +141,14 @@ function Step2({
                   <div className="relative w-32 shrink-0">
                     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                     <Input
-                      className="h-8 pl-6 text-sm"
+                      className={`h-8 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                       value={inputVal}
                       placeholder="0.00"
                       onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
                     />
+                    {svc.rateType === "Hour" && (
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                    )}
                   </div>
                 </div>
               )

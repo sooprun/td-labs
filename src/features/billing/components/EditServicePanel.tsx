@@ -237,11 +237,14 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                     <div className="relative w-28 shrink-0">
                       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                       <Input
-                        className="pl-6 h-8 text-sm"
+                        className={`pl-6 h-8 text-sm ${rateType === "Hour" ? "pr-8" : ""}`}
                         value={o.rateInput}
                         onChange={(e) => handleOverrideRateChange(o.accountId, e.target.value)}
                         placeholder="0.00"
                       />
+                      {rateType === "Hour" && (
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                      )}
                     </div>
                     <Button
                       size="icon"
