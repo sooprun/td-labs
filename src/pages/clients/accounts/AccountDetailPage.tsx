@@ -913,7 +913,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               <TableHead>Category</TableHead>
               <TableHead>Rate type</TableHead>
               <TableHead className="w-36 text-right">Default rate</TableHead>
-              <TableHead className="w-44 text-right">Custom rate</TableHead>
+              <TableHead className="w-44 text-right">Individual rate</TableHead>
               <TableHead className="w-10 px-0" />
             </TableRow>
           </TableHeader>
