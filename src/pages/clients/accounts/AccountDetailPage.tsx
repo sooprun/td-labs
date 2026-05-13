@@ -53,7 +53,7 @@ type AccountDetailPageProps = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const TAB_BADGE_CLASS =
-  "text-[10px] font-bold bg-[#24C875] text-white rounded-full size-4 inline-flex items-center justify-center ml-1"
+  "text-[10px] font-bold bg-[#24C875] text-white rounded-full h-4 min-w-4 px-1 inline-flex items-center justify-center ml-1"
 
 function isPastDate(dateStr: string | null): boolean {
   if (!dateStr) return false
