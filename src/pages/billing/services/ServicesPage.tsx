@@ -2,7 +2,6 @@ import * as React from "react"
 import {
   IconDotsVertical,
   IconSettings,
-  IconReceiptDollar,
   IconSearch,
   IconFilter,
   IconChevronDown,
