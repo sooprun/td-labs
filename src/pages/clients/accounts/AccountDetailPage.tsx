@@ -823,20 +823,30 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
 
   if (servicesWithOverride.length === 0) {
     return (
-      <div className="flex flex-col items-center py-16 text-center">
-        <IconReceiptDollar className="mb-5 size-14 text-muted-foreground/40" strokeWidth={1.25} />
-        <h3 className="text-lg font-semibold">No custom rates yet</h3>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-          This client uses your default service rates. Add a custom rate to override the price for any specific service.
-        </p>
-        <button
-          className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          onClick={() => setAddPanelOpen(true)}
-        >
-          <IconCirclePlus className="size-4" />
-          Set custom rates
-        </button>
-      </div>
+      <>
+        <div className="flex flex-col items-center py-16 text-center">
+          <IconReceiptDollar className="mb-5 size-14 text-muted-foreground/40" strokeWidth={1.25} />
+          <h3 className="text-lg font-semibold">No custom rates yet</h3>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+            This client uses your default service rates. Add a custom rate to override the price for any specific service.
+          </p>
+          <button
+            className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            onClick={() => setAddPanelOpen(true)}
+          >
+            <IconCirclePlus className="size-4" />
+            Set custom rates
+          </button>
+        </div>
+        <AddCustomRatePanel
+          open={addPanelOpen}
+          accountId={accountId}
+          accountName={accountName}
+          services={services}
+          onClose={() => setAddPanelOpen(false)}
+          onSave={onServicesChange}
+        />
+      </>
     )
   }
 
