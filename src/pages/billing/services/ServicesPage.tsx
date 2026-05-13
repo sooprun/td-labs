@@ -4,6 +4,7 @@ import {
   IconSettings,
   IconReceiptDollar,
 } from "@tabler/icons-react"
+import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
 
 import { PageHeader, PageLayout } from "@/components/page/PageLayout"
 import { StatusTabs } from "@/components/page/StatusTabs"
@@ -79,6 +80,146 @@ function formatRate(rate: number, rateType?: string) {
     ? "$0.00"
     : `$${rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   return rateType === "Hour" ? `${amount}/hr` : amount
+}
+
+// ─── Team member rates tab ───────────────────────────────────────────────────
+
+function MemberAvatars({ members }: { members: RateGroup["members"] }) {
+  return (
+    <div className="flex items-center -space-x-1.5">
+      {members.slice(0, 4).map((m) => (
+        <span
+          key={m.id}
+          title={m.name}
+          className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white"
+          style={{ backgroundColor: m.color }}
+        >
+          {m.initials}
+        </span>
+      ))}
+      {members.length > 4 && (
+        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-semibold text-muted-foreground">
+          +{members.length - 4}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function ServiceChips({ services }: { services: RateGroup["services"] }) {
+  const MAX = 3
+  const visible = services.slice(0, MAX)
+  const rest = services.length - MAX
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {visible.map((s) => (
+        <span
+          key={s.serviceId}
+          className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-foreground"
+        >
+          {s.serviceName}&nbsp;<span className="font-medium text-primary">
+            ${s.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{s.rateType === "Hour" ? "/hr" : ""}
+          </span>
+        </span>
+      ))}
+      {rest > 0 && (
+        <span className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground">
+          +{rest} more
+        </span>
+      )}
+    </div>
+  )
+}
+
+function TeamMemberRatesTab() {
+  const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+
+  const filtered = rateGroups.filter((g) => (status === "Active" ? !g.archived : g.archived))
+  const allSelected = filtered.length > 0 && selectedIds.length === filtered.length
+
+  const toggleAll = () => setSelectedIds(allSelected ? [] : filtered.map((g) => g.id))
+  const toggleOne = (id: string) => setSelectedIds((prev) =>
+    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  )
+
+  React.useEffect(() => { setSelectedIds([]) }, [status])
+
+  return (
+    <div className="mt-4">
+      <DataTableToolbarSlot>
+        <DataTableToolbarGroup className="shrink-0">
+          <StatusTabs
+            tabs={[
+              { label: "Active", active: status === "Active", onClick: () => setStatus("Active") },
+              { label: "Archived", active: status === "Archived", onClick: () => setStatus("Archived") },
+            ]}
+          />
+        </DataTableToolbarGroup>
+        <DataTableToolbarSpacer />
+        <DataTableToolbarGroup className="shrink-0">
+          <Button size="xl" onClick={protoAction("New rate group")}>New rate group</Button>
+        </DataTableToolbarGroup>
+      </DataTableToolbarSlot>
+
+      <div className="table-striped overflow-x-auto rounded-lg border bg-background">
+        <Table>
+          <TableHeader className="sticky top-0 z-40 bg-background">
+            <TableRow>
+              <TableHead className="w-12">
+                <input type="checkbox" className="table-checkbox" checked={allSelected} onChange={toggleAll} />
+              </TableHead>
+              <TableHead className="w-56">Name</TableHead>
+              <TableHead>Services</TableHead>
+              <TableHead className="w-48">Team members</TableHead>
+              <TableHead className="w-10 px-0">
+                <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
+                  <IconSettings className="size-4" />
+                </Button>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((group) => (
+              <TableRow
+                key={group.id}
+                className="group"
+                data-state={selectedIds.includes(group.id) ? "selected" : undefined}
+              >
+                <TableCell className="w-12">
+                  <input
+                    type="checkbox"
+                    className="table-checkbox"
+                    checked={selectedIds.includes(group.id)}
+                    onChange={() => toggleOne(group.id)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <button
+                    className="font-medium text-primary hover:underline"
+                    onClick={protoAction(`Open rate group: ${group.name}`)}
+                  >
+                    {group.name}
+                  </button>
+                </TableCell>
+                <TableCell>
+                  <ServiceChips services={group.services} />
+                </TableCell>
+                <TableCell>
+                  <MemberAvatars members={group.members} />
+                </TableCell>
+                <TableCell className="w-10 px-0">
+                  <Button size="icon-xl" variant="ghost" onClick={protoAction("Rate group actions")}>
+                    <IconDotsVertical className="size-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -284,17 +425,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           </div>
         </div>
       ) : (
-        <div className="flex flex-1 items-center justify-center pb-24 pt-16 text-center">
-          <div className="mx-auto flex max-w-lg flex-col items-center">
-            <IconReceiptDollar className="mb-6 size-16 text-muted-foreground/40" strokeWidth={1.25} />
-            <h2 className="text-xl font-semibold tracking-normal">
-              Team member custom rates isn't part of this prototype yet
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Everything's working — this section just hasn't been built out. Try a different page.
-            </p>
-          </div>
-        </div>
+        <TeamMemberRatesTab />
       )}
 
       <EditServicePanel
