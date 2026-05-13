@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTableBulkActionsBar, DataTableToolbarSlot, DataTableToolbarGroup, DataTableToolbarSpacer } from "@/components/data-table/DataTableToolbar"
+import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 import { protoAction } from "@/lib/proto"
 import {
   accountJobsMap,
@@ -39,8 +40,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { IconDotsVertical, IconSettings, IconTrash } from "@tabler/icons-react"
-import { AddCustomRatePanel } from "@/features/billing/components/AddCustomRatePanel"
 import { useQueryParam } from "@/hooks/useQueryParam"
+import { StatusTabs } from "@/components/page/StatusTabs"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -766,106 +767,81 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
 
 function CustomRatesTabContent({ accountId, services, onServicesChange }: { accountId: string; services: ServiceItem[]; onServicesChange: (items: ServiceItem[]) => void }) {
   const account = accounts.find((a) => a.id === accountId)
-  const accountName = account?.name ?? ""
 
-  const servicesWithOverride = services
-    .filter((s) => s.clientOverridesList.some((o) => o.accountId === accountId))
-
-  const [addPanelOpen, setAddPanelOpen] = React.useState(false)
-
+  const [view, setView] = React.useState<"all" | "custom">("all")
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
-  const allSelected = servicesWithOverride.length > 0 && selectedIds.length === servicesWithOverride.length
-  const toggleAll = () => setSelectedIds(allSelected ? [] : servicesWithOverride.map((s) => s.id))
+  const [pendingService, setPendingService] = React.useState<ServiceItem | null>(null)
+  const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
+  const [rateMode, setRateMode] = React.useState<"amount" | "percent">("amount")
+  const [rateValue, setRateValue] = React.useState("")
+  const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
+  const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc")
+
+  const handleSort = (key: typeof sortKey) => {
+    if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+    else { setSortKey(key); setSortDir("asc") }
+  }
+
+  const activeServices = services.filter((s) => !s.archived)
+  const withOverride = activeServices.filter((s) => s.clientOverridesList.some((o) => o.accountId === accountId))
+  const displayed = (view === "all" ? activeServices : withOverride).slice().sort((a, b) => {
+    const av = a[sortKey], bv = b[sortKey]
+    const cmp = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv))
+    return sortDir === "asc" ? cmp : -cmp
+  })
+
+  const allSelected = displayed.length > 0 && selectedIds.length === displayed.length
+  const toggleAll = () => setSelectedIds(allSelected ? [] : displayed.map((s) => s.id))
   const toggleOne = (id: string) => setSelectedIds((prev) =>
     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
   )
-
-  const [editingId, setEditingId] = React.useState<string | null>(null)
-  const [editingValue, setEditingValue] = React.useState("")
-
-  const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
-  const [bulkRateMode, setBulkRateMode] = React.useState<"amount" | "percent">("amount")
-  const [bulkRateValue, setBulkRateValue] = React.useState("")
-  const [bulkRounding, setBulkRounding] = React.useState<"0" | "1" | "5" | "10">("0")
-
-  const applyBulkRate = () => {
-    const val = parseFloat(bulkRateValue)
-    if (isNaN(val) || selectedIds.length === 0) return
-    onServicesChange(services.map((s) => {
-      if (!selectedIds.includes(s.id)) return s
-      const override = s.clientOverridesList.find((o) => o.accountId === accountId)
-      if (!override) return s
-      let newRate: number
-      if (bulkRateMode === "amount") {
-        newRate = val
-      } else {
-        const raw = override.rate * (1 + val / 100)
-        const r = Number(bulkRounding)
-        newRate = r === 0 ? Math.round(raw * 100) / 100 : Math.round(raw / r) * r
-      }
-      return {
-        ...s,
-        clientOverridesList: s.clientOverridesList.map((o) =>
-          o.accountId === accountId ? { ...o, rate: newRate } : o
-        ),
-      }
-    }))
-    setBulkRateValue("")
-    setBulkRateOpen(false)
-    setSelectedIds([])
-  }
-
-  const startEdit = (svcId: string, currentRate: number) => {
-    setEditingId(svcId)
-    setEditingValue(currentRate > 0 ? String(currentRate) : "")
-  }
-
-  const commitEdit = (svcId: string) => {
-    const newRate = parseFloat(editingValue) || 0
-    onServicesChange(services.map((s) => {
-      if (s.id !== svcId) return s
-      return {
-        ...s,
-        clientOverridesList: s.clientOverridesList.map((o) =>
-          o.accountId === accountId ? { ...o, rate: newRate } : o
-        ),
-      }
-    }))
-    setEditingId(null)
-  }
 
   const fmt = (n: number, rateType?: string) => {
     const amount = `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     return rateType === "Hour" ? `${amount}/hr` : amount
   }
 
-  if (servicesWithOverride.length === 0) {
-    return (
-      <>
-        <div className="flex flex-col items-center py-16 text-center">
-          <IconReceiptDollar className="mb-5 size-14 text-muted-foreground/40" strokeWidth={1.25} />
-          <h3 className="text-lg font-semibold">No client prices yet</h3>
-          <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-            This client uses your default service rates. Add a custom rate to override the price for any specific service.
-          </p>
-          <button
-            className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-            onClick={() => setAddPanelOpen(true)}
-          >
-            <IconCirclePlus className="size-4" />
-            Set client prices
-          </button>
-        </div>
-        <AddCustomRatePanel
-          open={addPanelOpen}
-          accountId={accountId}
-          accountName={accountName}
-          services={services}
-          onClose={() => setAddPanelOpen(false)}
-          onSave={onServicesChange}
-        />
-      </>
-    )
+  const dialogOpen = bulkRateOpen || pendingService !== null
+  const targetIds = pendingService ? [pendingService.id] : selectedIds
+
+  const applyRate = () => {
+    const val = parseFloat(rateValue)
+    if (isNaN(val) || targetIds.length === 0) return
+    onServicesChange(services.map((s) => {
+      if (!targetIds.includes(s.id)) return s
+      const existing = s.clientOverridesList.find((o) => o.accountId === accountId)
+      const baseRate = existing?.rate ?? s.defaultRate
+      let newRate: number
+      if (rateMode === "amount") {
+        newRate = val
+      } else {
+        const raw = baseRate * (1 + val / 100)
+        const r = Number(rateRounding)
+        newRate = r === 0 ? Math.round(raw * 100) / 100 : Math.round(raw / r) * r
+      }
+      const newOverrides = existing
+        ? s.clientOverridesList.map((o) => o.accountId === accountId ? { ...o, rate: newRate } : o)
+        : [...s.clientOverridesList, { accountId, accountName: account?.name ?? "", rate: newRate }]
+      return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
+    }))
+    closeDialog()
+    setSelectedIds([])
+  }
+
+  const closeDialog = () => {
+    setBulkRateOpen(false)
+    setPendingService(null)
+    setRateValue("")
+    setRateMode("amount")
+    setRateRounding("0")
+  }
+
+  const openEdit = (svc: ServiceItem) => {
+    const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
+    setPendingService(svc)
+    setRateMode("amount")
+    setRateValue(override ? String(override.rate) : String(svc.defaultRate))
   }
 
   return (
@@ -875,17 +851,17 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         <DataTableBulkActionsBar
           selectedCount={selectedIds.length}
           onClearSelection={() => setSelectedIds([])}
-          onSelectAll={() => setSelectedIds(servicesWithOverride.map((s) => s.id))}
-          selectAllLabel="Select all client prices"
+          onSelectAll={() => setSelectedIds(displayed.map((s) => s.id))}
+          selectAllLabel="Select all"
           actions={[
             {
               icon: IconReceiptDollar,
               label: "Update rate",
-              onClick: () => { setBulkRateValue(""); setBulkRateOpen(true) },
+              onClick: () => { setRateValue(""); setBulkRateOpen(true) },
             },
             {
               icon: IconTrash,
-              label: "Delete",
+              label: "Remove",
               onClick: () => {
                 onServicesChange(services.map((s) => {
                   if (!selectedIds.includes(s.id)) return s
@@ -900,17 +876,15 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
       ) : (
         <DataTableToolbarSlot>
           <DataTableToolbarGroup className="shrink-0">
-            <Button size="xl" variant="ghost" onClick={protoAction("Filter")}>
-              <IconFilter className="size-4" />
-              Filter
-              <IconChevronDown className="size-3.5" />
-            </Button>
+            <StatusTabs
+              tabs={[
+                { label: "All services", active: view === "all", onClick: () => { setView("all"); setSelectedIds([]) } },
+                { label: "Client only", active: view === "custom", onClick: () => { setView("custom"); setSelectedIds([]) } },
+              ]}
+            />
           </DataTableToolbarGroup>
           <DataTableToolbarSpacer />
           <DataTableToolbarGroup className="shrink-0">
-            <Button size="xl" onClick={() => setAddPanelOpen(true)}>
-              Set client prices
-            </Button>
             <div className="relative w-48">
               <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
@@ -926,17 +900,29 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               <TableHead className="w-12">
                 <input type="checkbox" className="table-checkbox" checked={allSelected} onChange={toggleAll} />
               </TableHead>
-              <TableHead>Service</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Rate type</TableHead>
-              <TableHead className="w-36 text-right">Default rate</TableHead>
+              <TableHead className="cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("name")}>
+                <span className="inline-flex items-center">Name<DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className="w-32 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("category")}>
+                <span className="inline-flex items-center">Category<DataTableSortIcon col="category" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className="w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("rateType")}>
+                <span className="inline-flex items-center">Type<DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className="w-36 cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
+                <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
               <TableHead className="w-44 text-right">Client price</TableHead>
-              <TableHead className="w-10 px-0" />
+              <TableHead className="w-10 px-0">
+                <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
+                  <IconSettings className="size-4" />
+                </Button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {servicesWithOverride.map((svc) => {
-              const override = svc.clientOverridesList.find((o) => o.accountId === accountId)!
+            {displayed.map((svc) => {
+              const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
               return (
                 <TableRow key={svc.id} data-state={selectedIds.includes(svc.id) ? "selected" : undefined}>
                   <TableCell className="w-12">
@@ -944,59 +930,48 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">{svc.name}</div>
-                    {svc.description && (
-                      <div className="text-xs text-muted-foreground">{svc.description}</div>
-                    )}
+                    {svc.description && <div className="text-xs text-muted-foreground">{svc.description}</div>}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{svc.category}</TableCell>
                   <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                   <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate, svc.rateType)}</TableCell>
                   <TableCell className="w-44 text-right">
-                    <div className="inline-flex items-center justify-end gap-2">
-                      {editingId === svc.id ? (
-                        <div className="relative w-28">
-                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                          <input
-                            className="h-8 w-full rounded-md border bg-background pl-6 pr-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                            value={editingValue}
-                            autoFocus
-                            onChange={(e) => setEditingValue(e.target.value)}
-                            onBlur={() => commitEdit(svc.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") commitEdit(svc.id)
-                              if (e.key === "Escape") setEditingId(null)
-                            }}
-                          />
-                        </div>
-                      ) : (
+                    {override ? (
+                      <div className="inline-flex items-center justify-end gap-2">
                         <button
-                          className="font-medium text-primary hover:underline"
-                          onClick={() => startEdit(svc.id, override.rate)}
+                          className="font-medium text-primary hover:underline underline-offset-2"
+                          onClick={() => openEdit(svc)}
                         >
                           {fmt(override.rate, svc.rateType)}
                         </button>
-                      )}
-                      {editingId !== svc.id && (() => {
-                        const pct = ((override.rate - svc.defaultRate) / svc.defaultRate) * 100
-                        const rounded = Math.round(pct)
-                        const sign = pct > 0 ? "+" : ""
-                        const color = pct > 0
-                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                        return (
-                          <span className="inline-flex w-14 justify-center">
-                            {rounded !== 0 && (
+                        {(() => {
+                          const pct = ((override.rate - svc.defaultRate) / svc.defaultRate) * 100
+                          const rounded = Math.round(pct)
+                          if (rounded === 0) return null
+                          const sign = pct > 0 ? "+" : ""
+                          const color = pct > 0
+                            ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                          return (
+                            <span className="inline-flex w-14 justify-center">
                               <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
                                 {sign}{rounded}%
                               </span>
-                            )}
-                          </span>
-                        )
-                      })()}
-                    </div>
+                            </span>
+                          )
+                        })()}
+                      </div>
+                    ) : (
+                      <button
+                        className="text-sm text-primary hover:underline underline-offset-2"
+                        onClick={() => openEdit(svc)}
+                      >
+                        Set price
+                      </button>
+                    )}
                   </TableCell>
                   <TableCell className="w-10 px-0">
-                    <Button size="icon-xl" variant="ghost" onClick={protoAction("Custom rate actions")}>
+                    <Button size="icon-xl" variant="ghost" onClick={protoAction("Service price actions")}>
                       <IconDotsVertical className="size-4" />
                     </Button>
                   </TableCell>
@@ -1007,66 +982,55 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </Table>
       </div>
 
-      <AddCustomRatePanel
-        open={addPanelOpen}
-        accountId={accountId}
-        accountName={accountName}
-        services={services}
-        onClose={() => setAddPanelOpen(false)}
-        onSave={onServicesChange}
-      />
-
-      <Dialog open={bulkRateOpen} onOpenChange={(open) => { if (!open) { setBulkRateOpen(false); setBulkRateValue(""); setBulkRateMode("amount"); setBulkRounding("0") } }}>
+      {/* Rate dialog — single item + bulk */}
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog() }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Update rate</DialogTitle>
+            <DialogTitle>
+              {pendingService ? `Set price — ${pendingService.name}` : `Update rate`}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
-            <p className="text-sm text-muted-foreground">
-              Changes will apply to {selectedIds.length} selected {selectedIds.length === 1 ? "service" : "services"}.
-            </p>
-
-            {/* Mode toggle */}
+            {!pendingService && (
+              <p className="text-sm text-muted-foreground">
+                Changes will apply to {targetIds.length} selected {targetIds.length === 1 ? "service" : "services"}.
+              </p>
+            )}
             <div className="flex rounded-lg border p-1 gap-1">
               {(["amount", "percent"] as const).map((mode) => (
                 <button
                   key={mode}
-                  onClick={() => { setBulkRateMode(mode); setBulkRateValue("") }}
+                  onClick={() => { setRateMode(mode); setRateValue("") }}
                   className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
-                    bulkRateMode === mode
-                      ? "bg-background shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                    rateMode === mode ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {mode === "amount" ? "Fixed amount" : "Percentage"}
                 </button>
               ))}
             </div>
-
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="bulk-rate-val">
-                {bulkRateMode === "amount" ? "New rate" : "Adjustment"}
+              <Label htmlFor="rate-val">
+                {rateMode === "amount" ? "New rate" : "Adjustment"}
               </Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    {bulkRateMode === "amount" ? "$" : "%"}
+                    {rateMode === "amount" ? "$" : "%"}
                   </span>
                   <Input
-                    id="bulk-rate-val"
-                    className={bulkRateMode === "amount" ? "pl-6" : "pl-7"}
-                    placeholder={bulkRateMode === "amount" ? "0.00" : "e.g. 10 or -5"}
-                    value={bulkRateValue}
+                    id="rate-val"
+                    className={rateMode === "amount" ? "pl-6" : "pl-7"}
+                    placeholder={rateMode === "amount" ? "0.00" : "e.g. 10 or -5"}
+                    value={rateValue}
                     autoFocus
-                    onChange={(e) => setBulkRateValue(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") applyBulkRate() }}
+                    onChange={(e) => setRateValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") applyRate() }}
                   />
                 </div>
-                {bulkRateMode === "percent" && (
-                  <Select value={bulkRounding} onValueChange={(v) => setBulkRounding(v as typeof bulkRounding)}>
-                    <SelectTrigger className="w-36">
-                      <SelectValue />
-                    </SelectTrigger>
+                {rateMode === "percent" && (
+                  <Select value={rateRounding} onValueChange={(v) => setRateRounding(v as typeof rateRounding)}>
+                    <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">No rounding</SelectItem>
                       <SelectItem value="1">Nearest $1</SelectItem>
@@ -1076,7 +1040,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   </Select>
                 )}
               </div>
-              {bulkRateMode === "percent" && (
+              {rateMode === "percent" && (
                 <p className="text-xs text-muted-foreground">
                   Use positive values to increase (e.g., 10%) or negative to decrease (e.g., -5%).
                 </p>
@@ -1084,9 +1048,9 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkRateOpen(false)}>Cancel</Button>
-            <Button disabled={!bulkRateValue || isNaN(parseFloat(bulkRateValue))} onClick={applyBulkRate}>
-              Update
+            <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+            <Button disabled={!rateValue || isNaN(parseFloat(rateValue))} onClick={applyRate}>
+              {rateMode === "amount" ? "Set price" : "Apply"}
             </Button>
           </DialogFooter>
         </DialogContent>
