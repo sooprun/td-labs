@@ -174,8 +174,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
         {/* Subheader */}
         <div className="border-b px-6 py-3">
           <p className="text-sm text-muted-foreground">
-            Select services and set a custom price for <span className="font-medium text-foreground">{accountName}</span>.
-            The default rate is shown for reference.
+            Choose which services to set individual rates for. <span className="font-medium text-foreground">{accountName}</span>'s default rates are shown for reference.
           </p>
         </div>
 
