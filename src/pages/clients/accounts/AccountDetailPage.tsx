@@ -891,7 +891,6 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           <DataTableToolbarSpacer />
           <DataTableToolbarGroup className="shrink-0">
             <Button size="xl" onClick={() => setAddPanelOpen(true)}>
-              <IconCirclePlus className="size-4" />
               Set individual rates
             </Button>
             <div className="relative w-48">
