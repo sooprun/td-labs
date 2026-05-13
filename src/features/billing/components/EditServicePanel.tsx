@@ -278,7 +278,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
               .flatMap((g) => {
                 const svc = g.services.find((s) => s.serviceId === service?.id)
                 if (!svc) return []
-                return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: svc.rateType, group: g.name }))
+                return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: service?.rateType ?? "", group: g.name }))
               })
             return (
               <div className="flex flex-col">

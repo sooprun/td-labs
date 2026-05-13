@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { RateGroup } from "@/mock/data/team-member-rates"
+import { serviceItems as allServices } from "@/mock/services"
 
 // ─── Member avatars ───────────────────────────────────────────────────────────
 
@@ -55,7 +56,7 @@ function applyAdjustment(rate: number, pct: number, rounding: Rounding): number 
   return Math.round(raw / rounding) * rounding
 }
 
-function formatRate(rate: number, rateType: string) {
+function formatRate(rate: number, rateType?: string) {
   const amount = `$${rate.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   return rateType === "Hour" ? `${amount}/hr` : amount
 }
@@ -181,14 +182,15 @@ function Step2({
               </div>
               <div className="border-t px-4 pb-3 pt-2 flex flex-col gap-1.5">
                 {group.services.map((svc) => {
+                  const serviceItem = allServices.find((s) => s.id === svc.serviceId)
                   const newRate = applyAdjustment(svc.rate, adjustment, rounding)
                   return (
                     <div key={svc.serviceId} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{svc.serviceName}</span>
+                      <span className="text-muted-foreground">{serviceItem?.name ?? svc.serviceId}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground line-through">{formatRate(svc.rate, svc.rateType)}</span>
+                        <span className="text-muted-foreground line-through">{formatRate(svc.rate, serviceItem?.rateType)}</span>
                         <IconArrowRight className="size-3.5 text-muted-foreground" />
-                        <span className="font-medium">{formatRate(newRate, svc.rateType)}</span>
+                        <span className="font-medium">{formatRate(newRate, serviceItem?.rateType)}</span>
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           adjustment > 0
                             ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"

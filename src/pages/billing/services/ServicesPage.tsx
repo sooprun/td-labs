@@ -9,6 +9,7 @@ import {
   IconStar,
 } from "@tabler/icons-react"
 import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
+import { serviceItems as allServiceItems } from "@/mock/services"
 import { TeamRatesBulkActionsBar } from "@/features/billing/components/TeamRatesBulkActionsBar"
 import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpdateTeamRatesPanel"
 
@@ -112,22 +113,25 @@ function MemberAvatars({ members }: { members: RateGroup["members"] }) {
   )
 }
 
-function ServiceChips({ services }: { services: RateGroup["services"] }) {
+function ServiceChips({ services: groupServices, allItems }: { services: RateGroup["services"]; allItems: ServiceItem[] }) {
   const MAX = 3
-  const visible = services.slice(0, MAX)
-  const rest = services.length - MAX
+  const visible = groupServices.slice(0, MAX)
+  const rest = groupServices.length - MAX
   return (
     <div className="flex flex-wrap gap-1.5">
-      {visible.map((s) => (
-        <span
-          key={s.serviceId}
-          className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-foreground"
-        >
-          {s.serviceName}&nbsp;<span className="font-medium text-primary">
-            ${s.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{s.rateType === "Hour" ? "/hr" : ""}
+      {visible.map((s) => {
+        const item = allItems.find((i) => i.id === s.serviceId)
+        return (
+          <span
+            key={s.serviceId}
+            className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-foreground"
+          >
+            {item?.name ?? s.serviceId}&nbsp;<span className="font-medium text-primary">
+              ${s.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{item?.rateType === "Hour" ? "/hr" : ""}
+            </span>
           </span>
-        </span>
-      ))}
+        )
+      })}
       {rest > 0 && (
         <span className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground">
           +{rest} more
@@ -226,7 +230,7 @@ function TeamMemberRatesTab() {
                   </button>
                 </TableCell>
                 <TableCell>
-                  <ServiceChips services={group.services} />
+                  <ServiceChips services={group.services} allItems={allServiceItems} />
                 </TableCell>
                 <TableCell>
                   <MemberAvatars members={group.members} />
