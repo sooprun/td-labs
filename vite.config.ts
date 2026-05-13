@@ -10,16 +10,16 @@ function getAppTitle(): string {
       process.env.VERCEL_GIT_COMMIT_REF ??
       execSync("git rev-parse --abbrev-ref HEAD", { stdio: "pipe" }).toString().trim()
 
-    if (branch === "master" || branch === "main") return "TaxDome Prototype"
+    if (branch === "master" || branch === "main") return "TrueDraft Firm"
 
     const name = branch.replace(/^(feature|feat|fix|chore|style)\//, "")
     const featureName = name
       .split(/[-_]/)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ")
-    return `TaxDome ${featureName} Prototype`
+    return `TrueDraft Firm — ${featureName}`
   } catch {
-    return "TaxDome Prototype"
+    return "TrueDraft Firm"
   }
 }
 

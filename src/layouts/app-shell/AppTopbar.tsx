@@ -33,8 +33,8 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         onClick={() => onNavigate("/app/insights")}
         type="button"
       >
-        <img src="/taxdome-logo.svg" alt="TaxDome" className="size-9 shrink-0" />
-        <span className="ml-3 truncate text-sm font-semibold text-foreground">TaxDome Prototype</span>
+        <img src="/taxdome-logo.svg" alt="TrueDraft" className="size-9 shrink-0" />
+        <span className="ml-3 truncate text-sm font-semibold text-foreground">TrueDraft Firm</span>
       </button>
 
       <div className="flex min-w-0 flex-1 items-center gap-2 pl-6 pr-8">
@@ -81,9 +81,9 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
                 AS
               </span>
               <div className="hidden min-w-0 leading-tight xl:block">
-                <p className="truncate text-sm text-foreground">Alex Suprun</p>
+                <p className="truncate text-sm text-foreground">Alex Shaw</p>
                 <p className="truncate text-xs font-normal text-muted-foreground">
-                  asuprun@tax
+                  ashaw@truedraft.com
                 </p>
               </div>
               <IconChevronDown className="ml-auto hidden size-4 shrink-0 text-muted-foreground xl:block" />
@@ -100,10 +100,10 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  Alex Suprun
+                  Alex Shaw
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  asuprun@taxdome.com
+                  ashaw@truedraft.com
                 </p>
               </div>
             </div>

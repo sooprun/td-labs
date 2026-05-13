@@ -1,6 +1,6 @@
-# TaxDome Sandbox Prototype
+# TrueDraft Firm
 
-Clickable SaaS prototype sandbox for TaxDome-like UX and product experiments.
+Clickable SaaS prototype sandbox for TrueDraft-like UX and product experiments.
 
 ## Project Docs
 

@@ -10,7 +10,7 @@ function AssigneeFilter() {
   return (
     <button className="flex items-center gap-1 text-sm font-semibold text-muted-foreground" onClick={protoAction("Assignee filter")}>
       <IconUserCircle className="size-4" />
-      Alex Suprun
+      Alex Shaw
       <IconChevronDown className="size-4" />
     </button>
   )

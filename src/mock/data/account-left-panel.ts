@@ -25,7 +25,7 @@ export type AccountLeftPanelData = {
 }
 
 export const teamMemberNames: Record<string, string> = {
-  AS: "Alex Suprun",
+  AS: "Alex Shaw",
   JD: "James Davis",
 }
 
@@ -56,7 +56,7 @@ export const accountLeftPanelMap: Record<string, AccountLeftPanelData> = {
       },
     ],
     roles: [
-      { roleName: "Tax preparer", members: ["Alex Suprun"] },
+      { roleName: "Tax preparer", members: ["Alex Shaw"] },
       { roleName: "Reviewer", members: ["James Davis"] },
     ],
   },
@@ -81,7 +81,7 @@ export const accountLeftPanelMap: Record<string, AccountLeftPanelData> = {
     ],
     roles: [
       { roleName: "Bookkeeper", members: ["James Davis"] },
-      { roleName: "Tax preparer", members: ["Alex Suprun", "James Davis"] },
+      { roleName: "Tax preparer", members: ["Alex Shaw", "James Davis"] },
     ],
   },
 
@@ -122,8 +122,8 @@ export const accountLeftPanelMap: Record<string, AccountLeftPanelData> = {
       },
     ],
     roles: [
-      { roleName: "Tax preparer", members: ["Alex Suprun"] },
-      { roleName: "Bookkeeper", members: ["Alex Suprun"] },
+      { roleName: "Tax preparer", members: ["Alex Shaw"] },
+      { roleName: "Bookkeeper", members: ["Alex Shaw"] },
     ],
   },
 
@@ -152,7 +152,7 @@ export const accountLeftPanelMap: Record<string, AccountLeftPanelData> = {
     ],
     roles: [
       { roleName: "Tax preparer", members: ["James Davis"] },
-      { roleName: "Reviewer", members: ["Alex Suprun"] },
+      { roleName: "Reviewer", members: ["Alex Shaw"] },
     ],
   },
 
@@ -188,8 +188,8 @@ export const accountLeftPanelMap: Record<string, AccountLeftPanelData> = {
       },
     ],
     roles: [
-      { roleName: "Tax preparer", members: ["Alex Suprun"] },
-      { roleName: "Bookkeeper", members: ["Alex Suprun"] },
+      { roleName: "Tax preparer", members: ["Alex Shaw"] },
+      { roleName: "Bookkeeper", members: ["Alex Shaw"] },
       { roleName: "Reviewer", members: ["James Davis"] },
     ],
   },
