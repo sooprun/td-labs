@@ -893,6 +893,21 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </DataTableToolbarSlot>
       )}
 
+      {displayed.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <IconReceiptDollar className="mb-4 size-12 text-muted-foreground/40" strokeWidth={1.25} />
+          <h3 className="text-base font-semibold">No client prices set</h3>
+          <p className="mt-1.5 max-w-xs text-sm text-muted-foreground">
+            Switch to All services and click Set price on any service to add a custom price for this client.
+          </p>
+          <button
+            className="mt-4 text-sm font-medium text-primary hover:underline underline-offset-2"
+            onClick={() => setView("all")}
+          >
+            View all services
+          </button>
+        </div>
+      ) : (
       <div className="table-striped overflow-x-auto rounded-lg border bg-background">
         <Table>
           <TableHeader className="sticky top-0 z-40 bg-background">
@@ -981,6 +996,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           </TableBody>
         </Table>
       </div>
+      )}
 
       {/* Rate dialog — single item + bulk */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog() }}>
