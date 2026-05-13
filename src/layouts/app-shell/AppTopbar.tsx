@@ -1,3 +1,4 @@
+import * as React from "react"
 import {
   IconChevronDown,
   IconDotsVertical,
@@ -8,6 +9,8 @@ import {
   IconSearch,
   IconUsersGroup,
   IconClockHour3,
+  IconUser,
+  IconClock,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +23,78 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { accounts } from "@/mock/accounts"
+
+const RECENT_IDS = ["acct-andrew-lee", "acct-mary-murphy", "acct-acme-corp"]
+
+function GlobalSearch({ onNavigate }: { onNavigate: (path: string) => void }) {
+  const [query, setQuery] = React.useState("")
+  const [open, setOpen] = React.useState(false)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  const recentAccounts = RECENT_IDS.map((id) => accounts.find((a) => a.id === id)).filter(Boolean) as typeof accounts
+
+  const results = query.trim().length > 0
+    ? accounts.filter((a) => a.name.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
+    : recentAccounts
+
+  React.useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
+
+  const handleSelect = (id: string) => {
+    setOpen(false)
+    setQuery("")
+    onNavigate(`/app/clients/${id}`)
+  }
+
+  return (
+    <div ref={containerRef} className="relative hidden w-48 lg:block xl:w-72">
+      <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        className="border-0 bg-transparent pl-9 shadow-none"
+        placeholder="Search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => setOpen(true)}
+      />
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-72 overflow-hidden rounded-xl border bg-background shadow-lg">
+          {!query && (
+            <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
+              <IconClock className="size-3" />
+              Recent
+            </div>
+          )}
+          {results.length === 0 && (
+            <p className="px-3 py-4 text-center text-sm text-muted-foreground">No results</p>
+          )}
+          {results.map((acc) => (
+            <button
+              key={acc.id}
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-accent"
+              onMouseDown={(e) => { e.preventDefault(); handleSelect(acc.id) }}
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <IconUser className="size-3.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{acc.name}</div>
+                <div className="text-xs text-muted-foreground">{acc.type}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 type AppTopbarProps = {
   onNavigate: (path: string) => void
@@ -42,10 +117,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
           <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button" onClick={protoAction("New")}>
             New
           </Button>
-          <div className="relative hidden w-48 lg:block xl:w-72">
-            <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="border-0 bg-transparent pl-9 shadow-none" placeholder="Search" />
-          </div>
+          <GlobalSearch onNavigate={onNavigate} />
         </div>
 
         <div className="min-w-6 flex-1" />
