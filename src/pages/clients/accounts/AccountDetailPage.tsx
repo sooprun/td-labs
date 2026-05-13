@@ -833,7 +833,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     setBulkRateOpen(false)
     setPendingService(null)
     setRateValue("")
-    setRateMode("amount")
+    setRateMode("percent")
     setRateRounding("0")
   }
 
