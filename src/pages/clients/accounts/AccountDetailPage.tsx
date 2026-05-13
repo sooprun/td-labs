@@ -819,7 +819,10 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     setEditingId(null)
   }
 
-  const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  const fmt = (n: number, rateType?: string) => {
+    const amount = `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    return rateType === "Hour" ? `${amount}/hr` : amount
+  }
 
   if (servicesWithOverride.length === 0) {
     return (
@@ -932,7 +935,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   </TableCell>
                   <TableCell className="text-muted-foreground">{svc.category}</TableCell>
                   <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
-                  <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate)}</TableCell>
+                  <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate, svc.rateType)}</TableCell>
                   <TableCell className="w-44 text-right">
                     <div className="inline-flex items-center justify-end gap-2">
                       {editingId === svc.id ? (
@@ -955,7 +958,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                           className="font-medium text-primary hover:underline"
                           onClick={() => startEdit(svc.id, override.rate)}
                         >
-                          {fmt(override.rate)}
+                          {fmt(override.rate, svc.rateType)}
                         </button>
                       )}
                       {editingId !== svc.id && (() => {
