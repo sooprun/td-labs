@@ -387,8 +387,6 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                       <DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
                     </span>
                   </TableHead>
-                  <TableHead>Individual rate</TableHead>
-                  <TableHead>Team rate</TableHead>
                   <TableHead
                     className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("rateType")}
@@ -398,6 +396,8 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                       <DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
                     </span>
                   </TableHead>
+                  <TableHead>Individual rate</TableHead>
+                  <TableHead>Team rate</TableHead>
                   <TableHead className="w-10 px-0">
                     <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
                       <IconSettings className="size-4" />
@@ -433,6 +433,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{svc.category}</TableCell>
                     <TableCell>{formatRate(svc.defaultRate, svc.rateType)}</TableCell>
+                    <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                     <TableCell>
                       {svc.customRates > 0 ? (
                         <button
@@ -458,7 +459,6 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                         ) : null
                       })()}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                     <TableCell className="w-10 px-0">
                       <Button size="icon-xl" variant="ghost" onClick={protoAction("Service actions")}>
                         <IconDotsVertical className="size-4" />
