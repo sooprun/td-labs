@@ -923,9 +923,9 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
       {displayed.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <IconReceiptDollar className="mb-4 size-12 text-muted-foreground/40" strokeWidth={1.25} />
-          <h3 className="text-base font-semibold">No client prices set</h3>
-          <p className="mt-1.5 max-w-xs text-sm text-muted-foreground">
-            Switch to All services and click Set price on any service to add a custom price for this client.
+          <h3 className="text-base font-semibold">Customize prices for this client</h3>
+          <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+            Set custom rates for invoices and proposals, overriding the default rate for any service. Prices you set in All services will appear here.
           </p>
           <button
             className="mt-4 text-sm font-medium text-primary hover:underline underline-offset-2"
