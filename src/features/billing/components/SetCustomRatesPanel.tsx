@@ -114,24 +114,42 @@ function Step2({
           <div className="flex items-baseline justify-between">
             <span className="font-medium">{svc.name}</span>
             <span className="text-xs text-muted-foreground">
-              Default: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              Default rate: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
           <div className="flex flex-col gap-2">
-            {accounts.map((acc) => (
-              <div key={acc.id} className="flex items-center gap-3">
-                <span className="flex-1 truncate text-sm text-muted-foreground">{acc.name}</span>
-                <div className="relative w-32 shrink-0">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                  <Input
-                    className="h-8 pl-6 text-sm"
-                    value={rates[svc.id]?.[acc.id] ?? ""}
-                    placeholder="0.00"
-                    onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
-                  />
+            {accounts.map((acc) => {
+              const inputVal = rates[svc.id]?.[acc.id] ?? ""
+              const parsed = parseFloat(inputVal)
+              const pct = svc.defaultRate > 0 && !isNaN(parsed)
+                ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
+                : null
+              return (
+                <div key={acc.id} className="flex items-center gap-3">
+                  <span className="flex-1 truncate text-sm text-muted-foreground">{acc.name}</span>
+                  <span className="inline-flex w-14 shrink-0 justify-center">
+                    {pct !== null && pct !== 0 && (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        pct > 0
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      }`}>
+                        {pct > 0 ? "+" : ""}{pct}%
+                      </span>
+                    )}
+                  </span>
+                  <div className="relative w-32 shrink-0">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                    <Input
+                      className="h-8 pl-6 text-sm"
+                      value={inputVal}
+                      placeholder="0.00"
+                      onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ))}
