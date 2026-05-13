@@ -53,7 +53,7 @@ type AccountDetailPageProps = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const TAB_BADGE_CLASS =
-  "text-[11px] font-bold bg-[#24C875] text-white rounded-full px-1.5 py-0.5 ml-1"
+  "text-[10px] font-bold bg-[#24C875] text-white rounded-full size-4 inline-flex items-center justify-center ml-1"
 
 function isPastDate(dateStr: string | null): boolean {
   if (!dateStr) return false
@@ -1087,7 +1087,7 @@ const TOP_TABS = [
   { label: "Communication", badge: undefined },
   { label: "Organizers", badge: 3 },
   { label: "Requests", badge: 1 },
-  { label: "Invoices", badge: 4 },
+  { label: "Billing", badge: 4 },
   { label: "Transactions", badge: undefined },
   { label: "Proposals & ELs", badge: 1 },
   { label: "Notes", badge: undefined },
@@ -1158,7 +1158,7 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
             <LeftPanel account={account} />
             <RightPanel accountId={accountId} />
           </div>
-        ) : activeTopTab === "Invoices" ? (
+        ) : activeTopTab === "Billing" ? (
           <InvoicesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
         ) : (
           <div className="flex items-center justify-center py-20">
