@@ -80,7 +80,7 @@ function CategoryGroup({
             )}
           </div>
           <span className="shrink-0 text-xs text-muted-foreground">
-            ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
           </span>
         </label>
       ))}
@@ -114,7 +114,7 @@ function Step2({
           <div className="flex items-baseline justify-between">
             <span className="font-medium">{svc.name}</span>
             <span className="text-xs text-muted-foreground">
-              Default rate: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              Default rate: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
             </span>
           </div>
           <div className="flex flex-col gap-2">
