@@ -28,8 +28,9 @@ type Props = {
 
 type DraftOverride = ClientOverride & { rateInput: string }
 
-function fmt(n: number) {
-  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+function fmt(n: number, rateType?: string) {
+  const amount = `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return rateType === "Hour" ? `${amount}/hr` : amount
 }
 
 export function ClientRatesModal({ service, onClose, onSave }: Props) {
@@ -83,7 +84,7 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
           {/* Default rate reference */}
           <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-sm">
             <span className="text-muted-foreground">Default rate</span>
-            <span className="font-medium">{service ? fmt(service.defaultRate) : "—"}</span>
+            <span className="font-medium">{service ? fmt(service.defaultRate, service.rateType) : "—"}</span>
           </div>
 
           {/* Overrides list */}

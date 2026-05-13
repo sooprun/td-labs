@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react"
 import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
 import { serviceItems as allServiceItems } from "@/mock/services"
+import { useQueryParam } from "@/hooks/useQueryParam"
 import { TeamRatesBulkActionsBar } from "@/features/billing/components/TeamRatesBulkActionsBar"
 import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpdateTeamRatesPanel"
 
@@ -262,8 +263,19 @@ type ServicesPageProps = {
   onItemsChange: (items: ServiceItem[]) => void
 }
 
+const TOP_TAB_SLUGS: Record<string, TopTab> = {
+  service_items: "Service items",
+  custom_rates: "Team member custom rates",
+}
+const TOP_TAB_SLUG_REV: Record<TopTab, string> = {
+  "Service items": "service_items",
+  "Team member custom rates": "custom_rates",
+}
+
 export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
-  const [topTab, setTopTab] = React.useState<TopTab>("Service items")
+  const [tabSlug, setTabSlug] = useQueryParam("tab", "service_items")
+  const topTab: TopTab = TOP_TAB_SLUGS[tabSlug] ?? "Service items"
+  const setTopTab = (tab: TopTab) => setTabSlug(TOP_TAB_SLUG_REV[tab])
   const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
   const [sortKey, setSortKey] = React.useState<SortKey>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")

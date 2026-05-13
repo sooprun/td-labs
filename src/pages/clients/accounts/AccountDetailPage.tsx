@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/table"
 import { IconDotsVertical, IconSettings, IconTrash } from "@tabler/icons-react"
 import { AddCustomRatePanel } from "@/features/billing/components/AddCustomRatePanel"
+import { useQueryParam } from "@/hooks/useQueryParam"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -504,8 +505,9 @@ type OverviewSubTab =
   | "activity"
 
 function RightPanel({ accountId }: { accountId: string }) {
-  const [activeSubTab, setActiveSubTab] =
-    React.useState<OverviewSubTab>("jobs")
+  const [activeSubTabSlug, setActiveSubTabSlug] = useQueryParam("overview_tab", "jobs")
+  const activeSubTab = (activeSubTabSlug as OverviewSubTab) ?? "jobs"
+  const setActiveSubTab = (tab: OverviewSubTab) => setActiveSubTabSlug(tab)
 
   const data = accountJobsMap[accountId] ?? { jobs: [], tasks: [] }
   const totalJobsAndTasks = data.jobs.length + data.tasks.length
@@ -604,8 +606,21 @@ const INVOICE_STATUS_STYLES: Record<InvoiceStatus, string> = {
 
 type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Individual rates"
 
+const BILLING_TAB_SLUG: Record<InvoicesSubTab, string> = {
+  "Invoices": "invoices",
+  "Recurring invoices": "recurring",
+  "Payments": "payments",
+  "Time entries": "time_entries",
+  "Individual rates": "individual_rates",
+}
+const BILLING_SLUG_TAB: Record<string, InvoicesSubTab> = Object.fromEntries(
+  Object.entries(BILLING_TAB_SLUG).map(([k, v]) => [v, k as InvoicesSubTab])
+)
+
 function InvoicesTabContent({ accountId, services, onServicesChange }: { accountId: string; services: ServiceItem[]; onServicesChange: (items: ServiceItem[]) => void }) {
-  const [subTab, setSubTab] = React.useState<InvoicesSubTab>("Invoices")
+  const [billingSlug, setBillingSlug] = useQueryParam("billing_tab", "invoices")
+  const subTab: InvoicesSubTab = BILLING_SLUG_TAB[billingSlug] ?? "Invoices"
+  const setSubTab = (tab: InvoicesSubTab) => setBillingSlug(BILLING_TAB_SLUG[tab])
 
   const accountInvoices = invoices.filter((inv) => inv.accountId === accountId)
   const paid = accountInvoices.filter((i) => i.status === "Paid").reduce((s, i) => s + i.amountPaid, 0)
@@ -1098,9 +1113,27 @@ const TOP_TABS = [
 
 type TopTabLabel = (typeof TOP_TABS)[number]["label"]
 
+const TOP_TAB_SLUG: Record<TopTabLabel, string> = {
+  "Overview": "overview",
+  "Info": "info",
+  "Docs": "docs",
+  "Communication": "communication",
+  "Organizers": "organizers",
+  "Requests": "requests",
+  "Billing": "billing",
+  "Transactions": "transactions",
+  "Proposals & ELs": "proposals",
+  "Notes": "notes",
+  "Workflow": "workflow",
+}
+const TOP_SLUG_TAB: Record<string, TopTabLabel> = Object.fromEntries(
+  Object.entries(TOP_TAB_SLUG).map(([k, v]) => [v, k as TopTabLabel])
+)
+
 export function AccountDetailPage({ accountId, onBack, services, onServicesChange }: AccountDetailPageProps) {
-  const [activeTopTab, setActiveTopTab] =
-    React.useState<TopTabLabel>("Overview")
+  const [tabSlug, setTabSlug] = useQueryParam("tab", "overview")
+  const activeTopTab: TopTabLabel = TOP_SLUG_TAB[tabSlug] ?? "Overview"
+  const setActiveTopTab = (tab: TopTabLabel) => setTabSlug(TOP_TAB_SLUG[tab])
 
   const account = accounts.find((a) => a.id === accountId)
 
