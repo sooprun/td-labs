@@ -36,6 +36,15 @@ function CategoryGroup({
   onRateChange: (id: string, value: string) => void
 }) {
   const [open, setOpen] = React.useState(true)
+  const inputRefs = React.useRef<Record<string, HTMLInputElement | null>>({})
+
+  const handleToggle = (id: string) => {
+    const wasSelected = rows[id]?.selected
+    onToggle(id)
+    if (!wasSelected) {
+      setTimeout(() => inputRefs.current[id]?.focus(), 0)
+    }
+  }
 
   return (
     <div className="flex flex-col">
@@ -65,7 +74,7 @@ function CategoryGroup({
                   type="checkbox"
                   className="table-checkbox shrink-0"
                   checked={row.selected}
-                  onChange={() => onToggle(svc.id)}
+                  onChange={() => handleToggle(svc.id)}
                 />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{svc.name}</div>
@@ -79,12 +88,12 @@ function CategoryGroup({
                 <div className="relative w-28 shrink-0">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                   <Input
+                    ref={(el) => { inputRefs.current[svc.id] = el }}
                     className="pl-6 h-8 text-sm"
                     disabled={!row.selected}
                     value={row.rateInput}
                     placeholder="0.00"
                     onChange={(e) => onRateChange(svc.id, e.target.value)}
-                    onClick={(e) => e.preventDefault()}
                   />
                 </div>
               </label>
