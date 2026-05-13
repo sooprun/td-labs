@@ -9,6 +9,8 @@ import {
   IconStar,
 } from "@tabler/icons-react"
 import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
+import { TeamRatesBulkActionsBar } from "@/features/billing/components/TeamRatesBulkActionsBar"
+import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpdateTeamRatesPanel"
 
 import { PageHeader, PageLayout } from "@/components/page/PageLayout"
 import { StatusTabs } from "@/components/page/StatusTabs"
@@ -137,6 +139,7 @@ function ServiceChips({ services }: { services: RateGroup["services"] }) {
 
 function TeamMemberRatesTab() {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
 
   const filtered = rateGroups.filter((g) => !g.archived)
   const allSelected = filtered.length > 0 && selectedIds.length === filtered.length
@@ -146,8 +149,18 @@ function TeamMemberRatesTab() {
     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
   )
 
+  const selectedGroups = filtered.filter((g) => selectedIds.includes(g.id))
+
   return (
     <div className="mt-4">
+      {selectedIds.length > 0 ? (
+        <TeamRatesBulkActionsBar
+          selectedCount={selectedIds.length}
+          onClearSelection={() => setSelectedIds([])}
+          onSelectAll={() => setSelectedIds(filtered.map((g) => g.id))}
+          onUpdateRates={() => setBulkUpdateOpen(true)}
+        />
+      ) : (
       <DataTableToolbarSlot>
         <DataTableToolbarGroup className="shrink-0">
           <Button size="xl" variant="ghost" onClick={protoAction("Favorites")}>
@@ -170,6 +183,7 @@ function TeamMemberRatesTab() {
           </div>
         </DataTableToolbarGroup>
       </DataTableToolbarSlot>
+      )}
 
       <div className="table-striped overflow-x-auto rounded-lg border bg-background">
         <Table>
@@ -227,6 +241,13 @@ function TeamMemberRatesTab() {
           </TableBody>
         </Table>
       </div>
+
+      <BulkUpdateTeamRatesPanel
+        open={bulkUpdateOpen}
+        groups={selectedGroups}
+        onClose={() => setBulkUpdateOpen(false)}
+        onConfirm={() => { setSelectedIds([]); setBulkUpdateOpen(false) }}
+      />
     </div>
   )
 }
