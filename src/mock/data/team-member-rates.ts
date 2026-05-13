@@ -34,9 +34,9 @@ export const rateGroups: RateGroup[] = [
     name: "Senior Accountants",
     archived: false,
     services: [
-      { serviceId: "svc-1",  serviceName: "Individual Tax Return (1040)",    rate: 500, rateType: "Item" },
-      { serviceId: "svc-3",  serviceName: "S-Corp Tax Return (1120-S)",       rate: 950, rateType: "Item" },
-      { serviceId: "svc-11", serviceName: "Bookkeeping",                      rate: 175, rateType: "Hour" },
+      { serviceId: "svc-1040",             serviceName: "Individual Tax Return (1040)",    rate: 500, rateType: "Item" },
+      { serviceId: "svc-1120s",            serviceName: "S-Corp Tax Return (1120-S)",      rate: 950, rateType: "Item" },
+      { serviceId: "svc-bookkeeping-monthly", serviceName: "Bookkeeping (monthly)",        rate: 175, rateType: "Hour" },
     ],
     members: [
       { id: "tm-alex",  name: "Alex Shaw",   initials: "AS", color: "#7C3AED" },
@@ -48,8 +48,8 @@ export const rateGroups: RateGroup[] = [
     name: "Junior Staff",
     archived: false,
     services: [
-      { serviceId: "svc-1",  serviceName: "Individual Tax Return (1040)",    rate: 250, rateType: "Item" },
-      { serviceId: "svc-11", serviceName: "Bookkeeping",                      rate: 95,  rateType: "Hour" },
+      { serviceId: "svc-1040",             serviceName: "Individual Tax Return (1040)",    rate: 250, rateType: "Item" },
+      { serviceId: "svc-bookkeeping-monthly", serviceName: "Bookkeeping (monthly)",        rate: 95,  rateType: "Hour" },
     ],
     members: [
       { id: "tm-sarah", name: "Sarah Kim",   initials: "SK", color: "#F59E0B" },
@@ -62,9 +62,9 @@ export const rateGroups: RateGroup[] = [
     name: "Tax Advisors",
     archived: false,
     services: [
-      { serviceId: "svc-2",  serviceName: "Nonresident Tax Return (1040-NR)", rate: 650, rateType: "Item" },
-      { serviceId: "svc-4",  serviceName: "Partnership Tax Return (1065)",    rate: 850, rateType: "Item" },
-      { serviceId: "svc-12", serviceName: "Tax Planning",                     rate: 225, rateType: "Hour" },
+      { serviceId: "svc-1040nr",   serviceName: "Nonresident Tax Return (1040-NR)", rate: 650, rateType: "Item" },
+      { serviceId: "svc-1065",     serviceName: "Partnership Tax Return (1065)",    rate: 850, rateType: "Item" },
+      { serviceId: "svc-tax-planning", serviceName: "Tax planning",                rate: 225, rateType: "Hour" },
     ],
     members: [
       { id: "tm-alex",  name: "Alex Shaw",   initials: "AS", color: "#7C3AED" },
@@ -76,7 +76,7 @@ export const rateGroups: RateGroup[] = [
     name: "Bookkeeping Team",
     archived: true,
     services: [
-      { serviceId: "svc-11", serviceName: "Bookkeeping",  rate: 120, rateType: "Hour" },
+      { serviceId: "svc-bookkeeping-monthly", serviceName: "Bookkeeping (monthly)", rate: 120, rateType: "Hour" },
     ],
     members: [
       { id: "tm-mike", name: "Mike Torres", initials: "MT", color: "#10B981" },

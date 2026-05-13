@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import type { ServiceItem, RateType, ClientOverride } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
+import { rateGroups } from "@/mock/data/team-member-rates"
 
 const CATEGORIES = ["Advisory", "Bookkeeping", "Payroll", "Tax"]
 const MAX_DESCRIPTION = 4000
@@ -40,6 +41,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
   const [tax, setTax] = React.useState(false)
   const [updateTemplates, setUpdateTemplates] = React.useState(false)
   const [overridesOpen, setOverridesOpen] = React.useState(false)
+  const [teamRatesOpen, setTeamRatesOpen] = React.useState(false)
   const [originalRate, setOriginalRate] = React.useState("")
   const [overrides, setOverrides] = React.useState<(ClientOverride & { rateInput: string })[]>([])
 
@@ -268,6 +270,58 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
               </div>
             </div>
           </div>
+
+          {/* Team member rates (collapsible) */}
+          {(() => {
+            const teamEntries = rateGroups
+              .filter((g) => !g.archived)
+              .flatMap((g) => {
+                const svc = g.services.find((s) => s.serviceId === service?.id)
+                if (!svc) return []
+                return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: svc.rateType, group: g.name }))
+              })
+            return (
+              <div className="flex flex-col">
+                <button
+                  className="flex min-w-0 items-center gap-2 text-left"
+                  onClick={() => setTeamRatesOpen((o) => !o)}
+                >
+                  {teamRatesOpen
+                    ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                    : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                  }
+                  <span className="text-sm font-medium">Team member rates</span>
+                  {teamEntries.length > 0 && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      {teamEntries.length}
+                    </span>
+                  )}
+                </button>
+                <div style={{ display: "grid", gridTemplateRows: teamRatesOpen ? "1fr" : "0fr", transition: "grid-template-rows 200ms ease" }}>
+                  <div className="flex flex-col gap-2 overflow-hidden pt-3">
+                    {teamEntries.length === 0 ? (
+                      <p className="pl-6 text-sm text-muted-foreground">No team member rates set</p>
+                    ) : teamEntries.map((entry, i) => (
+                      <div key={i} className="flex items-center gap-3 pl-2">
+                        <span
+                          className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                          style={{ backgroundColor: entry.member.color }}
+                          title={entry.member.name}
+                        >
+                          {entry.member.initials}
+                        </span>
+                        <span className="flex-1 truncate text-sm">{entry.member.name}</span>
+                        <span className="text-xs text-muted-foreground">{entry.group}</span>
+                        <span className="text-sm font-medium shrink-0">
+                          ${entry.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{entry.rateType === "Hour" ? "/hr" : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Update templates checkbox */}
           <label className="flex cursor-pointer items-start gap-3">
