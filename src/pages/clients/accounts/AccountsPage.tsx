@@ -127,6 +127,7 @@ export function AccountsPage({ onNavigate, services, onServicesChange }: Account
         onSave={(updated) => {
           onServicesChange(updated)
           setCustomRatesPanelOpen(false)
+          clearSelection()
           toast.success("Individual rates saved")
         }}
       />
