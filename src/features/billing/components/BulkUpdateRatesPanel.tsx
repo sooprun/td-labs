@@ -146,12 +146,12 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, clientMode, s
               </div>
               <div>
                 <div className="text-sm font-medium">
-                  {mode === "keep" ? "Keep client overrides unchanged" : "Update client overrides by same %"}
+                  {mode === "keep" ? "Default rates only" : "Default rates and individual rates"}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {mode === "keep"
-                    ? "Clients with individual rates stay at their negotiated prices"
-                    : `Raise all individual rates by ${valid ? `${pct > 0 ? "+" : ""}${pct}%` : "the same %"}`}
+                    ? "Clients with negotiated prices keep them"
+                    : `All client-specific prices update by the same %`}
                 </div>
               </div>
             </label>
