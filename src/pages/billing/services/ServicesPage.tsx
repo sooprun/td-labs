@@ -3,6 +3,10 @@ import {
   IconDotsVertical,
   IconSettings,
   IconReceiptDollar,
+  IconSearch,
+  IconFilter,
+  IconChevronDown,
+  IconStar,
 } from "@tabler/icons-react"
 import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
 
@@ -132,10 +136,9 @@ function ServiceChips({ services }: { services: RateGroup["services"] }) {
 }
 
 function TeamMemberRatesTab() {
-  const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
 
-  const filtered = rateGroups.filter((g) => (status === "Active" ? !g.archived : g.archived))
+  const filtered = rateGroups.filter((g) => !g.archived)
   const allSelected = filtered.length > 0 && selectedIds.length === filtered.length
 
   const toggleAll = () => setSelectedIds(allSelected ? [] : filtered.map((g) => g.id))
@@ -143,22 +146,28 @@ function TeamMemberRatesTab() {
     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
   )
 
-  React.useEffect(() => { setSelectedIds([]) }, [status])
-
   return (
     <div className="mt-4">
       <DataTableToolbarSlot>
         <DataTableToolbarGroup className="shrink-0">
-          <StatusTabs
-            tabs={[
-              { label: "Active", active: status === "Active", onClick: () => setStatus("Active") },
-              { label: "Archived", active: status === "Archived", onClick: () => setStatus("Archived") },
-            ]}
-          />
+          <Button size="xl" variant="ghost" onClick={protoAction("Favorites")}>
+            <IconStar className="size-4" />
+            Favorites
+            <IconChevronDown className="size-3.5" />
+          </Button>
+          <Button size="xl" variant="ghost" onClick={protoAction("Filter")}>
+            <IconFilter className="size-4" />
+            Filter
+            <IconChevronDown className="size-3.5" />
+          </Button>
         </DataTableToolbarGroup>
         <DataTableToolbarSpacer />
         <DataTableToolbarGroup className="shrink-0">
-          <Button size="xl" onClick={protoAction("New rate group")}>New rate group</Button>
+          <Button size="xl" onClick={protoAction("New custom rate")}>New custom rate</Button>
+          <div className="relative w-48">
+            <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
+          </div>
         </DataTableToolbarGroup>
       </DataTableToolbarSlot>
 
