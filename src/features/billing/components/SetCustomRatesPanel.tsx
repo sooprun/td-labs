@@ -220,7 +220,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-base font-semibold">Set custom rates</span>
+          <span className="text-base font-semibold">Set individual rates</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>
@@ -233,7 +233,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
             <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-6 py-6">
               <h2 className="text-2xl font-bold">Select services</h2>
               <p className="mb-2 text-sm text-muted-foreground">
-                Choose which services to set custom rates for across {selectedAccounts.length} selected {selectedAccounts.length === 1 ? "client" : "clients"}.
+                Choose which services to set individual rates for across {selectedAccounts.length} selected {selectedAccounts.length === 1 ? "client" : "clients"}.
               </p>
               {categories.map((cat) => (
                 <CategoryGroup
@@ -264,7 +264,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
               <Button size="icon-xl" variant="outline" onClick={() => setStep(1)}>
                 <IconArrowLeft className="size-4" />
               </Button>
-              <Button size="xl" onClick={handleSave}>Save custom rates</Button>
+              <Button size="xl" onClick={handleSave}>Save individual rates</Button>
               <Button size="xl" variant="outline" onClick={handleClose}>Cancel</Button>
             </div>
           </>

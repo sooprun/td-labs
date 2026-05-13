@@ -76,7 +76,7 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
     <Dialog open={!!service} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Client custom rates — {service?.name}</DialogTitle>
+          <DialogTitle>Individual rates — {service?.name}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3 py-1">

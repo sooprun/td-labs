@@ -32,7 +32,7 @@ import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRa
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-type TopTab = "Service items" | "Team member custom rates"
+type TopTab = "Service items" | "Team member individual rates"
 
 function TopTabs({
   active,
@@ -43,7 +43,7 @@ function TopTabs({
 }) {
   return (
     <div className="flex min-h-11 items-end border-b">
-      {(["Service items", "Team member custom rates"] as TopTab[]).map((tab) => (
+      {(["Service items", "Team member individual rates"] as TopTab[]).map((tab) => (
         <button
           key={tab}
           onClick={() => onChange(tab)}
@@ -54,7 +54,7 @@ function TopTabs({
           }`}
         >
           {tab}
-          {tab === "Team member custom rates" && (
+          {tab === "Team member individual rates" && (
             <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
               New
             </span>
@@ -287,7 +287,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           <div className="mx-auto flex max-w-lg flex-col items-center">
             <IconReceiptDollar className="mb-6 size-16 text-muted-foreground/40" strokeWidth={1.25} />
             <h2 className="text-xl font-semibold tracking-normal">
-              Custom rates isn't part of this prototype yet
+              Individual rates isn't part of this prototype yet
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Everything's working — this section just hasn't been built out. Try a different page.

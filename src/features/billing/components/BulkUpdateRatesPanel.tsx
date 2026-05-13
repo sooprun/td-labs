@@ -150,8 +150,8 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, clientMode, s
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {mode === "keep"
-                    ? "Clients with custom rates stay at their negotiated prices"
-                    : `Raise all client-specific rates by ${valid ? `${pct > 0 ? "+" : ""}${pct}%` : "the same %"}`}
+                    ? "Clients with individual rates stay at their negotiated prices"
+                    : `Raise all individual rates by ${valid ? `${pct > 0 ? "+" : ""}${pct}%` : "the same %"}`}
                 </div>
               </div>
             </label>

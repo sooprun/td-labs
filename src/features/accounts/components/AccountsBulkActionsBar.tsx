@@ -28,7 +28,7 @@ export function AccountsBulkActionsBar({
       actions={[
         {
           icon: IconReceiptDollar,
-          label: "Set custom rates",
+          label: "Set individual rates",
           onClick: onSetCustomRates,
         },
         {

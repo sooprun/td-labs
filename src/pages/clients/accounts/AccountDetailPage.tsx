@@ -602,7 +602,7 @@ const INVOICE_STATUS_STYLES: Record<InvoiceStatus, string> = {
   Draft:   "bg-muted text-muted-foreground",
 }
 
-type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Custom rates"
+type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Individual rates"
 
 function InvoicesTabContent({ accountId, services, onServicesChange }: { accountId: string; services: ServiceItem[]; onServicesChange: (items: ServiceItem[]) => void }) {
   const [subTab, setSubTab] = React.useState<InvoicesSubTab>("Invoices")
@@ -617,7 +617,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
     <div className="flex flex-col gap-4">
       {/* Sub-tabs */}
       <div className="flex border-b">
-        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Custom rates"] as InvoicesSubTab[]).map((t) => (
+        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Individual rates"] as InvoicesSubTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setSubTab(t)}
@@ -629,7 +629,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
           >
             <span className="inline-flex items-center gap-1.5">
               {t}
-              {t === "Custom rates" && (
+              {t === "Individual rates" && (
                 <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
                   New
                 </span>
@@ -738,7 +738,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
             </div>
           )}
         </>
-      ) : subTab === "Custom rates" ? (
+      ) : subTab === "Individual rates" ? (
         <CustomRatesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
       ) : (
         <div className="flex items-center justify-center py-20">
@@ -826,7 +826,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
       <>
         <div className="flex flex-col items-center py-16 text-center">
           <IconReceiptDollar className="mb-5 size-14 text-muted-foreground/40" strokeWidth={1.25} />
-          <h3 className="text-lg font-semibold">No custom rates yet</h3>
+          <h3 className="text-lg font-semibold">No individual rates yet</h3>
           <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
             This client uses your default service rates. Add a custom rate to override the price for any specific service.
           </p>
@@ -835,7 +835,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             onClick={() => setAddPanelOpen(true)}
           >
             <IconCirclePlus className="size-4" />
-            Set custom rates
+            Set individual rates
           </button>
         </div>
         <AddCustomRatePanel
@@ -858,7 +858,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           selectedCount={selectedIds.length}
           onClearSelection={() => setSelectedIds([])}
           onSelectAll={() => setSelectedIds(servicesWithOverride.map((s) => s.id))}
-          selectAllLabel="Select all custom rates"
+          selectAllLabel="Select all individual rates"
           actions={[
             {
               icon: IconReceiptDollar,
@@ -892,7 +892,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           <DataTableToolbarGroup className="shrink-0">
             <Button size="xl" onClick={() => setAddPanelOpen(true)}>
               <IconCirclePlus className="size-4" />
-              Set custom rates
+              Set individual rates
             </Button>
             <div className="relative w-48">
               <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

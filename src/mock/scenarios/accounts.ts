@@ -15,7 +15,7 @@ export type AccountsBulkCustomRatesScenario = PrototypeAccountScenario & {
 
 export const accountsBulkCustomRatesScenario: AccountsBulkCustomRatesScenario = {
   id: "accounts-bulk-custom-rates",
-  title: "Bulk custom rates",
+  title: "Bulk individual rates",
   entryPath: "/app/clients",
   accountIds: [
     "acct-mary-murphy",
