@@ -388,6 +388,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                     </span>
                   </TableHead>
                   <TableHead>Individual rate</TableHead>
+                  <TableHead>Team rate</TableHead>
                   <TableHead
                     className="cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("rateType")}
@@ -441,6 +442,21 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                           {svc.customRates} {svc.customRates === 1 ? "client" : "clients"}
                         </button>
                       ) : null}
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const memberCount = rateGroups
+                          .filter((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
+                          .reduce((sum, g) => sum + g.members.length, 0)
+                        return memberCount > 0 ? (
+                          <button
+                            className="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700 hover:bg-violet-200 transition-colors dark:bg-violet-900/30 dark:text-violet-400"
+                            onClick={protoAction("View team rates")}
+                          >
+                            {memberCount} {memberCount === 1 ? "member" : "members"}
+                          </button>
+                        ) : null
+                      })()}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                     <TableCell className="w-10 px-0">
