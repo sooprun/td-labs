@@ -452,7 +452,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                     <TableCell>
                       {svc.customRates > 0 ? (
                         <button
-                          className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                          className="text-sm text-primary hover:underline underline-offset-2"
                           onClick={() => setViewingRates(svc)}
                         >
                           {svc.customRates} {svc.customRates === 1 ? "client" : "clients"}
@@ -466,7 +466,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                           .reduce((sum, g) => sum + g.members.length, 0)
                         return memberCount > 0 ? (
                           <button
-                            className="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700 hover:bg-violet-200 transition-colors dark:bg-violet-900/30 dark:text-violet-400"
+                            className="text-sm text-primary hover:underline underline-offset-2"
                             onClick={protoAction("View team rates")}
                           >
                             {memberCount} {memberCount === 1 ? "member" : "members"}
