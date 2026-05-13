@@ -214,9 +214,24 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                   <p className="pl-6 text-sm text-muted-foreground">No client-specific rates set</p>
                 )}
 
-                {overrides.map((o) => (
+                {overrides.map((o) => {
+                  const defaultRate = parseFloat(rate) || 0
+                  const pct = defaultRate > 0 ? ((o.rate - defaultRate) / defaultRate) * 100 : null
+                  const rounded = pct !== null ? Math.round(pct) : null
+                  return (
                   <div key={o.accountId} className="flex items-center gap-3">
                     <span className="flex-1 truncate text-sm">{o.accountName}</span>
+                    <span className="inline-flex w-14 shrink-0 justify-center">
+                      {rounded !== null && rounded !== 0 && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          rounded > 0
+                            ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                        }`}>
+                          {rounded > 0 ? "+" : ""}{rounded}%
+                        </span>
+                      )}
+                    </span>
                     <div className="relative w-28 shrink-0">
                       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                       <Input
@@ -235,7 +250,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                       <IconTrash className="size-3.5" />
                     </Button>
                   </div>
-                ))}
+                )})}
 
                 {/* Persistent add row */}
                 {availableAccounts.length > 0 && (
