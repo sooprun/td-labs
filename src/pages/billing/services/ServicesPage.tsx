@@ -411,7 +411,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                       <DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
                     </span>
                   </TableHead>
-                  <TableHead>Individual rate</TableHead>
+                  <TableHead>Client price</TableHead>
                   <TableHead>Team rate</TableHead>
                   <TableHead className="w-10 px-0">
                     <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
