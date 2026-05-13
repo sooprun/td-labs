@@ -74,10 +74,11 @@ type SortKey = keyof Pick<
 
 // ─── Format ──────────────────────────────────────────────────────────────────
 
-function formatRate(rate: number) {
-  return rate === 0
+function formatRate(rate: number, rateType?: string) {
+  const amount = rate === 0
     ? "$0.00"
     : `$${rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return rateType === "Hour" ? `${amount}/hr` : amount
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -259,7 +260,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{svc.category}</TableCell>
-                    <TableCell>{formatRate(svc.defaultRate)}</TableCell>
+                    <TableCell>{formatRate(svc.defaultRate, svc.rateType)}</TableCell>
                     <TableCell>
                       {svc.customRates > 0 ? (
                         <button
