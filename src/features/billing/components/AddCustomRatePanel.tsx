@@ -83,7 +83,7 @@ function CategoryGroup({
                   )}
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
                 </span>
                 <div className="relative w-28 shrink-0">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
