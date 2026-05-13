@@ -772,7 +772,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [pendingService, setPendingService] = React.useState<ServiceItem | null>(null)
   const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
-  const [rateMode, setRateMode] = React.useState<"amount" | "percent">("amount")
+  const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
   const [rateValue, setRateValue] = React.useState("")
   const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
   const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
@@ -840,8 +840,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const openEdit = (svc: ServiceItem) => {
     const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
     setPendingService(svc)
-    setRateMode("amount")
-    setRateValue(override ? String(override.rate) : String(svc.defaultRate))
+    setRateMode("percent")
+    setRateValue("")
   }
 
   return (
@@ -1003,7 +1003,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {pendingService ? `Set price — ${pendingService.name}` : `Update rate`}
+              {pendingService ? pendingService.name : `Update rate`}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
@@ -1012,22 +1012,17 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                 Changes will apply to {targetIds.length} selected {targetIds.length === 1 ? "service" : "services"}.
               </p>
             )}
-            <div className="flex rounded-lg border p-1 gap-1">
-              {(["amount", "percent"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => { setRateMode(mode); setRateValue("") }}
-                  className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
-                    rateMode === mode ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {mode === "amount" ? "Fixed amount" : "Percentage"}
-                </button>
-              ))}
-            </div>
+            <StatusTabs
+              className="w-full"
+              fullWidth
+              tabs={[
+                { label: "Percentage", active: rateMode === "percent", onClick: () => { setRateMode("percent"); setRateValue("") } },
+                { label: "Fixed amount", active: rateMode === "amount", onClick: () => { setRateMode("amount"); setRateValue("") } },
+              ]}
+            />
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="rate-val">
-                {rateMode === "amount" ? "New rate" : "Adjustment"}
+                Price
               </Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -1064,10 +1059,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-            <Button disabled={!rateValue || isNaN(parseFloat(rateValue))} onClick={applyRate}>
-              {rateMode === "amount" ? "Set price" : "Apply"}
-            </Button>
+            <Button size="xl" disabled={!rateValue || isNaN(parseFloat(rateValue))} onClick={applyRate}>Save</Button>
+            <Button size="xl" variant="outline" onClick={closeDialog}>Cancel</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
