@@ -266,7 +266,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                           className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
                           onClick={() => setViewingRates(svc)}
                         >
-                          {svc.customRates}
+                          {svc.customRates} {svc.customRates === 1 ? "client" : "clients"}
                         </button>
                       ) : null}
                     </TableCell>
