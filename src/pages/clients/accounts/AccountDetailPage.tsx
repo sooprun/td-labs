@@ -16,7 +16,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -777,6 +777,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
   const [rateValue, setRateValue] = React.useState("")
   const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
+  const [resetConfirmOpen, setResetConfirmOpen] = React.useState(false)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [editingValue, setEditingValue] = React.useState("")
   const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
@@ -896,14 +897,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                 services.find((s) => s.id === id)?.clientOverridesList.some((o) => o.accountId === accountId)
               ),
               disabledTooltip: "No overrides to reset",
-              onClick: () => {
-                onServicesChange(services.map((s) => {
-                  if (!selectedIds.includes(s.id)) return s
-                  const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
-                  return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
-                }))
-                setSelectedIds([])
-              },
+              onClick: () => setResetConfirmOpen(true),
             },
           ]}
         />
@@ -1033,7 +1027,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                                 <Input
                                   autoFocus
-                                  className={`h-8 w-24 pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                  className={`w-24 pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                                   value={editingValue}
                                   placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                                   onChange={(e) => setEditingValue(e.target.value)}
@@ -1085,6 +1079,35 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </Table>
       </div>
       )}
+
+      {/* Reset override confirmation */}
+      <Dialog open={resetConfirmOpen} onOpenChange={(o) => { if (!o) setResetConfirmOpen(false) }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reset {selectedIds.length === 1 ? "override" : "overrides"}?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm">
+            The custom {selectedIds.length === 1 ? "rate" : "rates"} for {selectedIds.length} selected {selectedIds.length === 1 ? "service" : "services"} will be removed. The default rate will apply instead.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="destructive-solid"
+              onClick={() => {
+                onServicesChange(services.map((s) => {
+                  if (!selectedIds.includes(s.id)) return s
+                  const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
+                  return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
+                }))
+                setSelectedIds([])
+                setResetConfirmOpen(false)
+              }}
+            >
+              Reset {selectedIds.length === 1 ? "override" : "overrides"}
+            </Button>
+            <Button variant="outline" onClick={() => setResetConfirmOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Rate dialog — single item + bulk */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog() }}>

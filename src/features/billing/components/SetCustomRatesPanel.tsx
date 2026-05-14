@@ -103,6 +103,8 @@ function Step2({
   rates: RateMap
   onRateChange: (serviceId: string, accountId: string, value: string) => void
 }) {
+  const [focusedKey, setFocusedKey] = React.useState<string | null>(null)
+
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
       <h2 className="text-2xl font-bold">Set prices</h2>
@@ -119,9 +121,14 @@ function Step2({
           </div>
           <div className="flex flex-col gap-2">
             {accounts.map((acc) => {
+              const key = `${svc.id}-${acc.id}`
               const inputVal = rates[svc.id]?.[acc.id] ?? ""
+              const isFocused = focusedKey === key
+              const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
+                ? parseFloat(inputVal).toFixed(2)
+                : inputVal
               const parsed = parseFloat(inputVal)
-              const pct = svc.defaultRate > 0 && !isNaN(parsed)
+              const pct = inputVal !== "" && svc.defaultRate > 0 && !isNaN(parsed)
                 ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
                 : null
               return (
@@ -141,11 +148,12 @@ function Step2({
                   <div className="relative w-32 shrink-0">
                     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                     <Input
-                      className={`h-8 pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                      value={inputVal}
-                      placeholder="0.00"
+                      className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                      value={displayVal}
+                      placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                       onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
-                      onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
+                      onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
+                      onBlur={() => setFocusedKey(null)}
                     />
                     {svc.rateType === "Hour" && (
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
@@ -198,8 +206,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
       initial[svcId] = {}
       for (const acc of selectedAccounts) {
         const existing = svc.clientOverridesList.find((o) => o.accountId === acc.id)
-        const val = existing ? String(existing.rate) : svc.defaultRate > 0 ? String(svc.defaultRate) : ""
-        initial[svcId][acc.id] = val
+        initial[svcId][acc.id] = existing ? String(existing.rate) : ""
       }
     }
     setRates(initial)

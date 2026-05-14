@@ -104,7 +104,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center border-b bg-background">
       <button
-        className="flex h-full w-64 shrink-0 items-center px-5 text-left"
+        className="flex h-full w-64 shrink-0 items-center px-4 text-left"
         onClick={() => onNavigate("/app/insights")}
         type="button"
       >

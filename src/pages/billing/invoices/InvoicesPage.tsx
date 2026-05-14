@@ -117,6 +117,7 @@ export function InvoicesPage() {
             {
               icon: IconTrash,
               label: "Delete",
+              variant: "destructive-ghost",
               onClick: protoAction("Invoices deleted"),
             },
           ]}

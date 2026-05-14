@@ -30,6 +30,7 @@ export function TeamRatesBulkActionsBar({ selectedCount, onClearSelection, onSel
         {
           icon: IconTrash,
           label: "Delete",
+          variant: "destructive-ghost",
           onClick: protoAction("Rate groups deleted"),
         },
       ]}

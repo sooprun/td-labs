@@ -40,6 +40,7 @@ export function ServicesBulkActionsBar({
         {
           icon: IconTrash,
           label: "Delete",
+          variant: "destructive-ghost",
           onClick: protoAction("Services deleted"),
         },
       ]}

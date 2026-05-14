@@ -53,6 +53,7 @@ type DataTableBulkAction = {
   disabled?: boolean
   disabledTooltip?: string
   className?: string
+  variant?: "ghost" | "destructive-ghost"
 }
 
 type DataTableBulkActionsBarProps = {
@@ -95,7 +96,7 @@ export function DataTableBulkActionsBar({
                 key={action.label}
                 onClick={action.onClick}
                 size="xl"
-                variant="ghost"
+                variant={action.variant ?? "ghost"}
               >
                 {Icon ? <Icon className="size-4" /> : null}
                 {action.label}
