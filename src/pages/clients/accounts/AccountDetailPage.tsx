@@ -165,9 +165,11 @@ function CollapsibleSection({
 
 function LeftPanel({
   account,
+  services,
   onViewClientOverrides,
 }: {
   account: NonNullable<ReturnType<typeof accounts.find>>
+  services: ServiceItem[]
   onViewClientOverrides: () => void
 }) {
   const panelData = getAccountLeftPanel(account.id)
@@ -387,7 +389,7 @@ function LeftPanel({
 
       {/* Client overrides */}
       {(() => {
-        const overrides = serviceItems
+        const overrides = services
           .filter((s) => s.clientOverridesList.some((o) => o.accountId === account.id))
           .map((s) => ({
             name: s.name,
@@ -1008,7 +1010,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                 <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
               <TableHead className="w-44 text-right">Client override</TableHead>
-              <TableHead className="w-36">Team rate</TableHead>
+              {/* <TableHead className="w-36">Team rate</TableHead> */}
               <TableHead className="w-10 px-0">
                 <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
                   <IconSettings className="size-4" />
@@ -1050,7 +1052,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
-                                This service uses team member rates — it can't be overridden per client. The assigned rate will apply when creating invoices and proposals.
+                                This service uses team member rates — it can't be overridden per client. Default or team member rate will apply on invoices and proposals.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -1104,7 +1106,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                       )
                     })()}
                   </TableCell>
-                  <TableCell className="w-36">
+                  {/* <TableCell className="w-36">
                     {(() => {
                       const rateCount = rateGroups
                         .filter((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
@@ -1118,7 +1120,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                         </button>
                       ) : null
                     })()}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="w-10 px-0">
                     <Button size="icon-xl" variant="ghost" onClick={protoAction("Service price actions")}>
                       <IconDotsVertical className="size-4" />
@@ -1331,7 +1333,7 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
       <div className="flex-1 overflow-auto bg-workspace p-6">
         {activeTopTab === "Overview" ? (
           <div className="flex min-h-full items-start gap-5">
-            <LeftPanel account={account} onViewClientOverrides={navigateToBillingPricing} />
+            <LeftPanel account={account} services={services} onViewClientOverrides={navigateToBillingPricing} />
             <RightPanel accountId={accountId} />
           </div>
         ) : activeTopTab === "Billing" ? (

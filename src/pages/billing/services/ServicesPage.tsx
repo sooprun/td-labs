@@ -8,7 +8,6 @@ import {
   IconStar,
 } from "@tabler/icons-react"
 import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
-import { serviceItems as allServiceItems } from "@/mock/services"
 import { useQueryParam } from "@/hooks/useQueryParam"
 import { TeamRatesBulkActionsBar } from "@/features/billing/components/TeamRatesBulkActionsBar"
 import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpdateTeamRatesPanel"
@@ -112,7 +111,7 @@ function ServiceChips({ services: groupServices, allItems }: { services: RateGro
   )
 }
 
-function TeamMemberRatesTab() {
+function TeamMemberRatesTab({ items }: { items: ServiceItem[] }) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
 
@@ -201,7 +200,7 @@ function TeamMemberRatesTab() {
                   </button>
                 </TableCell>
                 <TableCell>
-                  <ServiceChips services={group.services} allItems={allServiceItems} />
+                  <ServiceChips services={group.services} allItems={items} />
                 </TableCell>
                 <TableCell>
                   <MemberAvatars members={group.members} />
@@ -220,6 +219,7 @@ function TeamMemberRatesTab() {
       <BulkUpdateTeamRatesPanel
         open={bulkUpdateOpen}
         groups={selectedGroups}
+        services={items}
         onClose={() => setBulkUpdateOpen(false)}
         onConfirm={() => { setSelectedIds([]); setBulkUpdateOpen(false) }}
       />
@@ -470,7 +470,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           </div>
         </div>
       ) : (
-        <TeamMemberRatesTab />
+        <TeamMemberRatesTab items={items} />
       )}
 
       <EditServicePanel

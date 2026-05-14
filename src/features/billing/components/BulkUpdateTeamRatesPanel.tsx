@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { RateGroup } from "@/mock/data/team-member-rates"
-import { serviceItems as allServices } from "@/mock/services"
+import type { ServiceItem } from "@/mock/services"
 
 // ─── Member avatars ───────────────────────────────────────────────────────────
 
@@ -154,9 +154,10 @@ function Step1({
 // ─── Step 2 ──────────────────────────────────────────────────────────────────
 
 function Step2({
-  groups, adjustment, rounding, onBack, onClose, onConfirm,
+  groups, services, adjustment, rounding, onBack, onClose, onConfirm,
 }: {
   groups: RateGroup[]
+  services: ServiceItem[]
   adjustment: number
   rounding: Rounding
   onBack: () => void
@@ -181,7 +182,7 @@ function Step2({
               </div>
               <div className="border-t px-4 pb-3 pt-2 flex flex-col gap-1.5">
                 {group.services.map((svc) => {
-                  const serviceItem = allServices.find((s) => s.id === svc.serviceId)
+                  const serviceItem = services.find((s) => s.id === svc.serviceId)
                   const newRate = applyAdjustment(svc.rate, adjustment, rounding)
                   return (
                     <div key={svc.serviceId} className="flex items-center justify-between text-sm">
@@ -222,11 +223,12 @@ function Step2({
 type Props = {
   open: boolean
   groups: RateGroup[]
+  services: ServiceItem[]
   onClose: () => void
   onConfirm: () => void
 }
 
-export function BulkUpdateTeamRatesPanel({ open, groups, onClose, onConfirm }: Props) {
+export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onConfirm }: Props) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("10")
   const [rounding, setRounding] = React.useState<Rounding>(5)
@@ -263,6 +265,7 @@ export function BulkUpdateTeamRatesPanel({ open, groups, onClose, onConfirm }: P
         ) : (
           <Step2
             groups={groups}
+            services={services}
             adjustment={parseFloat(adjustment)}
             rounding={rounding}
             onBack={() => setStep(1)}
