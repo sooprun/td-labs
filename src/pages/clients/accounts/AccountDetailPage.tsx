@@ -1025,44 +1025,37 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                         : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
                       return (
                         <div className="flex items-center justify-end gap-2">
-                          <span className="inline-flex w-14 justify-center">
-                            {pct !== null && pct !== 0 && (
-                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
-                                {pct > 0 ? "+" : ""}{pct}%
-                              </span>
-                            )}
-                          </span>
-                          {isEditing ? (
-                            <div className="relative w-28 shrink-0">
-                              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                              <Input
-                                autoFocus
-                                className={`h-8 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                                value={editingValue}
-                                placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                                onChange={(e) => setEditingValue(e.target.value)}
-                                onBlur={() => commitEditing(svc)}
-                                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") { setEditingId(null); setEditingValue("") } }}
-                              />
-                              {svc.rateType === "Hour" && (
-                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                              )}
-                            </div>
-                          ) : override ? (
-                            <button
-                              className="w-28 text-right text-sm font-medium text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4"
-                              onClick={() => openEditing(svc)}
-                            >
-                              {fmt(override.rate, svc.rateType)}
-                            </button>
-                          ) : (
-                            <button
-                              className="w-28 text-right text-sm text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4"
-                              onClick={() => openEditing(svc)}
-                            >
-                              Set price
-                            </button>
+                          {pct !== null && pct !== 0 && (
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
+                              {pct > 0 ? "+" : ""}{pct}%
+                            </span>
                           )}
+                          <div className={`relative transition-[width] duration-150 ${isEditing ? "w-24" : "w-auto"}`}>
+                            {isEditing ? (
+                              <>
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                                <Input
+                                  autoFocus
+                                  className={`h-8 w-full pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                  value={editingValue}
+                                  placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                                  onChange={(e) => setEditingValue(e.target.value)}
+                                  onBlur={() => commitEditing(svc)}
+                                  onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") { setEditingId(null); setEditingValue("") } }}
+                                />
+                                {svc.rateType === "Hour" && (
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                                )}
+                              </>
+                            ) : (
+                              <button
+                                className={`flex h-8 items-center text-sm text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4 ${override ? "font-medium" : ""}`}
+                                onClick={() => openEditing(svc)}
+                              >
+                                {override ? fmt(override.rate, svc.rateType) : "Set price"}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )
                     })()}
