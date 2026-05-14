@@ -2,6 +2,7 @@ import {
   IconBell,
   IconBellOff,
   IconCheck,
+  IconEye,
   IconEyeOff,
   IconMail,
   IconMailOff,
@@ -32,6 +33,7 @@ type AccountsTableProps = {
   sortKey: AccountSortKey
   sortDir: SortDir
   onSort: (key: AccountSortKey) => void
+  followedIds: Set<string>
 }
 
 const stickyCheckbox = "col-sticky-cb w-12"
@@ -46,6 +48,7 @@ export function AccountsTable({
   sortKey,
   sortDir,
   onSort,
+  followedIds,
 }: AccountsTableProps) {
   const allSelected =
     accounts.length > 0 && selectedIds.length === accounts.length
@@ -127,9 +130,10 @@ export function AccountsTable({
                 ) : null}
               </TableCell>
               <TableCell>
-                {account.followed ? null : (
-                  <IconEyeOff className="size-5 text-muted-foreground" />
-                )}
+                {followedIds.has(account.id)
+                  ? <IconEye className="size-5 text-primary" />
+                  : <IconEyeOff className="size-5 text-muted-foreground" />
+                }
               </TableCell>
               <TableCell>{account.type}</TableCell>
               <TableCell>{formatCurrency(account.balanceDue)}</TableCell>

@@ -189,8 +189,11 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             </div>
           </div>
 
-          {/* Client overrides (collapsible) */}
-          <div className="flex flex-col">
+          {/* Client overrides + Team member rates group */}
+          <div className="rounded-xl border bg-background">
+
+            {/* Client overrides (collapsible) */}
+            <div className="flex flex-col px-4 py-3">
             <button
               className="flex min-w-0 items-center gap-2 text-left"
               onClick={() => setOverridesOpen((o) => !o)}
@@ -215,7 +218,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                 transition: "grid-template-rows 200ms ease",
               }}
             >
-              <div className="flex flex-col gap-3 overflow-hidden pt-3">
+              <div className="overflow-hidden" style={{ minHeight: 0 }}><div className="flex flex-col gap-3 pt-3">
                 {overrides.length === 0 && (
                   <p className="pl-6 text-sm text-muted-foreground">No client overrides set</p>
                 )}
@@ -275,61 +278,63 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                     </SelectContent>
                   </Select>
                 )}
-              </div>
+              </div></div>
             </div>
-          </div>
+            </div>
 
-          {/* Team member rates (collapsible) */}
-          {(() => {
-            const teamEntries = rateGroups
-              .filter((g) => !g.archived)
-              .flatMap((g) => {
-                const svc = g.services.find((s) => s.serviceId === service?.id)
-                if (!svc) return []
-                return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: service?.rateType ?? "", group: g.name }))
-              })
-            return (
-              <div className="flex flex-col">
-                <button
-                  className="flex min-w-0 items-center gap-2 text-left"
-                  onClick={() => setTeamRatesOpen((o) => !o)}
-                >
-                  {teamRatesOpen
-                    ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
-                    : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
-                  }
-                  <span className="text-sm font-medium">Team member rates</span>
-                  {teamEntries.length > 0 && (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                      {teamEntries.length}
-                    </span>
-                  )}
-                </button>
-                <div style={{ display: "grid", gridTemplateRows: teamRatesOpen ? "1fr" : "0fr", transition: "grid-template-rows 200ms ease" }}>
-                  <div className="flex flex-col gap-2 overflow-hidden pt-3">
-                    {teamEntries.length === 0 ? (
-                      <p className="pl-6 text-sm text-muted-foreground">No team member rates set</p>
-                    ) : teamEntries.map((entry, i) => (
-                      <div key={i} className="flex items-center gap-3 pl-2">
-                        <span
-                          className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                          style={{ backgroundColor: entry.member.color }}
-                          title={entry.member.name}
-                        >
-                          {entry.member.initials}
-                        </span>
-                        <span className="flex-1 truncate text-sm">{entry.member.name}</span>
-                        <span className="text-xs text-muted-foreground">{entry.group}</span>
-                        <span className="text-sm font-medium shrink-0">
-                          ${entry.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{entry.rateType === "Hour" ? "/hr" : ""}
-                        </span>
-                      </div>
-                    ))}
+            {/* Team member rates (collapsible) */}
+            {(() => {
+              const teamEntries = rateGroups
+                .filter((g) => !g.archived)
+                .flatMap((g) => {
+                  const svc = g.services.find((s) => s.serviceId === service?.id)
+                  if (!svc) return []
+                  return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: service?.rateType ?? "", group: g.name }))
+                })
+              return (
+                <div className="flex flex-col border-t px-4 py-3">
+                  <button
+                    className="flex min-w-0 items-center gap-2 text-left"
+                    onClick={() => setTeamRatesOpen((o) => !o)}
+                  >
+                    {teamRatesOpen
+                      ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                      : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                    }
+                    <span className="text-sm font-medium">Team member rates</span>
+                    {teamEntries.length > 0 && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {teamEntries.length}
+                      </span>
+                    )}
+                  </button>
+                  <div style={{ display: "grid", gridTemplateRows: teamRatesOpen ? "1fr" : "0fr", transition: "grid-template-rows 200ms ease" }}>
+                    <div className="overflow-hidden" style={{ minHeight: 0 }}><div className="flex flex-col gap-2 pt-3">
+                      {teamEntries.length === 0 ? (
+                        <p className="pl-6 text-sm text-muted-foreground">No team member rates set</p>
+                      ) : teamEntries.map((entry, i) => (
+                        <div key={i} className="flex items-center gap-3 pl-2">
+                          <span
+                            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                            style={{ backgroundColor: entry.member.color }}
+                            title={entry.member.name}
+                          >
+                            {entry.member.initials}
+                          </span>
+                          <span className="flex-1 truncate text-sm">{entry.member.name}</span>
+                          <span className="text-xs text-muted-foreground">{entry.group}</span>
+                          <span className="text-sm font-medium shrink-0">
+                            ${entry.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{entry.rateType === "Hour" ? "/hr" : ""}
+                          </span>
+                        </div>
+                      ))}
+                    </div></div>
                   </div>
                 </div>
-              </div>
-            )
-          })()}
+              )
+            })()}
+
+          </div>
 
           {/* Update templates checkbox */}
           <label className="flex cursor-pointer items-start gap-3">

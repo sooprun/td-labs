@@ -11,10 +11,21 @@ import { ServicesPage } from "@/pages/billing/services/ServicesPage"
 import { InvoicesPage } from "@/pages/billing/invoices/InvoicesPage"
 import { serviceItems } from "@/mock/services"
 import type { ServiceItem } from "@/mock/services"
+import { accounts } from "@/mock/accounts"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
 
 export function App() {
   const [services, setServices] = React.useState<ServiceItem[]>(serviceItems)
+  const [followedIds, setFollowedIds] = React.useState<Set<string>>(
+    () => new Set(accounts.filter((a) => a.followed).map((a) => a.id))
+  )
+  const toggleFollow = React.useCallback((id: string) => {
+    setFollowedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }, [])
 
   const [activePath, setActivePath] = React.useState(() => {
     const pathname = window.location.pathname
@@ -61,6 +72,8 @@ export function App() {
           onBack={() => handleNavigate("/app/clients")}
           services={services}
           onServicesChange={setServices}
+          followed={followedIds.has(accountId)}
+          onToggleFollow={() => toggleFollow(accountId)}
         />
       </AppShell>
     )
@@ -72,7 +85,7 @@ export function App() {
 
   const pageMap: Partial<Record<string, React.ReactElement>> = {
     "/app/insights": <InsightsPage />,
-    "/app/clients": <AccountsPage onNavigate={handleNavigate} services={services} onServicesChange={setServices} />,
+    "/app/clients": <AccountsPage onNavigate={handleNavigate} services={services} onServicesChange={setServices} followedIds={followedIds} />,
     "/app/workflow/pipelines": <PipelinesPage />,
     "/app/billing": <InvoicesPage />,
     "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} />,

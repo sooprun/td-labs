@@ -42,10 +42,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { IconDotsVertical, IconRotate, IconSettings } from "@tabler/icons-react"
+import { IconDotsVertical, IconEye, IconEyeOff, IconRotate, IconSettings } from "@tabler/icons-react"
 import { useQueryParam } from "@/hooks/useQueryParam"
 import { rateGroups } from "@/mock/data/team-member-rates"
 import { StatusTabs } from "@/components/page/StatusTabs"
+import { ProtoPlaceholder } from "@/components/page/ProtoPlaceholder"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,8 @@ type AccountDetailPageProps = {
   onBack: () => void
   services: ServiceItem[]
   onServicesChange: (items: ServiceItem[]) => void
+  followed: boolean
+  onToggleFollow: () => void
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -114,6 +117,7 @@ function AssigneeAvatar({ initials }: { initials: string }) {
 type CollapsibleSectionProps = {
   title: string
   count?: number
+  badge?: React.ReactNode
   actions: React.ReactNode
   defaultOpen?: boolean
   children?: React.ReactNode
@@ -122,6 +126,7 @@ type CollapsibleSectionProps = {
 function CollapsibleSection({
   title,
   count,
+  badge,
   actions,
   defaultOpen = false,
   children,
@@ -146,6 +151,7 @@ function CollapsibleSection({
               {count}
             </span>
           )}
+          {badge}
         </button>
         <div className="ml-auto flex items-center gap-3 text-sm text-primary">
           {actions}
@@ -166,10 +172,14 @@ function LeftPanel({
   account,
   services,
   onViewClientOverrides,
+  followed,
+  onToggleFollow,
 }: {
   account: NonNullable<ReturnType<typeof accounts.find>>
   services: ServiceItem[]
   onViewClientOverrides: () => void
+  followed: boolean
+  onToggleFollow: () => void
 }) {
   const panelData = getAccountLeftPanel(account.id)
 
@@ -186,9 +196,9 @@ function LeftPanel({
         <span className="text-lg font-semibold">Account</span>
         <button
           className="text-sm text-primary hover:underline"
-          onClick={protoAction("Unfollow account")}
+          onClick={onToggleFollow}
         >
-          Unfollow account
+          {followed ? "Unfollow account" : "Follow account"}
         </button>
       </div>
 
@@ -401,6 +411,7 @@ function LeftPanel({
           <CollapsibleSection
             title="Client overrides"
             count={overrides.length || undefined}
+            badge={<span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>}
             actions={
               <button className="hover:underline" onClick={onViewClientOverrides}>
                 View all
@@ -598,13 +609,13 @@ function RightPanel({ accountId }: { accountId: string }) {
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex border-b px-5 gap-0">
+      <div className="flex border-b gap-0 px-5">
         {subTabs.map((tab) => (
           <button
             key={tab.id}
-            className={`flex items-center pb-3.5 pt-4 text-sm mr-5 border-b-2 transition-colors ${
+            className={`flex items-center pb-3.5 pt-4 text-sm mr-5 font-medium border-b-2 transition-colors ${
               activeSubTab === tab.id
-                ? "border-primary text-primary font-medium"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setActiveSubTab(tab.id)}
@@ -821,9 +832,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
       ) : subTab === "Pricing" ? (
         <CustomRatesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
       ) : (
-        <div className="flex items-center justify-center py-20">
-          <p className="text-muted-foreground">{subTab} — coming soon</p>
-        </div>
+        <ProtoPlaceholder title={subTab} />
       )}
     </div>
   )
@@ -1273,7 +1282,7 @@ const TOP_SLUG_TAB: Record<string, TopTabLabel> = Object.fromEntries(
   Object.entries(TOP_TAB_SLUG).map(([k, v]) => [v, k as TopTabLabel])
 )
 
-export function AccountDetailPage({ accountId, onBack, services, onServicesChange }: AccountDetailPageProps) {
+export function AccountDetailPage({ accountId, onBack, services, onServicesChange, followed, onToggleFollow }: AccountDetailPageProps) {
   const [tabSlug, setTabSlug] = useQueryParam("tab", "overview")
   const [, setBillingTabSlug] = useQueryParam("billing_tab", "invoices")
   const activeTopTab: TopTabLabel = TOP_SLUG_TAB[tabSlug] ?? "Overview"
@@ -1308,6 +1317,15 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
           </Button>
         </div>
 
+        {/* Divider */}
+        <div className="h-5 w-px shrink-0 bg-border mr-3" />
+
+        {/* Follow indicator */}
+        {followed
+          ? <IconEye className="mr-1.5 size-4 shrink-0 text-primary" />
+          : <IconEyeOff className="mr-1.5 size-4 shrink-0 text-muted-foreground" />
+        }
+
         {/* Account name */}
         <span className="shrink-0 pr-3 text-sm font-medium">{account.name}</span>
 
@@ -1315,14 +1333,14 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
         <div className="h-5 w-px shrink-0 bg-border" />
 
         {/* Scrollable tabs */}
-        <div className="flex min-w-0 overflow-x-auto">
+        <div className="flex min-w-0 overflow-x-auto pl-4">
           <ul className="flex">
             {TOP_TABS.map((tab) => (
               <li key={tab.label} className="shrink-0">
                 <button
-                  className={`flex h-[49px] items-center whitespace-nowrap px-4 text-sm transition-colors ${
+                  className={`flex h-[49px] items-center whitespace-nowrap mr-5 text-sm font-medium transition-colors ${
                     activeTopTab === tab.label
-                      ? "border-b-2 border-primary font-medium text-primary"
+                      ? "border-b-2 border-primary text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                   onClick={() => setActiveTopTab(tab.label)}
@@ -1342,17 +1360,13 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
       <div className="flex-1 overflow-auto bg-workspace p-6">
         {activeTopTab === "Overview" ? (
           <div className="flex min-h-full items-start gap-5">
-            <LeftPanel account={account} services={services} onViewClientOverrides={navigateToBillingPricing} />
+            <LeftPanel account={account} services={services} onViewClientOverrides={navigateToBillingPricing} followed={followed} onToggleFollow={onToggleFollow} />
             <RightPanel accountId={accountId} />
           </div>
         ) : activeTopTab === "Billing" ? (
           <InvoicesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
         ) : (
-          <div className="flex items-center justify-center py-20">
-            <p className="text-muted-foreground">
-              {activeTopTab} — coming soon
-            </p>
-          </div>
+          <ProtoPlaceholder title={activeTopTab} />
         )}
       </div>
     </div>
