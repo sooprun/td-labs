@@ -154,7 +154,7 @@ function CollapsibleSection({
       {open && (
         <div className="mt-3">
           {children ?? (
-            <p className="pl-5 text-sm text-muted-foreground">None yet</p>
+            <p className="text-sm text-muted-foreground">None yet</p>
           )}
         </div>
       )}
@@ -213,17 +213,15 @@ function LeftPanel({
         }
       >
         {panelData.notes.length > 0 ? (
-          <div className="-mx-5">
+          <div className="flex flex-col gap-2">
             {panelData.notes.map((note) => (
               <button
                 key={note.id}
-                className="w-full border-t px-5 py-3 text-left hover:bg-muted/50"
+                className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-muted/60"
                 onClick={protoAction(note.title)}
               >
                 <p className="truncate text-sm font-medium">{note.title}</p>
-                <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                  {note.body}
-                </p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{note.body}</p>
               </button>
             ))}
           </div>
@@ -240,7 +238,7 @@ function LeftPanel({
           </button>
         }
       >
-        <div className="space-y-3 pl-5">
+        <div className="space-y-3">
           {/* Tags */}
           <div>
             <p className="mb-1.5 text-xs text-muted-foreground">Tags</p>
@@ -297,7 +295,7 @@ function LeftPanel({
         }
       >
         {panelData.roles.length > 0 ? (
-          <div className="space-y-3 pl-5">
+          <div className="space-y-3">
             {panelData.roles.map((role) => (
               <div key={role.roleName}>
                 <p className="mb-1.5 text-xs uppercase tracking-wide text-muted-foreground">
@@ -330,7 +328,7 @@ function LeftPanel({
         }
       >
         {panelData.contacts.length > 0 ? (
-          <div className="space-y-3 pl-5 pr-1">
+          <div className="space-y-3 pr-1">
             {panelData.contacts.map((contact) => (
               <div
                 key={contact.id}
@@ -389,7 +387,10 @@ function LeftPanel({
       {/* Client overrides */}
       {(() => {
         const overrides = services
-          .filter((s) => s.clientOverridesList.some((o) => o.accountId === account.id))
+          .filter((s) =>
+            s.clientOverridesList.some((o) => o.accountId === account.id) &&
+            !rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === s.id))
+          )
           .map((s) => ({
             name: s.name,
             rate: s.clientOverridesList.find((o) => o.accountId === account.id)!.rate,
@@ -407,31 +408,40 @@ function LeftPanel({
             }
           >
             {overrides.length > 0 ? (
-              <div className="flex flex-col gap-2 pl-5">
-                {overrides.map((o) => {
-                  const pct = o.defaultRate > 0 ? Math.round(((o.rate - o.defaultRate) / o.defaultRate) * 100) : null
-                  return (
-                    <div key={o.name} className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm">{o.name}</span>
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        {pct !== null && pct !== 0 && (
-                          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                            pct > 0
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}>
-                            {pct > 0 ? "+" : ""}{pct}%
-                          </span>
-                        )}
-                        <span className="text-sm font-medium">
-                          ${o.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{o.rateType === "Hour" ? "/hr" : ""}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
+              <table className="w-full text-sm">
+                <tbody>
+                  {overrides.map((o) => {
+                    const pct = o.defaultRate > 0 ? Math.round(((o.rate - o.defaultRate) / o.defaultRate) * 100) : null
+                    return (
+                      <tr key={o.name} className="border-b last:border-0">
+                        <td className="py-2.5 pr-4 truncate max-w-0 w-full">{o.name}</td>
+                        <td className="py-2.5 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {pct !== null && pct !== 0 && (
+                              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                                pct > 0
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              }`}>
+                                {pct > 0 ? "+" : ""}{pct}%
+                              </span>
+                            )}
+                            <span className="text-sm font-medium">
+                              ${o.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{o.rateType === "Hour" ? "/hr" : ""}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-4">
+                <IconReceiptDollar className="size-10 text-muted-foreground/40" strokeWidth={1} />
+                <p className="text-sm text-muted-foreground">No client overrides set</p>
               </div>
-            ) : undefined}
+            )}
           </CollapsibleSection>
         )
       })()}
