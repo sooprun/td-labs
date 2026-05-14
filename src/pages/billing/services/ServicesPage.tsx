@@ -37,6 +37,7 @@ import { ServicesBulkActionsBar } from "@/features/billing/components/ServicesBu
 import { ClientRatesModal } from "@/features/billing/components/ClientRatesModal"
 import { EditServicePanel } from "@/features/billing/components/EditServicePanel"
 import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRatesPanel"
+import { UpdateClientOverridesCsvPanel } from "@/features/billing/components/UpdateClientOverridesCsvPanel"
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
@@ -282,6 +283,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [editingService, setEditingService] = React.useState<ServiceItem | null>(null)
   const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
+  const [csvImportOpen, setCsvImportOpen] = React.useState(false)
   const [viewingRates, setViewingRates] = React.useState<ServiceItem | null>(null)
 
   const handleSort = (key: SortKey) => {
@@ -338,6 +340,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
               onClearSelection={() => setSelectedIds([])}
               onSelectAll={() => setSelectedIds(filtered.map((s) => s.id))}
               onBulkUpdateRates={() => setBulkUpdateOpen(true)}
+              onImportCsv={() => setCsvImportOpen(true)}
             />
           ) : (
             <DataTableToolbarSlot>
@@ -512,6 +515,11 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           setBulkUpdateOpen(false)
         }}
       />
+      <UpdateClientOverridesCsvPanel
+        open={csvImportOpen}
+        onClose={() => setCsvImportOpen(false)}
+      />
+
       <ClientRatesModal
         service={viewingRates}
         onClose={() => setViewingRates(null)}
