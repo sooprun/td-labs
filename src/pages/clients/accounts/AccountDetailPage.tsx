@@ -939,7 +939,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </div>
       ) : (
       <div className="table-striped overflow-x-auto rounded-lg border bg-background">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader className="sticky top-0 z-40 bg-background">
             <TableRow>
               <TableHead className="w-12">
@@ -1030,13 +1030,13 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                               {pct > 0 ? "+" : ""}{pct}%
                             </span>
                           )}
-                          <div className={`relative transition-[width] duration-150 ${isEditing ? "w-24" : "w-auto"}`}>
+                          <div className="relative">
                             {isEditing ? (
-                              <>
+                              <div className="animate-in zoom-in-95 fade-in-0 duration-150 origin-right">
                                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                                 <Input
                                   autoFocus
-                                  className={`h-8 w-full pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                  className={`h-8 w-24 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                                   value={editingValue}
                                   placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                                   onChange={(e) => setEditingValue(e.target.value)}
@@ -1046,7 +1046,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 {svc.rateType === "Hour" && (
                                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
                                 )}
-                              </>
+                              </div>
                             ) : (
                               <button
                                 className={`flex h-8 items-center text-sm text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4 ${override ? "font-medium" : ""}`}
