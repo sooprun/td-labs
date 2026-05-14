@@ -987,13 +987,6 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate, svc.rateType)}</TableCell>
                   <TableCell className="w-44">
                     {hasTeamRate ? (() => {
-                      const suffix = svc.rateType === "Hour" ? "/hr" : ""
-                      const min = Math.min(...teamRates)
-                      const max = Math.max(...teamRates)
-                      const fmtRate = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 0 })
-                      const rateDisplay = min === max
-                        ? `$${fmtRate(min)}${suffix}`
-                        : `$${fmtRate(min)}–${fmtRate(max)}${suffix}`
                       return (
                         <div className="flex items-center justify-end gap-1.5">
                           <TooltipProvider>
@@ -1003,12 +996,12 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                   <IconInfoCircle className="size-4" />
                                 </span>
                               </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground border shadow-md" hideArrow>
+                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-[12px] border shadow-md" hideArrow>
                                 Client price can't be set for services with team member rates. Default or team member rates will apply instead.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                          <span className="text-sm text-muted-foreground">{rateDisplay}</span>
+                          <span className="text-sm text-muted-foreground">Unavailable</span>
                         </div>
                       )
                     })() : (() => {
