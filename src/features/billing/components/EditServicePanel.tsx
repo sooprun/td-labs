@@ -156,9 +156,10 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                 <Input
                   id="svc-rate"
-                  className={`pl-6 w-40 ${rateType === "Hour" ? "pr-8" : ""}`}
+                  className={`pl-6 w-40 text-right ${rateType === "Hour" ? "pr-8" : ""}`}
                   value={rate}
                   onChange={(e) => setRate(e.target.value)}
+                  onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
                   placeholder="0.00"
                 />
                 {rateType === "Hour" && (
@@ -240,9 +241,10 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                     <div className="relative w-28 shrink-0">
                       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                       <Input
-                        className={`pl-6 h-8 text-sm ${rateType === "Hour" ? "pr-8" : ""}`}
+                        className={`pl-6 h-8 text-right text-sm ${rateType === "Hour" ? "pr-8" : ""}`}
                         value={o.rateInput}
                         onChange={(e) => handleOverrideRateChange(o.accountId, e.target.value)}
+                        onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
                         placeholder="0.00"
                       />
                       {rateType === "Hour" && (
@@ -356,7 +358,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
 
         {/* Footer */}
         <div className="flex gap-3 border-t px-6 py-4">
-          <Button size="xl" onClick={() => {
+          <Button size="xl" className="px-5" onClick={() => {
             if (!service) return
             const savedOverrides = overrides.map(({ rateInput: _, ...o }) => o)
             onSave({
@@ -371,7 +373,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             })
             onClose()
           }}>Save</Button>
-          <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button size="xl" className="px-5" variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </SheetContent>
     </Sheet>

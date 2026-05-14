@@ -109,7 +109,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
-        <h2 className="text-2xl font-bold">Update service rates</h2>
+        <h2 className="text-2xl font-bold">Price adjustment</h2>
 
         <div className="flex flex-col gap-2">
           <div className="text-sm font-medium">Price adjustment</div>
@@ -165,8 +165,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
       </div>
 
       <div className="flex gap-3 border-t px-6 py-4">
-        <Button size="xl" disabled={!valid} onClick={onNext}>Continue</Button>
-        <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button size="xl" className="px-5" disabled={!valid} onClick={onNext}>Continue</Button>
       </div>
     </>
   )
@@ -302,8 +301,7 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onClose, onC
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
-        <Button size="xl" onClick={() => onConfirm(updates)}>Confirm update</Button>
-        <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button size="xl" className="px-5" onClick={() => onConfirm(updates)}>Confirm update</Button>
         <Button size="xl" variant="ghost" onClick={protoAction("Export to preview")}>
           <IconDownload className="size-4" />
           Export to preview

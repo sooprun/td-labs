@@ -89,11 +89,12 @@ function CategoryGroup({
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                   <Input
                     ref={(el) => { inputRefs.current[svc.id] = el }}
-                    className={`pl-6 h-8 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                    className={`pl-6 h-8 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                     disabled={!row.selected}
                     value={row.rateInput}
                     placeholder="0.00"
                     onChange={(e) => onRateChange(svc.id, e.target.value)}
+                    onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
                   />
                   {svc.rateType === "Hour" && (
                     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>

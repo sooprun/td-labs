@@ -112,7 +112,7 @@ function Step1({
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
-        <h2 className="text-2xl font-bold">Bulk update rates</h2>
+        <h2 className="text-2xl font-bold">Price adjustment</h2>
 
         <div className="flex flex-col gap-2">
           <div className="text-sm font-medium">Price adjustment</div>
@@ -145,8 +145,7 @@ function Step1({
       </div>
 
       <div className="flex gap-3 border-t px-6 py-4">
-        <Button size="xl" disabled={!valid} onClick={onNext}>Continue</Button>
-        <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button size="xl" className="px-5" disabled={!valid} onClick={onNext}>Continue</Button>
       </div>
     </>
   )
@@ -212,8 +211,7 @@ function Step2({
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
-        <Button size="xl" onClick={onConfirm}>Confirm update</Button>
-        <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button size="xl" className="px-5" onClick={onConfirm}>Confirm update</Button>
       </div>
     </>
   )
@@ -245,7 +243,7 @@ export function BulkUpdateTeamRatesPanel({ open, groups, onClose, onConfirm }: P
     <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose() }}>
       <SheetContent className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-base font-semibold">Update rates</span>
+          <span className="text-base font-semibold">Update team member rates</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>

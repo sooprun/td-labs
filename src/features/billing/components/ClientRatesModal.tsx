@@ -111,9 +111,10 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
                 <div className="relative w-28 shrink-0">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                   <Input
-                    className={`h-8 pl-6 text-sm ${service?.rateType === "Hour" ? "pr-8" : ""}`}
+                    className={`h-8 pl-6 text-right text-sm ${service?.rateType === "Hour" ? "pr-8" : ""}`}
                     value={o.rateInput}
                     onChange={(e) => handleRateChange(o.accountId, e.target.value)}
+                    onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
                     placeholder="0.00"
                   />
                   {service?.rateType === "Hour" && (

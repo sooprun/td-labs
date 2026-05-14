@@ -892,6 +892,10 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             {
               icon: IconRotate,
               label: "Reset override",
+              disabled: !selectedIds.some((id) =>
+                services.find((s) => s.id === id)?.clientOverridesList.some((o) => o.accountId === accountId)
+              ),
+              disabledTooltip: "No overrides to reset",
               onClick: () => {
                 onServicesChange(services.map((s) => {
                   if (!selectedIds.includes(s.id)) return s
@@ -1029,10 +1033,11 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                                 <Input
                                   autoFocus
-                                  className={`h-8 w-24 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                  className={`h-8 w-24 pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                                   value={editingValue}
                                   placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                                   onChange={(e) => setEditingValue(e.target.value)}
+                                  onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
                                   onBlur={() => commitEditing(svc)}
                                   onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") { setEditingId(null); setEditingValue("") } }}
                                 />

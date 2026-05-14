@@ -3,6 +3,7 @@ import { IconX } from "@tabler/icons-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type DataTableToolbarSlotProps = {
   children: ReactNode
@@ -50,6 +51,7 @@ type DataTableBulkAction = {
   icon?: ComponentType<{ className?: string }>
   onClick?: () => void
   disabled?: boolean
+  disabledTooltip?: string
   className?: string
 }
 
@@ -77,29 +79,43 @@ export function DataTableBulkActionsBar({
         <Button onClick={onClearSelection} size="icon-xl" variant="ghost">
           <IconX className="size-4" />
         </Button>
-        <Button onClick={onSelectAll} size="xl" variant="outline">
+        <Button onClick={onSelectAll} size="xl" variant="outline" className="px-5">
           {selectAllLabel}
         </Button>
       </DataTableToolbarGroup>
 
       <DataTableToolbarGroup className="hidden shrink-0 md:flex">
-        {actions.map((action) => {
-          const Icon = action.icon
+        <TooltipProvider>
+          {actions.map((action) => {
+            const Icon = action.icon
+            const btn = (
+              <Button
+                className={cn("shrink-0", action.className)}
+                disabled={action.disabled}
+                key={action.label}
+                onClick={action.onClick}
+                size="xl"
+                variant="ghost"
+              >
+                {Icon ? <Icon className="size-4" /> : null}
+                {action.label}
+              </Button>
+            )
 
-          return (
-            <Button
-              className={cn("shrink-0", action.className)}
-              disabled={action.disabled}
-              key={action.label}
-              onClick={action.onClick}
-              size="xl"
-              variant="ghost"
-            >
-              {Icon ? <Icon className="size-4" /> : null}
-              {action.label}
-            </Button>
-          )
-        })}
+            if (action.disabled && action.disabledTooltip) {
+              return (
+                <Tooltip key={action.label}>
+                  <TooltipTrigger asChild>
+                    <span>{btn}</span>
+                  </TooltipTrigger>
+                  <TooltipContent hideArrow className="bg-background text-foreground text-xs border shadow-md">{action.disabledTooltip}</TooltipContent>
+                </Tooltip>
+              )
+            }
+
+            return btn
+          })}
+        </TooltipProvider>
         {moreActions}
       </DataTableToolbarGroup>
     </DataTableToolbarSlot>
