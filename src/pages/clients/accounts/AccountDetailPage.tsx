@@ -777,7 +777,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
   const [rateValue, setRateValue] = React.useState("")
   const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
-  const [inputValues, setInputValues] = React.useState<Record<string, string>>({})
+  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editingValue, setEditingValue] = React.useState("")
   const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
 
@@ -842,14 +843,15 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     setRateRounding("0")
   }
 
-  const handleInputChange = (svcId: string, value: string) => {
-    setInputValues((prev) => ({ ...prev, [svcId]: value }))
+  const openEditing = (svc: ServiceItem) => {
+    const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
+    setEditingId(svc.id)
+    setEditingValue(override ? String(override.rate) : "")
   }
 
-  const handleInputBlur = (svc: ServiceItem, value: string) => {
-    const trimmed = value.trim()
+  const commitEditing = (svc: ServiceItem) => {
+    const trimmed = editingValue.trim()
     if (trimmed === "") {
-      // Remove override
       onServicesChange(services.map((s) => {
         if (s.id !== svc.id) return s
         const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
@@ -868,7 +870,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         }))
       }
     }
-    setInputValues((prev) => { const next = { ...prev }; delete next[svc.id]; return next })
+    setEditingId(null)
+    setEditingValue("")
   }
 
   return (
@@ -1012,12 +1015,11 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                         </div>
                       )
                     })() : (() => {
-                      const liveVal = inputValues[svc.id]
-                      const displayVal = liveVal !== undefined ? liveVal : (override ? String(override.rate) : "")
-                      const parsed = parseFloat(displayVal)
-                      const pct = !isNaN(parsed) && svc.defaultRate > 0
-                        ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
-                        : null
+                      const isEditing = editingId === svc.id
+                      const liveParsed = parseFloat(editingValue)
+                      const pct = isEditing
+                        ? (!isNaN(liveParsed) && svc.defaultRate > 0 ? Math.round(((liveParsed - svc.defaultRate) / svc.defaultRate) * 100) : null)
+                        : (override && svc.defaultRate > 0 ? Math.round(((override.rate - svc.defaultRate) / svc.defaultRate) * 100) : null)
                       const badgeColor = pct !== null && pct > 0
                         ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                         : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
@@ -1030,20 +1032,37 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                               </span>
                             )}
                           </span>
-                          <div className="relative w-28 shrink-0">
-                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                            <Input
-                              className={`h-8 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                              value={displayVal}
-                              placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                              onChange={(e) => handleInputChange(svc.id, e.target.value)}
-                              onBlur={() => handleInputBlur(svc, displayVal)}
-                              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur() }}
-                            />
-                            {svc.rateType === "Hour" && (
-                              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                            )}
-                          </div>
+                          {isEditing ? (
+                            <div className="relative w-28 shrink-0">
+                              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                              <Input
+                                autoFocus
+                                className={`h-8 pl-6 text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                value={editingValue}
+                                placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                                onChange={(e) => setEditingValue(e.target.value)}
+                                onBlur={() => commitEditing(svc)}
+                                onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") { setEditingId(null); setEditingValue("") } }}
+                              />
+                              {svc.rateType === "Hour" && (
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                              )}
+                            </div>
+                          ) : override ? (
+                            <button
+                              className="w-28 text-right text-sm font-medium text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4"
+                              onClick={() => openEditing(svc)}
+                            >
+                              {fmt(override.rate, svc.rateType)}
+                            </button>
+                          ) : (
+                            <button
+                              className="w-28 text-right text-sm text-primary no-underline hover:underline decoration-dashed decoration-primary/50 underline-offset-4"
+                              onClick={() => openEditing(svc)}
+                            >
+                              Set price
+                            </button>
+                          )}
                         </div>
                       )
                     })()}
