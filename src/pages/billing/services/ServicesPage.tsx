@@ -40,7 +40,7 @@ import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRa
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-type TopTab = "Service items" | "Team member rates"
+type TopTab = "Services" | "Team member rates"
 
 function TopTabs({
   active,
@@ -51,7 +51,7 @@ function TopTabs({
 }) {
   return (
     <div className="flex min-h-11 items-end border-b">
-      {(["Service items", "Team member rates"] as TopTab[]).map((tab) => (
+      {(["Services", "Team member rates"] as TopTab[]).map((tab) => (
         <button
           key={tab}
           onClick={() => onChange(tab)}
@@ -264,17 +264,17 @@ type ServicesPageProps = {
 }
 
 const TOP_TAB_SLUGS: Record<string, TopTab> = {
-  service_items: "Service items",
+  service_items: "Services",
   custom_rates: "Team member rates",
 }
 const TOP_TAB_SLUG_REV: Record<TopTab, string> = {
-  "Service items": "service_items",
+  "Services": "service_items",
   "Team member rates": "custom_rates",
 }
 
 export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
   const [tabSlug, setTabSlug] = useQueryParam("tab", "service_items")
-  const topTab: TopTab = TOP_TAB_SLUGS[tabSlug] ?? "Service items"
+  const topTab: TopTab = TOP_TAB_SLUGS[tabSlug] ?? "Services"
   const setTopTab = (tab: TopTab) => setTabSlug(TOP_TAB_SLUG_REV[tab])
   const [status, setStatus] = React.useState<"Active" | "Archived">("Active")
   const [sortKey, setSortKey] = React.useState<SortKey>("name")
@@ -322,14 +322,14 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
 
   return (
     <PageLayout>
-      <PageHeader title="Services" />
+      <PageHeader title="Pricing" />
 
       <TopTabs
         active={topTab}
         onChange={setTopTab}
       />
 
-      {topTab === "Service items" ? (
+      {topTab === "Services" ? (
         <div className="mt-4">
           {/* Toolbar */}
           {selectedIds.length > 0 ? (

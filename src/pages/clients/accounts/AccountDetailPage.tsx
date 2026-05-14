@@ -608,14 +608,14 @@ const INVOICE_STATUS_STYLES: Record<InvoiceStatus, string> = {
   Draft:   "bg-muted text-muted-foreground",
 }
 
-type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Client overrides"
+type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Pricing"
 
 const BILLING_TAB_SLUG: Record<InvoicesSubTab, string> = {
   "Invoices": "invoices",
   "Recurring invoices": "recurring",
   "Payments": "payments",
   "Time entries": "time_entries",
-  "Client overrides": "client_prices",
+  "Pricing": "client_prices",
 }
 const BILLING_SLUG_TAB: Record<string, InvoicesSubTab> = Object.fromEntries(
   Object.entries(BILLING_TAB_SLUG).map(([k, v]) => [v, k as InvoicesSubTab])
@@ -636,7 +636,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
     <div className="flex flex-col gap-4">
       {/* Sub-tabs */}
       <div className="flex border-b">
-        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Client overrides"] as InvoicesSubTab[]).map((t) => (
+        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Pricing"] as InvoicesSubTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setSubTab(t)}
@@ -648,7 +648,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
           >
             <span className="inline-flex items-center gap-1.5">
               {t}
-              {t === "Client overrides" && (
+              {t === "Pricing" && (
                 <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
                   New
                 </span>
@@ -757,7 +757,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
             </div>
           )}
         </>
-      ) : subTab === "Client overrides" ? (
+      ) : subTab === "Pricing" ? (
         <CustomRatesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
       ) : (
         <div className="flex items-center justify-center py-20">
@@ -906,7 +906,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             <StatusTabs
               tabs={[
                 { label: "All services", active: view === "all", onClick: () => { setView("all"); setSelectedIds([]) } },
-                { label: "Overrides only", active: view === "custom", onClick: () => { setView("custom"); setSelectedIds([]) } },
+                { label: "Client overrides only", active: view === "custom", onClick: () => { setView("custom"); setSelectedIds([]) } },
               ]}
             />
           </DataTableToolbarGroup>
