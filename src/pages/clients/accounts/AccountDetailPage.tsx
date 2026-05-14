@@ -183,7 +183,7 @@ function LeftPanel({
     <div className="w-80 shrink-0 rounded-xl border bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
-        <span className="font-semibold">Account</span>
+        <span className="text-lg font-semibold">Account</span>
         <button
           className="text-sm text-primary hover:underline"
           onClick={protoAction("Unfollow account")}
@@ -593,16 +593,16 @@ function RightPanel({ accountId }: { accountId: string }) {
   return (
     <div className="min-w-0 flex-1 rounded-xl border bg-background">
       {/* Header */}
-      <div className="px-5 pb-0 pt-5">
+      <div className="border-b px-5 pb-4 pt-5">
         <h2 className="text-lg font-semibold">Overview</h2>
       </div>
 
       {/* Sub-tabs */}
-      <div className="mt-3 flex border-b px-5 gap-0">
+      <div className="flex border-b px-5 gap-0">
         {subTabs.map((tab) => (
           <button
             key={tab.id}
-            className={`flex items-center pb-2.5 pt-1 text-sm mr-5 border-b-2 transition-colors ${
+            className={`flex items-center pb-3.5 pt-4 text-sm mr-5 border-b-2 transition-colors ${
               activeSubTab === tab.id
                 ? "border-primary text-primary font-medium"
                 : "border-transparent text-muted-foreground hover:text-foreground"
