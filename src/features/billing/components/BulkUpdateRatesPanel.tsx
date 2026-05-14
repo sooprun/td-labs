@@ -90,7 +90,6 @@ type Step1Props = {
   rateTypes: Record<RateTypeKey, boolean>
   setRateTypes: (v: Record<RateTypeKey, boolean>) => void
   onNext: () => void
-  onClose: () => void
 }
 
 const RATE_TYPE_OPTIONS: { key: RateTypeKey; label: string; description: string }[] = [
@@ -99,7 +98,7 @@ const RATE_TYPE_OPTIONS: { key: RateTypeKey; label: string; description: string 
   { key: "team", label: "Team member rates", description: "Update rates assigned to team member rate groups" },
 ]
 
-function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, setRateTypes, onNext, onClose }: Step1Props) {
+function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, setRateTypes, onNext }: Step1Props) {
   const pct = parseFloat(adjustment)
   const anySelected = Object.values(rateTypes).some(Boolean)
   const valid = !isNaN(pct) && pct !== 0 && anySelected
@@ -179,11 +178,10 @@ type Step2Props = {
   rounding: Rounding
   rateTypes: Record<RateTypeKey, boolean>
   onBack: () => void
-  onClose: () => void
   onConfirm: (updates: { id: string; defaultRate: number; clientOverridesList: ServiceItem["clientOverridesList"] }[]) => void
 }
 
-function Step2({ services, adjustment, rounding, rateTypes, onBack, onClose, onConfirm }: Step2Props) {
+function Step2({ services, adjustment, rounding, rateTypes, onBack, onConfirm }: Step2Props) {
   const hasTeamRate = (svc: ServiceItem) =>
     rateGroups.some((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
 
@@ -360,7 +358,7 @@ export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: Bul
             rateTypes={rateTypes}
             setRateTypes={setRateTypes}
             onNext={() => setStep(2)}
-            onClose={handleClose}
+
           />
         ) : (
           <Step2
@@ -369,7 +367,7 @@ export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: Bul
             rounding={rounding}
             rateTypes={rateTypes}
             onBack={() => setStep(1)}
-            onClose={handleClose}
+
             onConfirm={handleConfirm}
           />
         )}

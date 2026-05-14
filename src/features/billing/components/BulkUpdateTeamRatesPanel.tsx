@@ -97,14 +97,13 @@ function Stepper({ step }: { step: 1 | 2 }) {
 // ─── Step 1 ──────────────────────────────────────────────────────────────────
 
 function Step1({
-  adjustment, setAdjustment, rounding, setRounding, onNext, onClose,
+  adjustment, setAdjustment, rounding, setRounding, onNext,
 }: {
   adjustment: string
   setAdjustment: (v: string) => void
   rounding: Rounding
   setRounding: (v: Rounding) => void
   onNext: () => void
-  onClose: () => void
 }) {
   const pct = parseFloat(adjustment)
   const valid = !isNaN(pct) && pct !== 0
@@ -154,14 +153,13 @@ function Step1({
 // ─── Step 2 ──────────────────────────────────────────────────────────────────
 
 function Step2({
-  groups, services, adjustment, rounding, onBack, onClose, onConfirm,
+  groups, services, adjustment, rounding, onBack, onConfirm,
 }: {
   groups: RateGroup[]
   services: ServiceItem[]
   adjustment: number
   rounding: Rounding
   onBack: () => void
-  onClose: () => void
   onConfirm: () => void
 }) {
   const sign = adjustment > 0 ? "+" : ""
@@ -260,7 +258,7 @@ export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onCo
             rounding={rounding}
             setRounding={setRounding}
             onNext={() => setStep(2)}
-            onClose={handleClose}
+
           />
         ) : (
           <Step2
@@ -269,7 +267,7 @@ export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onCo
             adjustment={parseFloat(adjustment)}
             rounding={rounding}
             onBack={() => setStep(1)}
-            onClose={handleClose}
+
             onConfirm={handleConfirm}
           />
         )}
