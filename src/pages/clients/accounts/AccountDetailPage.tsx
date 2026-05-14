@@ -926,15 +926,15 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
       {displayed.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <IconReceiptDollar className="mb-4 size-12 text-muted-foreground/40" strokeWidth={1.25} />
-          <h3 className="text-base font-semibold">No overrides set for this client</h3>
+          <h3 className="text-base font-semibold">Set a custom rate for this client</h3>
           <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
-            Override the default rate for any service. Overrides you set in All services will appear here.
+            Any service rate you customize here will be used instead of the default on invoices and proposals.
           </p>
           <button
             className="mt-4 text-sm font-medium text-primary hover:underline underline-offset-2"
             onClick={() => setView("all")}
           >
-            View all services
+            Go to All services
           </button>
         </div>
       ) : (
