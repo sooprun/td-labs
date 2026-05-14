@@ -1000,7 +1000,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
-                                Client override can't be set for services with team member rates. Default or team member rates will apply instead.
+                                This service uses team member rates — it can't be overridden per client. The assigned rate will apply when creating invoices and proposals.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -1045,7 +1045,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 className={`flex h-8 items-center text-sm text-primary hover:underline decoration-dashed decoration-primary/50 underline-offset-4 ${override ? "font-medium" : ""}`}
                                 onClick={() => openEditing(svc)}
                               >
-                                {override ? fmt(override.rate, svc.rateType) : "Set price"}
+                                {override ? fmt(override.rate, svc.rateType) : "Set override"}
                               </button>
                             )}
                           </div>
