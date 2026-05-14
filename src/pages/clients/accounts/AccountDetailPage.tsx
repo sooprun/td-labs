@@ -1338,10 +1338,10 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
             {TOP_TABS.map((tab) => (
               <li key={tab.label} className="shrink-0">
                 <button
-                  className={`flex h-[49px] items-center whitespace-nowrap mr-5 text-sm font-medium transition-colors ${
+                  className={`flex h-[53px] items-center whitespace-nowrap mr-5 text-sm font-medium transition-colors border-b-2 ${
                     activeTopTab === tab.label
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                   onClick={() => setActiveTopTab(tab.label)}
                 >
