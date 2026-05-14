@@ -109,7 +109,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
-        <h2 className="text-2xl font-bold">Price adjustment</h2>
+        <h2 className="text-xl font-semibold">Price adjustment</h2>
 
         <div className="flex flex-col gap-2">
           <div className="text-sm font-medium">Price adjustment</div>
@@ -209,7 +209,7 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onClose, onC
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
-        <h2 className="text-2xl font-bold">Preview changes</h2>
+        <h2 className="text-xl font-semibold">Preview changes</h2>
         <p className="text-sm text-muted-foreground">{summaryParts.join(" · ")}</p>
 
         <div className="flex flex-col gap-2">
@@ -342,7 +342,7 @@ export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: Bul
       <SheetContent className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-base font-semibold">Update service rates</span>
+          <span className="text-xl font-semibold">Update service rates</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>

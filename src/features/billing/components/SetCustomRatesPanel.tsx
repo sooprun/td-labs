@@ -1,5 +1,6 @@
 import * as React from "react"
-import { IconX, IconCheck, IconChevronRight, IconChevronDown, IconArrowLeft } from "@tabler/icons-react"
+import { IconX, IconCheck, IconArrowLeft, IconSearch } from "@tabler/icons-react"
+import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -41,50 +42,132 @@ function Stepper({ step }: { step: 1 | 2 }) {
 
 // ─── Step 1: Select services ──────────────────────────────────────────────────
 
-function CategoryGroup({
-  category,
+function Step1({
   services,
   selectedServiceIds,
   onToggle,
+  onSelectAll,
+  onClearAll,
+  onContinue,
 }: {
-  category: string
   services: ServiceItem[]
   selectedServiceIds: string[]
   onToggle: (id: string) => void
+  onSelectAll: () => void
+  onClearAll: () => void
+  onContinue: () => void
 }) {
-  const [open, setOpen] = React.useState(true)
+  const [search, setSearch] = React.useState("")
+  const [sortKey, setSortKey] = React.useState<"name" | "category" | "defaultRate">("name")
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc")
+
+  const handleSort = (key: "name" | "category" | "defaultRate") => {
+    if (sortKey === key) setSortDir((d) => d === "asc" ? "desc" : "asc")
+    else { setSortKey(key); setSortDir("asc") }
+  }
+
+  const filtered = services
+    .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      const mul = sortDir === "asc" ? 1 : -1
+      if (sortKey === "defaultRate") return (a.defaultRate - b.defaultRate) * mul
+      return a[sortKey].localeCompare(b[sortKey]) * mul
+    })
+
+  const allSelected = filtered.length > 0 && filtered.every((s) => selectedServiceIds.includes(s.id))
+  const someSelected = filtered.some((s) => selectedServiceIds.includes(s.id))
+
+  const handleHeaderCheckbox = () => {
+    if (allSelected) onClearAll()
+    else onSelectAll()
+  }
+
   return (
-    <div className="flex flex-col">
-      <button
-        className="flex items-center gap-2 py-2 text-left"
-        onClick={() => setOpen((o) => !o)}
-      >
-        {open
-          ? <IconChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
-          : <IconChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-        }
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{category}</span>
-      </button>
-      {open && services.map((svc) => (
-        <label key={svc.id} className="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-2.5 hover:bg-muted/40">
-          <input
-            type="checkbox"
-            className="table-checkbox shrink-0"
-            checked={selectedServiceIds.includes(svc.id)}
-            onChange={() => onToggle(svc.id)}
-          />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium">{svc.name}</div>
-            {svc.description && (
-              <div className="truncate text-xs text-muted-foreground">{svc.description}</div>
-            )}
+    <>
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="flex flex-col px-6 py-6">
+          <div className="flex flex-col gap-0">
+            <h2 className="text-xl font-semibold">Select services</h2>
+            <p className="text-sm text-muted-foreground">{selectedServiceIds.length} selected</p>
+            <p className="mt-3 text-sm">Choose which services to set client overrides for. Client rates will be used instead of the default on invoices and proposals.</p>
           </div>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-          </span>
-        </label>
-      ))}
-    </div>
+          <div className="relative mt-4">
+            <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 -mt-2">
+          <div className="rounded-xl border overflow-hidden">
+          <table className="w-full table-fixed text-[14px]">
+            <thead className="bg-background border-b">
+              <tr>
+                <th className="w-12 px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    className="table-checkbox"
+                    checked={allSelected}
+                    ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected }}
+                    onChange={handleHeaderCheckbox}
+                  />
+                </th>
+                <th className="px-2 py-3 text-left text-[14px] font-semibold text-secondary-foreground">
+                  <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("name")}>
+                    Service <DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
+                  </button>
+                </th>
+                <th className="w-32 px-2 py-3 text-left text-[14px] font-semibold text-secondary-foreground">
+                  <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("category")}>
+                    Category <DataTableSortIcon col="category" sortKey={sortKey} sortDir={sortDir} />
+                  </button>
+                </th>
+                <th className="w-40 px-4 py-3 text-right text-[14px] font-semibold text-secondary-foreground">
+                  <button className="flex items-center gap-1 justify-end w-full hover:text-foreground" onClick={() => handleSort("defaultRate")}>
+                    Default price <DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((svc) => (
+                <tr
+                  key={svc.id}
+                  className={`cursor-pointer hover:bg-muted/60 ${filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
+                  onClick={() => onToggle(svc.id)}
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="table-checkbox"
+                      checked={selectedServiceIds.includes(svc.id)}
+                      onChange={() => onToggle(svc.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </td>
+                  <td className="px-2 py-3 font-medium truncate">{svc.name}</td>
+                  <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
+                  <td className="w-32 px-4 py-3 text-right tabular-nums">
+                    ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 border-t px-6 py-4">
+        <Button size="xl" className="px-5" disabled={selectedServiceIds.length === 0} onClick={onContinue}>
+          Continue
+        </Button>
+      </div>
+    </>
   )
 }
 
@@ -107,10 +190,13 @@ function Step2({
 
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
-      <h2 className="text-2xl font-bold">Set prices</h2>
-      <p className="text-sm text-muted-foreground">
-        Set a custom rate for each client. Leave as-is to use the default rate.
-      </p>
+      <div className="flex flex-col gap-0">
+        <div className="flex flex-col gap-0">
+          <h2 className="text-xl font-semibold">Set prices</h2>
+          <p className="text-sm text-muted-foreground">{services.length} {services.length === 1 ? "service" : "services"}</p>
+        </div>
+        <p className="mt-3 text-sm">Set client overrides for each service. Fields are pre-filled with the default rate — edit any to override.</p>
+      </div>
       {services.map((svc) => (
         <div key={svc.id} className="flex flex-col gap-3 rounded-xl border bg-background p-4">
           <div className="flex items-baseline justify-between">
@@ -206,7 +292,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
       initial[svcId] = {}
       for (const acc of selectedAccounts) {
         const existing = svc.clientOverridesList.find((o) => o.accountId === acc.id)
-        initial[svcId][acc.id] = existing ? String(existing.rate) : ""
+        initial[svcId][acc.id] = (existing && existing.rate > 0) ? String(existing.rate) : ""
       }
     }
     setRates(initial)
@@ -242,14 +328,13 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
   }
 
   const selectedServices = services.filter((s) => selectedServiceIds.includes(s.id))
-  const categories = Array.from(new Set(services.filter((s) => !s.archived).map((s) => s.category))).sort()
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose() }}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-base font-semibold">Set client overrides</span>
+          <span className="text-xl font-semibold">Set client overrides</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>
@@ -258,29 +343,14 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
         <Stepper step={step} />
 
         {step === 1 ? (
-          <>
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-6 py-6">
-              <h2 className="text-2xl font-bold">Select services</h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                Choose which services to set client overrides for across {selectedAccounts.length} selected {selectedAccounts.length === 1 ? "client" : "clients"}.
-              </p>
-              {categories.map((cat) => (
-                <CategoryGroup
-                  key={cat}
-                  category={cat}
-                  services={services.filter((s) => !s.archived && s.category === cat)}
-                  selectedServiceIds={selectedServiceIds}
-                  onToggle={handleToggleService}
-                />
-              ))}
-            </div>
-            <div className="flex gap-3 border-t px-6 py-4">
-              <Button size="xl" disabled={selectedServiceIds.length === 0} onClick={handleContinue}>
-                Continue
-              </Button>
-              <Button size="xl" variant="outline" onClick={handleClose}>Cancel</Button>
-            </div>
-          </>
+          <Step1
+            services={services.filter((s) => !s.archived)}
+            selectedServiceIds={selectedServiceIds}
+            onToggle={handleToggleService}
+            onSelectAll={() => setSelectedServiceIds(services.filter((s) => !s.archived).map((s) => s.id))}
+            onClearAll={() => setSelectedServiceIds([])}
+            onContinue={handleContinue}
+          />
         ) : (
           <>
             <Step2
@@ -293,8 +363,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
               <Button size="icon-xl" variant="outline" onClick={() => setStep(1)}>
                 <IconArrowLeft className="size-4" />
               </Button>
-              <Button size="xl" onClick={handleSave}>Save client overrides</Button>
-              <Button size="xl" variant="outline" onClick={handleClose}>Cancel</Button>
+              <Button size="xl" className="px-5" onClick={handleSave}>Apply client overrides</Button>
             </div>
           </>
         )}

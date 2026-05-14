@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 
-const STEPS = ["Upload", "Map clients", "Review"]
+const STEPS = ["Upload", "Review"]
 
-function Stepper({ step }: { step: 1 | 2 | 3 }) {
+function Stepper({ step }: { step: 1 | 2 }) {
   return (
     <div className="flex items-center justify-center gap-0 border-b px-6 py-4">
       {STEPS.map((label, i) => {
@@ -100,21 +100,18 @@ function Step1({ onFileSelect }: { onFileSelect: (file: File) => void }) {
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
       <div className="flex flex-col gap-0">
         <h2 className="text-xl font-semibold">Upload CSV file</h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Upload a CSV file to update client-specific prices in bulk. Make sure your file matches the required format.
+        <p className="text-sm text-muted-foreground">
+          Upload a CSV file to update client overrides in bulk. Download the sample file below to make sure your file matches the required format.
         </p>
       </div>
 
       <Dropzone onFileSelect={onFileSelect} />
 
       <div className="flex justify-end">
-        <button
-          className="flex items-center gap-1.5 text-sm text-primary hover:underline"
-          onClick={() => {}}
-        >
+        <Button size="xl" variant="ghost" onClick={() => {}}>
           <IconDownload className="size-4" />
           Download CSV sample
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -128,10 +125,9 @@ type Props = {
 }
 
 export function UpdateClientOverridesCsvPanel({ open, onClose }: Props) {
-  const [step] = React.useState<1 | 2 | 3>(1)
-  const [file, setFile] = React.useState<File | null>(null)
+  const [step] = React.useState<1 | 2>(1)
 
-  const reset = () => { setFile(null) }
+  const reset = () => {}
   const handleClose = () => { onClose(); setTimeout(reset, 300) }
 
   return (
@@ -139,7 +135,7 @@ export function UpdateClientOverridesCsvPanel({ open, onClose }: Props) {
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-xl font-semibold">Import</span>
+          <span className="text-xl font-semibold">Update client overrides</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>
@@ -148,21 +144,7 @@ export function UpdateClientOverridesCsvPanel({ open, onClose }: Props) {
         <Stepper step={step} />
 
         {step === 1 && (
-          <>
-            <Step1 onFileSelect={(f) => setFile(f)} />
-            <div className="flex items-center gap-3 border-t px-6 py-4">
-              <Button
-                size="xl"
-                className="px-5"
-                disabled={!file}
-              >
-                Continue
-              </Button>
-              {file && (
-                <span className="truncate text-sm text-muted-foreground">{file.name}</span>
-              )}
-            </div>
-          </>
+          <Step1 onFileSelect={() => {}} />
         )}
       </SheetContent>
     </Sheet>

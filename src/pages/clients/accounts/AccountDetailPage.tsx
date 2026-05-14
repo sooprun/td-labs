@@ -15,6 +15,7 @@ import {
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { PageTabs } from "@/components/page/PageTabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -635,28 +636,24 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
   return (
     <div className="flex flex-col gap-4">
       {/* Sub-tabs */}
-      <div className="flex border-b">
-        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Pricing"] as InvoicesSubTab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setSubTab(t)}
-            className={`mr-6 shrink-0 whitespace-nowrap border-b-2 pb-2.5 pt-1 text-sm font-medium transition-colors ${
-              subTab === t
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              {t}
-              {t === "Pricing" && (
-                <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
-                  New
-                </span>
-              )}
-            </span>
-          </button>
-        ))}
-      </div>
+      <PageTabs
+        tabs={[
+          "Invoices",
+          "Recurring invoices",
+          "Payments",
+          "Time entries",
+          {
+            label: "Pricing",
+            badge: (
+              <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
+                New
+              </span>
+            ),
+          },
+        ]}
+        active={subTab}
+        onChange={setSubTab}
+      />
 
       {subTab === "Invoices" ? (
         <>

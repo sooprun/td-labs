@@ -113,7 +113,7 @@ export const productNavigation: ProductNavSection[] = [
       { title: "WIP", path: "/app/billing/wip" },
       { title: "Proposals & ELs", path: "/app/billing/proposals-els" },
       { title: "Payments", path: "/app/billing/payments" },
-      { title: "Pricing", path: "/app/billing/services" },
+      { title: "Services & Pricing", path: "/app/billing/services" },
     ],
   },
   {

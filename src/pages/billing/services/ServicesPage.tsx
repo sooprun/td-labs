@@ -15,6 +15,7 @@ import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpda
 
 import { PageHeader, PageLayout } from "@/components/page/PageLayout"
 import { StatusTabs } from "@/components/page/StatusTabs"
+import { PageTabs } from "@/components/page/PageTabs"
 import {
   DataTableToolbarGroup,
   DataTableToolbarSlot,
@@ -41,38 +42,7 @@ import { UpdateClientOverridesCsvPanel } from "@/features/billing/components/Upd
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-type TopTab = "Services" | "Team member rates"
-
-function TopTabs({
-  active,
-  onChange,
-}: {
-  active: TopTab
-  onChange: (tab: TopTab) => void
-}) {
-  return (
-    <div className="flex min-h-11 items-end border-b">
-      {(["Services", "Team member rates"] as TopTab[]).map((tab) => (
-        <button
-          key={tab}
-          onClick={() => onChange(tab)}
-          className={`flex items-center gap-2 border-b-2 px-1 pb-2.5 pt-1 text-sm font-medium mr-6 transition-colors ${
-            active === tab
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {tab}
-          {tab === "Team member rates" && (
-            <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
-              New
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
-  )
-}
+type TopTab = "Service items" | "Team member rates"
 
 // ─── Sort ────────────────────────────────────────────────────────────────────
 
@@ -265,11 +235,11 @@ type ServicesPageProps = {
 }
 
 const TOP_TAB_SLUGS: Record<string, TopTab> = {
-  service_items: "Services",
+  service_items: "Service items",
   custom_rates: "Team member rates",
 }
 const TOP_TAB_SLUG_REV: Record<TopTab, string> = {
-  "Services": "service_items",
+  "Service items": "service_items",
   "Team member rates": "custom_rates",
 }
 
@@ -324,14 +294,25 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
 
   return (
     <PageLayout>
-      <PageHeader title="Pricing" />
+      <PageHeader title="Services & Pricing" />
 
-      <TopTabs
+      <PageTabs
+        tabs={[
+          "Service items",
+          {
+            label: "Team member rates",
+            badge: (
+              <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
+                New
+              </span>
+            ),
+          },
+        ]}
         active={topTab}
         onChange={setTopTab}
       />
 
-      {topTab === "Services" ? (
+      {topTab === "Service items" ? (
         <div className="mt-4">
           {/* Toolbar */}
           {selectedIds.length > 0 ? (

@@ -98,7 +98,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
       >
         {/* Header */}
         <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-muted/40 px-4 py-0">
-          <SheetTitle className="text-base">Edit service</SheetTitle>
+          <SheetTitle className="text-xl">Edit service</SheetTitle>
           <Button size="icon-xl" variant="ghost" onClick={onClose}>
             <IconX className="size-4" />
           </Button>
@@ -119,7 +119,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             <div className="flex flex-col gap-1.5">
               <Label>Category name</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +179,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2 pb-0.5">
+            <div className="flex items-center gap-2 mb-3">
               <Switch
                 checked={tax}
                 onCheckedChange={setTax}
