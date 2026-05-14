@@ -128,7 +128,7 @@ export function AccountsPage({ onNavigate, services, onServicesChange }: Account
           onServicesChange(updated)
           setCustomRatesPanelOpen(false)
           clearSelection()
-          toast.success("Client prices saved")
+          toast.success("Client overrides saved")
         }}
       />
     </PageLayout>

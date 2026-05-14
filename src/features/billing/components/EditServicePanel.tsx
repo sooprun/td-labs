@@ -188,7 +188,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             </div>
           </div>
 
-          {/* Client prices (collapsible) */}
+          {/* Client overrides (collapsible) */}
           <div className="flex flex-col">
             <button
               className="flex min-w-0 items-center gap-2 text-left"
@@ -198,7 +198,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                 ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
                 : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
               }
-              <span className="text-sm font-medium">Client prices</span>
+              <span className="text-sm font-medium">Client overrides</span>
               {overrides.length > 0 && (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {overrides.length}
@@ -216,7 +216,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             >
               <div className="flex flex-col gap-3 overflow-hidden pt-3">
                 {overrides.length === 0 && (
-                  <p className="pl-6 text-sm text-muted-foreground">No client prices set</p>
+                  <p className="pl-6 text-sm text-muted-foreground">No client overrides set</p>
                 )}
 
                 {overrides.map((o) => {

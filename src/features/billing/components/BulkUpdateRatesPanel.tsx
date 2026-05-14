@@ -146,7 +146,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, clientMode, s
               </div>
               <div>
                 <div className="text-sm font-medium">
-                  {mode === "keep" ? "Default rates only" : "Default rates and client prices"}
+                  {mode === "keep" ? "Default rates only" : "Default rates and client overrides"}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {mode === "keep"

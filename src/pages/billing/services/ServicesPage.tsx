@@ -40,7 +40,7 @@ import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRa
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-type TopTab = "Service items" | "Team member custom rates"
+type TopTab = "Service items" | "Team member rates"
 
 function TopTabs({
   active,
@@ -51,7 +51,7 @@ function TopTabs({
 }) {
   return (
     <div className="flex min-h-11 items-end border-b">
-      {(["Service items", "Team member custom rates"] as TopTab[]).map((tab) => (
+      {(["Service items", "Team member rates"] as TopTab[]).map((tab) => (
         <button
           key={tab}
           onClick={() => onChange(tab)}
@@ -62,7 +62,7 @@ function TopTabs({
           }`}
         >
           {tab}
-          {tab === "Team member custom rates" && (
+          {tab === "Team member rates" && (
             <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
               New
             </span>
@@ -265,11 +265,11 @@ type ServicesPageProps = {
 
 const TOP_TAB_SLUGS: Record<string, TopTab> = {
   service_items: "Service items",
-  custom_rates: "Team member custom rates",
+  custom_rates: "Team member rates",
 }
 const TOP_TAB_SLUG_REV: Record<TopTab, string> = {
   "Service items": "service_items",
-  "Team member custom rates": "custom_rates",
+  "Team member rates": "custom_rates",
 }
 
 export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
@@ -411,7 +411,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                       <DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} />
                     </span>
                   </TableHead>
-                  <TableHead>Client price</TableHead>
+                  <TableHead>Client override</TableHead>
                   <TableHead>Team rate</TableHead>
                   <TableHead className="w-10 px-0">
                     <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
@@ -461,15 +461,15 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        const memberCount = rateGroups
+                        const rateCount = rateGroups
                           .filter((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
-                          .reduce((sum, g) => sum + g.members.length, 0)
-                        return memberCount > 0 ? (
+                          .length
+                        return rateCount > 0 ? (
                           <button
                             className="text-sm text-primary hover:underline underline-offset-2"
                             onClick={protoAction("View team rates")}
                           >
-                            {memberCount} {memberCount === 1 ? "member" : "members"}
+                            {rateCount} {rateCount === 1 ? "rate" : "rates"}
                           </button>
                         ) : null
                       })()}

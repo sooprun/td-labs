@@ -168,7 +168,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-muted/40 px-4 py-0">
-          <SheetTitle className="text-base">Set client prices</SheetTitle>
+          <SheetTitle className="text-base">Set client overrides</SheetTitle>
           <Button size="icon-xl" variant="ghost" onClick={onClose}>
             <IconX className="size-4" />
           </Button>
@@ -177,7 +177,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
         {/* Subheader */}
         <div className="border-b px-6 py-3">
           <p className="text-sm text-muted-foreground">
-            Choose which services to set client prices for. <span className="font-medium text-foreground">{accountName}</span>'s default rates are shown for reference.
+            Choose which services to set client overrides for. <span className="font-medium text-foreground">{accountName}</span>'s default rates are shown for reference.
           </p>
         </div>
 
@@ -185,7 +185,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-6 py-4">
           {available.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              All services already have a client price for this client.
+              All services already have a client override for this client.
             </p>
           ) : (
             categories.map((cat) => (
@@ -204,7 +204,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
         {/* Footer */}
         <div className="flex items-center gap-3 border-t px-6 py-4">
           <Button size="xl" disabled={!canSave} onClick={handleSave}>
-            {selectedCount > 0 ? `Set ${selectedCount} client price${selectedCount === 1 ? "" : "s"}` : "Set client prices"}
+            {selectedCount > 0 ? `Set ${selectedCount} client override${selectedCount === 1 ? "" : "s"}` : "Set client overrides"}
           </Button>
           <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
         </div>

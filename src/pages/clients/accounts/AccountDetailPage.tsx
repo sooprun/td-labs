@@ -608,14 +608,14 @@ const INVOICE_STATUS_STYLES: Record<InvoiceStatus, string> = {
   Draft:   "bg-muted text-muted-foreground",
 }
 
-type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Client prices"
+type InvoicesSubTab = "Invoices" | "Recurring invoices" | "Payments" | "Time entries" | "Client overrides"
 
 const BILLING_TAB_SLUG: Record<InvoicesSubTab, string> = {
   "Invoices": "invoices",
   "Recurring invoices": "recurring",
   "Payments": "payments",
   "Time entries": "time_entries",
-  "Client prices": "client_prices",
+  "Client overrides": "client_prices",
 }
 const BILLING_SLUG_TAB: Record<string, InvoicesSubTab> = Object.fromEntries(
   Object.entries(BILLING_TAB_SLUG).map(([k, v]) => [v, k as InvoicesSubTab])
@@ -636,7 +636,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
     <div className="flex flex-col gap-4">
       {/* Sub-tabs */}
       <div className="flex border-b">
-        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Client prices"] as InvoicesSubTab[]).map((t) => (
+        {(["Invoices", "Recurring invoices", "Payments", "Time entries", "Client overrides"] as InvoicesSubTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setSubTab(t)}
@@ -648,7 +648,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
           >
             <span className="inline-flex items-center gap-1.5">
               {t}
-              {t === "Client prices" && (
+              {t === "Client overrides" && (
                 <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">
                   New
                 </span>
@@ -757,7 +757,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
             </div>
           )}
         </>
-      ) : subTab === "Client prices" ? (
+      ) : subTab === "Client overrides" ? (
         <CustomRatesTabContent accountId={accountId} services={services} onServicesChange={onServicesChange} />
       ) : (
         <div className="flex items-center justify-center py-20">
@@ -906,7 +906,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             <StatusTabs
               tabs={[
                 { label: "All services", active: view === "all", onClick: () => { setView("all"); setSelectedIds([]) } },
-                { label: "Client only", active: view === "custom", onClick: () => { setView("custom"); setSelectedIds([]) } },
+                { label: "Overrides only", active: view === "custom", onClick: () => { setView("custom"); setSelectedIds([]) } },
               ]}
             />
           </DataTableToolbarGroup>
@@ -954,7 +954,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               <TableHead className="w-36 cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
                 <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-44 text-right">Client price</TableHead>
+              <TableHead className="w-44 text-right">Client override</TableHead>
               <TableHead className="w-36">Team rate</TableHead>
               <TableHead className="w-10 px-0">
                 <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
@@ -997,7 +997,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
-                                Client price can't be set for services with team member rates. Default or team member rates will apply instead.
+                                Client override can't be set for services with team member rates. Default or team member rates will apply instead.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -1043,15 +1043,15 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   </TableCell>
                   <TableCell className="w-36">
                     {(() => {
-                      const memberCount = rateGroups
+                      const rateCount = rateGroups
                         .filter((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
-                        .reduce((sum, g) => sum + g.members.length, 0)
-                      return memberCount > 0 ? (
+                        .length
+                      return rateCount > 0 ? (
                         <button
                           className="text-sm text-primary hover:underline underline-offset-2"
                           onClick={protoAction("View team rates")}
                         >
-                          {memberCount} {memberCount === 1 ? "member" : "members"}
+                          {rateCount} {rateCount === 1 ? "rate" : "rates"}
                         </button>
                       ) : null
                     })()}

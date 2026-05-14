@@ -77,7 +77,7 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
     <Dialog open={!!service} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Client prices — {service?.name}</DialogTitle>
+          <DialogTitle>Client overrides — {service?.name}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3 py-1">
