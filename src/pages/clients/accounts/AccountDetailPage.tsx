@@ -41,7 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { IconDotsVertical, IconSettings, IconTrash } from "@tabler/icons-react"
+import { IconDotsVertical, IconRotate, IconSettings } from "@tabler/icons-react"
 import { useQueryParam } from "@/hooks/useQueryParam"
 import { rateGroups } from "@/mock/data/team-member-rates"
 import { StatusTabs } from "@/components/page/StatusTabs"
@@ -890,8 +890,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               onClick: () => { setRateValue(""); setBulkRateOpen(true) },
             },
             {
-              icon: IconTrash,
-              label: "Remove",
+              icon: IconRotate,
+              label: "Reset override",
               onClick: () => {
                 onServicesChange(services.map((s) => {
                   if (!selectedIds.includes(s.id)) return s
