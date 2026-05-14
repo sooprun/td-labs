@@ -1159,7 +1159,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             <DialogTitle>Reset {selectedIds.length === 1 ? "override" : "overrides"}?</DialogTitle>
           </DialogHeader>
           <p className="text-sm">
-            The custom {selectedIds.length === 1 ? "rate" : "rates"} for {selectedIds.length} selected {selectedIds.length === 1 ? "service" : "services"} will be removed. The default rate will apply instead.
+            Client overrides for {selectedIds.length} selected {selectedIds.length === 1 ? "service" : "services"} will be removed. The default rate will apply instead.
           </p>
           <DialogFooter>
             <Button
