@@ -148,8 +148,8 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button size="xl" onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
