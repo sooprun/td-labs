@@ -124,16 +124,16 @@ function ServiceChips({ services: groupServices, allItems }: { services: RateGro
         return (
           <span
             key={s.serviceId}
-            className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-foreground"
+            className="inline-flex items-center rounded-full bg-foreground/10 px-2.5 py-0.5 text-xs font-medium text-foreground"
           >
-            {item?.name ?? s.serviceId}&nbsp;<span className="font-medium text-primary">
+            {item?.name ?? s.serviceId}<span className="mx-1 text-muted-foreground/50">·</span><span className="text-muted-foreground">
               ${s.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{item?.rateType === "Hour" ? "/hr" : ""}
             </span>
           </span>
         )
       })}
       {rest > 0 && (
-        <span className="inline-flex items-center rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground">
+        <span className="inline-flex items-center rounded-full bg-foreground/10 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
           +{rest} more
         </span>
       )}
