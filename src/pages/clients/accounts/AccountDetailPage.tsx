@@ -996,7 +996,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                                   <IconInfoCircle className="size-4" />
                                 </span>
                               </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-[12px] border shadow-md" hideArrow>
+                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
                                 Client price can't be set for services with team member rates. Default or team member rates will apply instead.
                               </TooltipContent>
                             </Tooltip>
