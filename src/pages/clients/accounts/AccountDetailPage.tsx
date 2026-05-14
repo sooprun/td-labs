@@ -34,6 +34,7 @@ import {
 } from "@/mock/accounts"
 import { invoices, type InvoiceStatus } from "@/mock/data/invoices"
 import type { ServiceItem } from "@/mock/services"
+import { serviceItems } from "@/mock/services"
 import {
   Table,
   TableBody,
@@ -164,8 +165,10 @@ function CollapsibleSection({
 
 function LeftPanel({
   account,
+  onViewClientOverrides,
 }: {
   account: NonNullable<ReturnType<typeof accounts.find>>
+  onViewClientOverrides: () => void
 }) {
   const panelData = getAccountLeftPanel(account.id)
 
@@ -176,7 +179,7 @@ function LeftPanel({
   const visibleMembers = teamMembers.slice(0, 3)
 
   return (
-    <div className="w-72 shrink-0 rounded-xl border bg-background">
+    <div className="w-80 shrink-0 rounded-xl border bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
         <span className="font-semibold">Account</span>
@@ -381,6 +384,56 @@ function LeftPanel({
           </div>
         ) : undefined}
       </CollapsibleSection>
+
+      {/* Client overrides */}
+      {(() => {
+        const overrides = serviceItems
+          .filter((s) => s.clientOverridesList.some((o) => o.accountId === account.id))
+          .map((s) => ({
+            name: s.name,
+            rate: s.clientOverridesList.find((o) => o.accountId === account.id)!.rate,
+            defaultRate: s.defaultRate,
+            rateType: s.rateType,
+          }))
+        return (
+          <CollapsibleSection
+            title="Client overrides"
+            count={overrides.length || undefined}
+            actions={
+              <button className="hover:underline" onClick={onViewClientOverrides}>
+                View all
+              </button>
+            }
+          >
+            {overrides.length > 0 ? (
+              <div className="flex flex-col gap-2 pl-5">
+                {overrides.map((o) => {
+                  const pct = o.defaultRate > 0 ? Math.round(((o.rate - o.defaultRate) / o.defaultRate) * 100) : null
+                  return (
+                    <div key={o.name} className="flex items-center justify-between gap-2">
+                      <span className="truncate text-sm">{o.name}</span>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        {pct !== null && pct !== 0 && (
+                          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                            pct > 0
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          }`}>
+                            {pct > 0 ? "+" : ""}{pct}%
+                          </span>
+                        )}
+                        <span className="text-sm font-medium">
+                          ${o.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{o.rateType === "Hour" ? "/hr" : ""}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : undefined}
+          </CollapsibleSection>
+        )
+      })()}
     </div>
   )
 }
@@ -768,7 +821,9 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
 function CustomRatesTabContent({ accountId, services, onServicesChange }: { accountId: string; services: ServiceItem[]; onServicesChange: (items: ServiceItem[]) => void }) {
   const account = accounts.find((a) => a.id === accountId)
 
-  const [view, setView] = React.useState<"all" | "custom">("all")
+  const [viewParam, setViewParam] = useQueryParam("pricing_view", "all")
+  const view = viewParam === "custom" ? "custom" : "all"
+  const setView = (v: "all" | "custom") => setViewParam(v)
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
   const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
@@ -1209,8 +1264,17 @@ const TOP_SLUG_TAB: Record<string, TopTabLabel> = Object.fromEntries(
 
 export function AccountDetailPage({ accountId, onBack, services, onServicesChange }: AccountDetailPageProps) {
   const [tabSlug, setTabSlug] = useQueryParam("tab", "overview")
+  const [, setBillingTabSlug] = useQueryParam("billing_tab", "invoices")
   const activeTopTab: TopTabLabel = TOP_SLUG_TAB[tabSlug] ?? "Overview"
   const setActiveTopTab = (tab: TopTabLabel) => setTabSlug(TOP_TAB_SLUG[tab])
+
+  const [, setPricingView] = useQueryParam("pricing_view", "all")
+
+  const navigateToBillingPricing = () => {
+    setTabSlug("billing")
+    setBillingTabSlug("client_prices")
+    setPricingView("custom")
+  }
 
   const account = accounts.find((a) => a.id === accountId)
 
@@ -1267,7 +1331,7 @@ export function AccountDetailPage({ accountId, onBack, services, onServicesChang
       <div className="flex-1 overflow-auto bg-workspace p-6">
         {activeTopTab === "Overview" ? (
           <div className="flex min-h-full items-start gap-5">
-            <LeftPanel account={account} />
+            <LeftPanel account={account} onViewClientOverrides={navigateToBillingPricing} />
             <RightPanel accountId={accountId} />
           </div>
         ) : activeTopTab === "Billing" ? (
