@@ -185,6 +185,15 @@ type Step2Props = {
 }
 
 function Step2({ services, adjustment, rounding, rateTypes, onBack, onClose, onConfirm }: Step2Props) {
+  const hasTeamRate = (svc: ServiceItem) =>
+    rateGroups.some((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
+
+  const visibleServices = services.filter((svc) =>
+    (rateTypes.default) ||
+    (rateTypes.client && svc.clientOverridesList.length > 0) ||
+    (rateTypes.team && hasTeamRate(svc))
+  )
+
   const updates = services.map((svc) => ({
     id: svc.id,
     defaultRate: rateTypes.default ? applyAdjustment(svc.defaultRate, adjustment, rounding) : svc.defaultRate,
@@ -205,12 +214,18 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onClose, onC
         <p className="text-sm text-muted-foreground">{summaryParts.join(" · ")}</p>
 
         <div className="flex flex-col gap-2">
-          {updates.map((upd, i) => {
-            const svc = services[i]
+          {visibleServices.map((svc) => {
+            const upd = updates.find((u) => u.id === svc.id)!
             return (
               <div key={upd.id} className="rounded-xl border bg-background">
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="font-medium">{svc.name}</span>
+                  {!rateTypes.default && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground/60">Default rate:</span>
+                      <span className="text-sm text-muted-foreground">{formatRate(svc.defaultRate)}</span>
+                    </div>
+                  )}
                   {rateTypes.default && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground line-through">{formatRate(svc.defaultRate)}</span>
