@@ -146,7 +146,7 @@ function Step1({
                 return (
                   <tr
                     key={svc.id}
-                    className={`${hasTeamRate ? "opacity-50" : "cursor-pointer hover:bg-muted/60"} ${filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
+                    className={`${hasTeamRate ? "" : "cursor-pointer"} ${selectedServiceIds.includes(svc.id) ? "bg-muted" : filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
                     onClick={() => !hasTeamRate && onToggle(svc.id)}
                   >
                     <td className="px-4 py-3">
@@ -160,9 +160,10 @@ function Step1({
                       />
                     </td>
                     <td className="px-2 py-3">
-                      <div className="font-medium truncate">{svc.name}</div>
+                      <div className={`font-medium truncate ${hasTeamRate ? "text-muted-foreground" : ""}`}>{svc.name}</div>
                       {hasTeamRate && (
                         <div className="mt-0.5 flex items-center gap-1.5">
+                          <span className="text-sm text-muted-foreground">Unavailable</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -173,12 +174,11 @@ function Step1({
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                          <span className="text-sm text-muted-foreground">Unavailable</span>
                         </div>
                       )}
                     </td>
                     <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
-                    <td className="w-32 px-4 py-3 text-right tabular-nums">
+                    <td className={`w-32 px-4 py-3 text-right tabular-nums ${hasTeamRate ? "text-muted-foreground" : ""}`}>
                       ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
                     </td>
                   </tr>

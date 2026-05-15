@@ -155,6 +155,11 @@
 .table-checkbox:hover {
   border-color: var(--primary);
 }
+.table-checkbox:disabled {
+  cursor: default;
+  border-color: #E2E8F0;
+  background-color: #F8FAFC;
+}
 .table-checkbox:checked {
   background-color: var(--primary);
   border-color: var(--primary);
