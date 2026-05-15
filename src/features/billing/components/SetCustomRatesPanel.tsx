@@ -13,7 +13,7 @@ import { rateGroups } from "@/mock/data/team-member-rates"
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 
 function Stepper({ step }: { step: 1 | 2 }) {
-  const steps = ["Select services", "Set prices"]
+  const steps = ["Select services", "Price adjustment"]
   return (
     <div className="flex items-center justify-center gap-0 border-b px-6 py-4">
       {steps.map((label, i) => {
@@ -72,7 +72,7 @@ function Step1({
     rateGroups.filter((g) => !g.archived).flatMap((g) => g.services.map((s) => s.serviceId))
   )
 
-  const filtered = services
+  const allFiltered = services
     .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       const mul = sortDir === "asc" ? 1 : -1
@@ -80,7 +80,12 @@ function Step1({
       return a[sortKey].localeCompare(b[sortKey]) * mul
     })
 
-  const selectableFiltered = filtered.filter((s) => !teamRateServiceIds.has(s.id))
+  const filtered = allFiltered.filter((s) => !teamRateServiceIds.has(s.id))
+  const skippedCount = search
+    ? allFiltered.filter((s) => teamRateServiceIds.has(s.id)).length
+    : services.filter((s) => teamRateServiceIds.has(s.id)).length
+
+  const selectableFiltered = filtered
   const allSelected = selectableFiltered.length > 0 && selectableFiltered.every((s) => selectedServiceIds.includes(s.id))
   const someSelected = selectableFiltered.some((s) => selectedServiceIds.includes(s.id))
 
@@ -96,8 +101,16 @@ function Step1({
           <div className="flex flex-col gap-0">
             <h2 className="text-xl font-semibold">Select services</h2>
             <p className="text-sm text-muted-foreground">{selectedServiceIds.length} selected</p>
-            <p className="mt-3 text-sm">Choose which services to set client overrides for. Client rates will be used instead of the default on invoices and proposals.</p>
+            <p className="mt-3 text-sm">Choose which services should use client-specific pricing on invoices and proposals.</p>
           </div>
+          {skippedCount > 0 && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+              <span className="shrink-0">ℹ</span>
+              {skippedCount === 1
+                ? "1 service is unavailable for client overrides because it uses team member rates"
+                : `${skippedCount} services are unavailable for client overrides because they use team member rates`}
+            </div>
+          )}
           <div className="relative mt-4">
             <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
@@ -141,50 +154,31 @@ function Step1({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((svc) => {
-                const hasTeamRate = teamRateServiceIds.has(svc.id)
-                return (
-                  <tr
-                    key={svc.id}
-                    data-state={selectedServiceIds.includes(svc.id) ? "selected" : undefined}
-                    className={`${hasTeamRate ? "" : "cursor-pointer"} ${selectedServiceIds.includes(svc.id) ? "" : filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
-                    onClick={() => !hasTeamRate && onToggle(svc.id)}
-                  >
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        className="table-checkbox"
-                        checked={selectedServiceIds.includes(svc.id)}
-                        disabled={hasTeamRate}
-                        onChange={() => onToggle(svc.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </td>
-                    <td className="px-2 py-3">
-                      <div className={`font-medium truncate ${hasTeamRate ? "text-muted-foreground" : ""}`}>{svc.name}</div>
-                      {hasTeamRate && (
-                        <div className="mt-0.5 flex items-center gap-1.5">
-                          <span className="text-sm text-muted-foreground">Unavailable</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-default text-primary"><IconInfoCircle className="size-4" /></span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md max-w-56" hideArrow>
-                                This service uses team member rates and can't be overridden per client.
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      )}
-                    </td>
-                    <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
-                    <td className={`w-32 px-4 py-3 text-right tabular-nums ${hasTeamRate ? "text-muted-foreground" : ""}`}>
-                      ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-                    </td>
-                  </tr>
-                )
-              })}
+              {filtered.map((svc, i) => (
+                <tr
+                  key={svc.id}
+                  data-state={selectedServiceIds.includes(svc.id) ? "selected" : undefined}
+                  className={`cursor-pointer ${selectedServiceIds.includes(svc.id) ? "" : i % 2 === 1 ? "bg-muted/50" : ""}`}
+                  onClick={() => onToggle(svc.id)}
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="table-checkbox"
+                      checked={selectedServiceIds.includes(svc.id)}
+                      onChange={() => onToggle(svc.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </td>
+                  <td className="px-2 py-3">
+                    <div className="font-medium truncate">{svc.name}</div>
+                  </td>
+                  <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
+                  <td className="w-32 px-4 py-3 text-right tabular-nums">
+                    ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
           </div>
@@ -200,7 +194,7 @@ function Step1({
   )
 }
 
-// ─── Step 2: Set prices ───────────────────────────────────────────────────────
+// ─── Step 2: Price adjustment ───────────────────────────────────────────────────────
 
 type RateMap = Record<string, Record<string, string>> // serviceId → accountId → rateInput
 
@@ -209,88 +203,128 @@ function Step2({
   accounts,
   rates,
   onRateChange,
+  onBack,
+  onSave,
 }: {
   services: ServiceItem[]
   accounts: Account[]
   rates: RateMap
   onRateChange: (serviceId: string, accountId: string, value: string) => void
+  onBack: () => void
+  onSave: () => void
 }) {
   const [focusedKey, setFocusedKey] = React.useState<string | null>(null)
+  const [search, setSearch] = React.useState("")
 
-  const multiAccount = accounts.length > 1
+  const filtered = accounts.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex flex-col gap-0 px-6 pb-4 pt-6">
-        <h2 className="text-xl font-semibold">Set prices</h2>
-        <p className="text-sm text-muted-foreground">{services.length} {services.length === 1 ? "service" : "services"}</p>
-        <p className="mt-3 text-sm">Set client overrides for each service. Fields are pre-filled with the default rate — edit any to override.</p>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-        <div className="flex flex-col gap-3">
-        {services.map((svc) => (
-          <div key={svc.id} className="flex flex-col gap-2">
-            <div className="flex items-baseline justify-between">
-              <span className="font-medium">{svc.name}</span>
-              <span className="text-xs text-muted-foreground tabular-nums">
-                Default: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-              </span>
+    <>
+      <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto px-6 py-6">
+        <div className="flex flex-col gap-0">
+          <h2 className="text-xl font-semibold">Price adjustment</h2>
+          <p className="text-sm text-muted-foreground">
+            {services.length} {services.length === 1 ? "service" : "services"} · {accounts.length} {accounts.length === 1 ? "account" : "accounts"}
+          </p>
+        </div>
+
+        <div className="relative">
+          <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input className="pl-9" placeholder="Search accounts" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {services.map((svc) => (
+            <div key={svc.id} className="flex flex-col gap-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-semibold">{svc.name}</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  Default: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
+                </span>
+              </div>
+              <div className="shrink-0 overflow-hidden rounded-xl border">
+                <table className="panel-table w-full text-[14px]">
+                  <thead className="border-b bg-background">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-[13px] font-semibold text-secondary-foreground">Account</th>
+                      <th className="w-52 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">Client override</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((acc, i) => {
+                      const key = `${svc.id}-${acc.id}`
+                      const inputVal = rates[svc.id]?.[acc.id] ?? ""
+                      const isFocused = focusedKey === key
+                      const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
+                        ? parseFloat(inputVal).toFixed(2)
+                        : inputVal
+                      const parsed = parseFloat(inputVal)
+                      const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
+                      const oldPrice = existingOverride?.rate ?? svc.defaultRate
+                      const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
+                      const pct = inputVal !== "" && oldPrice > 0 && !isNaN(parsed)
+                        ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
+                        : null
+
+                      return (
+                        <tr key={acc.id} className={i % 2 === 1 ? "bg-workspace" : ""}>
+                          <td className="px-4 py-2.5">
+                            <div className="font-medium truncate">{acc.name}</div>
+                          </td>
+                          <td className="w-52 px-4 py-2">
+                            <div className="flex items-center justify-end gap-2">
+                              {inputVal === "" ? null : !isNaN(parsed) && parsed === oldPrice ? null : (
+                                <>
+                                  <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
+                                  {pct !== null && pct !== 0 && (
+                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
+                                      pct > 0
+                                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                    }`}>
+                                      {pct > 0 ? "+" : ""}{pct}%
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                              <div className="relative w-28 shrink-0">
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                                  value={displayVal}
+                                  placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                                  onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
+                                  onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
+                                  onBlur={() => setFocusedKey(null)}
+                                />
+                                {svc.rateType === "Hour" && (
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="overflow-hidden rounded-xl border">
-          <table className="panel-table table-striped w-full text-[14px]">
-            <tbody>
-              {accounts.map((acc) => {
-                const key = `${svc.id}-${acc.id}`
-                const inputVal = rates[svc.id]?.[acc.id] ?? ""
-                const isFocused = focusedKey === key
-                const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
-                  ? parseFloat(inputVal).toFixed(2)
-                  : inputVal
-                const parsed = parseFloat(inputVal)
-                const pct = inputVal !== "" && svc.defaultRate > 0 && !isNaN(parsed)
-                  ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
-                  : null
-                return (
-                  <tr key={acc.id}>
-                    <td className="px-4 py-2.5 text-muted-foreground truncate">{acc.name}</td>
-                    <td className="w-14 px-2 py-2.5 text-center">
-                      {pct !== null && pct !== 0 && (
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          pct > 0
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}>
-                          {pct > 0 ? "+" : ""}{pct}%
-                        </span>
-                      )}
-                    </td>
-                    <td className="w-36 px-4 py-2">
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                        <Input
-                          className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                          value={displayVal}
-                          placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                          onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
-                          onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                          onBlur={() => setFocusedKey(null)}
-                        />
-                        {svc.rateType === "Hour" && (
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          </div>
-          </div>
-        ))}
+          ))}
         </div>
       </div>
-    </div>
+
+      <div className="flex shrink-0 gap-3 border-t px-6 py-4">
+        <Button size="icon-xl" variant="outline" onClick={onBack}>
+          <IconArrowLeft className="size-4" />
+        </Button>
+        <Button size="xl" className="px-5" onClick={onSave}>Apply overrides</Button>
+      </div>
+    </>
   )
 }
 
@@ -391,20 +425,14 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
             onContinue={handleContinue}
           />
         ) : (
-          <>
-            <Step2
-              services={selectedServices}
-              accounts={selectedAccounts}
-              rates={rates}
-              onRateChange={handleRateChange}
-            />
-            <div className="flex gap-3 border-t px-6 py-4">
-              <Button size="icon-xl" variant="outline" onClick={() => setStep(1)}>
-                <IconArrowLeft className="size-4" />
-              </Button>
-              <Button size="xl" className="px-5" onClick={handleSave}>Apply client overrides</Button>
-            </div>
-          </>
+          <Step2
+            services={selectedServices}
+            accounts={selectedAccounts}
+            rates={rates}
+            onRateChange={handleRateChange}
+            onBack={() => setStep(1)}
+            onSave={handleSave}
+          />
         )}
       </SheetContent>
     </Sheet>
