@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconSearch, IconX, IconCheck, IconChevronDown, IconInfoCircle, IconArrowLeft } from "@tabler/icons-react"
+import { IconSearch, IconX, IconCheck, IconChevronDown, IconInfoCircle, IconArrowLeft, IconArrowRight } from "@tabler/icons-react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -291,24 +291,23 @@ function Step2({
                     Service <DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
                   </button>
                 </th>
-                <th className="w-36 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">
-                  <button className="flex items-center gap-1 justify-end w-full hover:text-foreground" onClick={() => handleSort("defaultRate")}>
-                    Default rate <DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
-                  </button>
-                </th>
-                <th className="w-40 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">
-                  Override
+                <th className="w-64 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">
+                  Price
                 </th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((svc, i) => {
+                const existingOverride = svc.clientOverridesList.find((o) => o.accountId === account.id)
+                const oldPrice = existingOverride?.rate ?? svc.defaultRate
+                const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
+
                 const raw = overrides[svc.id] ?? ""
                 const isFocused = focusedId === svc.id
                 const parsed = parseFloat(raw)
                 const displayVal = !isFocused && raw && !isNaN(parsed) ? parsed.toFixed(2) : raw
-                const pct = raw !== "" && svc.defaultRate > 0 && !isNaN(parsed)
-                  ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
+                const pct = raw !== "" && oldPrice > 0 && !isNaN(parsed)
+                  ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
                   : null
 
                 return (
@@ -316,14 +315,12 @@ function Step2({
                     <td className="px-4 py-2.5">
                       <div className="font-medium truncate">{svc.name}</div>
                     </td>
-                    <td className="w-36 px-4 py-2.5 text-right tabular-nums text-muted-foreground">
-                      ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      {svc.rateType === "Hour" ? "/hr" : ""}
-                    </td>
-                    <td className="w-40 px-4 py-2">
+                    <td className="w-64 px-4 py-2">
                       <div className="flex items-center justify-end gap-2">
+                        <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap">{fmtOld(oldPrice)}</span>
+                        <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
                         {pct !== null && pct !== 0 && (
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
                             pct > 0
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                               : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -331,14 +328,14 @@ function Step2({
                             {pct > 0 ? "+" : ""}{pct}%
                           </span>
                         )}
-                        <div className="relative w-28">
+                        <div className="relative w-28 shrink-0">
                           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
                           <Input
                             type="text"
                             inputMode="decimal"
                             className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
                             value={displayVal}
-                            placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                            placeholder={oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"}
                             onChange={(e) => onOverrideChange(svc.id, e.target.value)}
                             onFocus={(e) => {
                               setFocusedId(svc.id)
