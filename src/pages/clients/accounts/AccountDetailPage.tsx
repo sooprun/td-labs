@@ -1165,6 +1165,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           open={setOverridesOpen}
           account={account}
           services={services}
+          selectedIds={selectedIds}
           onClose={() => setSetOverridesOpen(false)}
           onSave={(updated) => { onServicesChange(updated); setSetOverridesOpen(false); setSelectedIds([]) }}
         />

@@ -377,11 +377,12 @@ type Props = {
   open: boolean
   account: Account
   services: ServiceItem[]
+  selectedIds: string[]
   onClose: () => void
   onSave: (updated: ServiceItem[]) => void
 }
 
-export function EditClientOverridesPanel({ open, account, services, onClose, onSave }: Props) {
+export function EditClientOverridesPanel({ open, account, services, selectedIds, onClose, onSave }: Props) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("")
   const [rounding, setRounding] = React.useState<Rounding>(1)
@@ -391,7 +392,10 @@ export function EditClientOverridesPanel({ open, account, services, onClose, onS
   const teamRateServiceIds = new Set(
     rateGroups.filter((g) => !g.archived).flatMap((g) => g.services.map((s) => s.serviceId))
   )
-  const activeServices = services.filter((s) => !s.archived && !teamRateServiceIds.has(s.id))
+  // Only operate on the services selected in the table
+  const activeServices = services.filter((s) =>
+    selectedIds.includes(s.id) && !teamRateServiceIds.has(s.id)
+  )
   const servicesWithOverride = activeServices.filter((s) =>
     s.clientOverridesList.some((o) => o.accountId === account.id)
   )
