@@ -136,6 +136,7 @@ function Step1({
   rounding, setRounding,
   applyTo, setApplyTo,
   showApplyTo,
+  skippedCount,
   onNext,
 }: {
   adjustment: string
@@ -145,6 +146,7 @@ function Step1({
   applyTo: ApplyTo
   setApplyTo: (v: ApplyTo) => void
   showApplyTo: boolean
+  skippedCount: number
   onNext: () => void
 }) {
   const pct = parseFloat(adjustment)
@@ -219,6 +221,16 @@ function Step1({
                 </div>
               </label>
             ))}
+          </div>
+        )}
+
+        {/* Info banner — shown when selected services include team-rate (Unavailable) ones */}
+        {skippedCount > 0 && (
+          <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+            <span className="shrink-0">ℹ</span>
+            {skippedCount === 1
+              ? "1 selected service uses team member rates and can't have client overrides — it will be skipped."
+              : `${skippedCount} selected services use team member rates and can't have client overrides — they'll be skipped.`}
           </div>
         )}
       </div>
@@ -396,6 +408,7 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
   const activeServices = services.filter((s) =>
     selectedIds.includes(s.id) && !teamRateServiceIds.has(s.id)
   )
+  const skippedCount = selectedIds.filter((id) => teamRateServiceIds.has(id)).length
   const servicesWithOverride = activeServices.filter((s) =>
     s.clientOverridesList.some((o) => o.accountId === account.id)
   )
@@ -477,6 +490,7 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
             applyTo={applyTo}
             setApplyTo={setApplyTo}
             showApplyTo={showApplyTo}
+            skippedCount={skippedCount}
             onNext={handleContinue}
           />
         ) : (
