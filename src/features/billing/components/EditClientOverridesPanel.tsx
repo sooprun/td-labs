@@ -341,7 +341,7 @@ function Step2({
                       <div className="flex items-center justify-end gap-2">
                         {raw === "" ? (
                           <span className="text-sm text-muted-foreground whitespace-nowrap">Default rate:</span>
-                        ) : (
+                        ) : !isNaN(parsed) && parsed === oldPrice ? null : (
                           <>
                             <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
                             <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
