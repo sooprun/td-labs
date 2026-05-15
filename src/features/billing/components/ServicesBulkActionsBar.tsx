@@ -1,4 +1,4 @@
-import { IconArchive, IconCurrencyDollar, IconTableImport, IconTrash } from "@tabler/icons-react"
+import { IconArchive, IconCurrencyDollar, IconTrash } from "@tabler/icons-react"
 import { protoAction } from "@/lib/proto"
 import { DataTableBulkActionsBar } from "@/components/data-table/DataTableToolbar"
 
@@ -7,7 +7,6 @@ type ServicesBulkActionsBarProps = {
   onClearSelection: () => void
   onSelectAll: () => void
   onBulkUpdateRates: () => void
-  onImportCsv: () => void
 }
 
 export function ServicesBulkActionsBar({
@@ -15,7 +14,6 @@ export function ServicesBulkActionsBar({
   onClearSelection,
   onSelectAll,
   onBulkUpdateRates,
-  onImportCsv,
 }: ServicesBulkActionsBarProps) {
   return (
     <DataTableBulkActionsBar
@@ -28,11 +26,6 @@ export function ServicesBulkActionsBar({
           icon: IconCurrencyDollar,
           label: "Update rates",
           onClick: onBulkUpdateRates,
-        },
-        {
-          icon: IconTableImport,
-          label: "Update client overrides via CSV",
-          onClick: onImportCsv,
         },
         {
           icon: IconArchive,

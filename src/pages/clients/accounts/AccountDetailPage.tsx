@@ -42,11 +42,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { IconDotsVertical, IconEye, IconEyeOff, IconRotate, IconSettings } from "@tabler/icons-react"
+import { IconDotsVertical, IconEye, IconEyeOff, IconRotate, IconSettings, IconTableImport } from "@tabler/icons-react"
 import { useQueryParam } from "@/hooks/useQueryParam"
 import { rateGroups } from "@/mock/data/team-member-rates"
 import { StatusTabs } from "@/components/page/StatusTabs"
 import { ProtoPlaceholder } from "@/components/page/ProtoPlaceholder"
+import { UpdateClientOverridesCsvPanel } from "@/features/billing/components/UpdateClientOverridesCsvPanel"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -846,6 +847,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const setView = (v: "all" | "custom") => setViewParam(v)
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
+  const [csvImportOpen, setCsvImportOpen] = React.useState(false)
   const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
   const [rateValue, setRateValue] = React.useState("")
   const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
@@ -965,6 +967,11 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               icon: IconReceiptDollar,
               label: "Update rate",
               onClick: () => { setRateValue(""); setBulkRateOpen(true) },
+            },
+            {
+              icon: IconTableImport,
+              label: "Update client overrides via CSV",
+              onClick: () => setCsvImportOpen(true),
             },
             {
               icon: IconRotate,
@@ -1187,6 +1194,9 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* CSV import panel */}
+      <UpdateClientOverridesCsvPanel open={csvImportOpen} onClose={() => setCsvImportOpen(false)} />
 
       {/* Rate dialog — single item + bulk */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog() }}>

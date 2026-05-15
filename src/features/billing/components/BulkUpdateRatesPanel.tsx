@@ -133,9 +133,9 @@ type Step1Props = {
 }
 
 const RATE_TYPE_OPTIONS: { key: RateTypeKey; label: string; description: string }[] = [
-  { key: "default", label: "Default rates", description: "Update the base rate for all selected services" },
-  { key: "client", label: "Client overrides", description: "Update client-specific prices by the same %" },
-  { key: "team", label: "Team member rates", description: "Update rates assigned to team member rate groups" },
+  { key: "default", label: "Default rates", description: "The base rate used when no override is set" },
+  { key: "client", label: "Client overrides", description: "Per-client rates that override the default" },
+  { key: "team", label: "Team member rates", description: "Rates tied to individual team members" },
 ]
 
 function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, setRateTypes, onNext }: Step1Props) {
@@ -153,7 +153,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-4 gap-4">
             <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium">Adjust rates by</div>
+              <div className="text-sm font-medium">Adjust by</div>
               <div className="relative w-full">
                 <Input
                   type="text"
@@ -168,7 +168,7 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium">Round prices to</div>
+              <div className="text-sm font-medium">Round to</div>
               <RoundingInput value={rounding} onChange={setRounding} />
             </div>
           </div>
@@ -256,10 +256,13 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onConfirm }:
       : svc.clientOverridesList,
   }))
 
-  const direction = adjustment > 0 ? "Increase" : "Decrease"
-  const appliedTo = RATE_TYPE_OPTIONS.filter(({ key }) => rateTypes[key]).map(({ label }) => label).join(", ")
-  const roundingPart = rounding > 0 ? `, rounded to increments of $${rounding}` : ""
-  const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart} · applied to ${appliedTo}`
+  const direction = adjustment > 0 ? "Increased" : "Decreased"
+  const appliedToList = RATE_TYPE_OPTIONS.filter(({ key }) => rateTypes[key]).map(({ label }) => label)
+  const appliedTo = appliedToList.length > 1
+    ? appliedToList.slice(0, -1).join(", ") + ", and " + appliedToList.at(-1)
+    : appliedToList[0] ?? ""
+  const roundingPart = rounding > 0 ? `, rounded to $${rounding} increments,` : ""
+  const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart} and applied to ${appliedTo}`
 
   return (
     <>
