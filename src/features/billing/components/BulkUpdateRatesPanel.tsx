@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconArrowRight, IconArrowLeft, IconDownload, IconCheck, IconX } from "@tabler/icons-react"
+import { IconArrowRight, IconArrowLeft, IconDownload, IconCheck, IconX, IconChevronDown } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 import {
@@ -9,31 +9,71 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { protoAction } from "@/lib/proto"
 import type { ServiceItem } from "@/mock/services"
 import { rateGroups } from "@/mock/data/team-member-rates"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type Rounding = 0 | 1 | 5 | 10
+type Rounding = number
 
-const ROUNDING_OPTIONS: { value: Rounding; label: string }[] = [
+const ROUNDING_PRESETS: { value: number; label: string }[] = [
   { value: 0,  label: "No rounding" },
-  { value: 1,  label: "Nearest $1" },
-  { value: 5,  label: "Nearest $5" },
-  { value: 10, label: "Nearest $10" },
+  { value: 1,  label: "$1" },
+  { value: 5,  label: "$5" },
+  { value: 10, label: "$10" },
 ]
+
+function RoundingInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [input, setInput] = React.useState(value === 0 ? "" : String(value))
+
+  const handleChange = (raw: string) => {
+    setInput(raw)
+    const n = parseFloat(raw)
+    onChange(!raw || isNaN(n) ? 0 : n)
+  }
+
+  return (
+    <div className="relative flex w-full items-center">
+      <span className="pointer-events-none absolute left-3 text-sm text-muted-foreground">$</span>
+      <Input
+        type="text"
+        inputMode="decimal"
+        className="pl-6 pr-9 text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        value={input}
+        placeholder="0"
+        onChange={(e) => handleChange(e.target.value)}
+        onFocus={(e) => { const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="absolute right-2 flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:text-foreground">
+            <IconChevronDown className="size-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {ROUNDING_PRESETS.map((p) => (
+            <DropdownMenuItem key={p.value} onClick={() => { setInput(p.value === 0 ? "" : String(p.value)); onChange(p.value) }}>
+              {p.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
 
 function applyAdjustment(rate: number, pct: number, rounding: Rounding): number {
   const raw = rate * (1 + pct / 100)
   if (rounding === 0) return Math.round(raw * 100) / 100
-  return Math.round(raw / rounding) * rounding
+  return pct >= 0
+    ? Math.ceil(raw / rounding) * rounding
+    : Math.floor(raw / rounding) * rounding
 }
 
 function formatRate(rate: number) {
@@ -110,33 +150,50 @@ function Step1({ adjustment, setAdjustment, rounding, setRounding, rateTypes, se
       <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
         <h2 className="text-xl font-semibold">Price adjustment</h2>
 
-        <div className="flex flex-col gap-2">
-          <div className="text-sm font-medium">Price adjustment</div>
-          <div className="flex items-center gap-3">
-            <div className="relative w-32">
-              <Input
-                type="number"
-                className="pr-8"
-                value={adjustment}
-                onChange={(e) => setAdjustment(e.target.value)}
-                placeholder="0"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-4 gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="text-sm font-medium">Adjust rates by</div>
+              <div className="relative w-full">
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  className="pr-8 text-right"
+                  value={adjustment}
+                  onChange={(e) => setAdjustment(e.target.value)}
+                  onFocus={(e) => { const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
+                  placeholder="0"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+              </div>
             </div>
-            <Select value={String(rounding)} onValueChange={(v) => setRounding(Number(v) as Rounding)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROUNDING_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={String(o.value)}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-2">
+              <div className="text-sm font-medium">Round prices to</div>
+              <RoundingInput value={rounding} onChange={setRounding} />
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Enter positive values to increase (e.g., 10%) or negative values to decrease (e.g., -10%).
-          </p>
+          {(() => {
+            const example = 137.50
+            const pctVal = parseFloat(adjustment)
+            if (!adjustment || isNaN(pctVal) || pctVal === 0) return (
+              <p className="text-xs text-muted-foreground">Enter a positive or negative percentage to see how prices will change</p>
+            )
+            const afterPct = example * (1 + pctVal / 100)
+            const afterRound = rounding > 0
+              ? pctVal >= 0
+                ? Math.ceil(afterPct / rounding) * rounding
+                : Math.floor(afterPct / rounding) * rounding
+              : afterPct
+            const direction = pctVal > 0 ? "increased" : "decreased"
+            const fmt = (n: number) => n % 1 === 0 ? `$${n}` : `$${n.toFixed(2)}`
+            const parts: string[] = [fmt(example), fmt(afterPct)]
+            if (rounding > 0) parts.push(fmt(afterRound))
+            return (
+              <p className="text-xs text-muted-foreground">
+                Example: {parts.join(" → ")}
+              </p>
+            )
+          })()}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -199,16 +256,18 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onConfirm }:
       : svc.clientOverridesList,
   }))
 
-  const sign = adjustment > 0 ? "+" : ""
-  const roundingLabel = ROUNDING_OPTIONS.find((o) => o.value === rounding)?.label ?? ""
+  const direction = adjustment > 0 ? "Increase" : "Decrease"
   const appliedTo = RATE_TYPE_OPTIONS.filter(({ key }) => rateTypes[key]).map(({ label }) => label).join(", ")
-  const summaryParts = [`${sign}${adjustment}%`, appliedTo, roundingLabel]
+  const roundingPart = rounding > 0 ? `, rounded to increments of $${rounding}` : ""
+  const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart} · applied to ${appliedTo}`
 
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
-        <h2 className="text-xl font-semibold">Preview changes</h2>
-        <p className="text-sm text-muted-foreground">{summaryParts.join(" · ")}</p>
+        <div className="flex flex-col gap-0">
+          <h2 className="text-xl font-semibold">Preview changes</h2>
+          <p className="text-sm text-muted-foreground">{summaryLine}</p>
+        </div>
 
         <div className="flex flex-col gap-2">
           {visibleServices.map((svc) => {
@@ -225,16 +284,10 @@ function Step2({ services, adjustment, rounding, rateTypes, onBack, onConfirm }:
                   )}
                   {rateTypes.default && (
                     <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Default rate:</span>
                       <span className="text-sm text-muted-foreground line-through">{formatRate(svc.defaultRate)}</span>
                       <IconArrowRight className="size-3.5 text-muted-foreground" />
                       <span className="font-medium">{formatRate(upd.defaultRate)}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        adjustment > 0
-                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                      }`}>
-                        {sign}{adjustment}%
-                      </span>
                     </div>
                   )}
                 </div>
@@ -321,7 +374,7 @@ type BulkUpdateRatesPanelProps = {
 export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: BulkUpdateRatesPanelProps) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("10")
-  const [rounding, setRounding] = React.useState<Rounding>(5)
+  const [rounding, setRounding] = React.useState<Rounding>(1)
   const [rateTypes, setRateTypes] = React.useState<Record<RateTypeKey, boolean>>({ default: true, client: false, team: false })
 
   const handleClose = () => {
