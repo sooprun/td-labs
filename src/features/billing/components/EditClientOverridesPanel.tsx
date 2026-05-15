@@ -296,7 +296,10 @@ function Step2({
         <div className="flex flex-col gap-0">
           <h2 className="text-xl font-semibold">Review overrides</h2>
           <p className="text-sm text-muted-foreground">{summaryLine}</p>
-          <p className="text-sm text-muted-foreground">Clear a field to use the default rate.</p>
+          <div className="mt-3 flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+            <span className="shrink-0">ℹ</span>
+            Clear a field to use the default rate.
+          </div>
         </div>
 
         <div className="relative">
