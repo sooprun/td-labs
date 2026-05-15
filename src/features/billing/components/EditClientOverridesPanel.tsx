@@ -121,7 +121,7 @@ function Stepper({ step }: { step: 1 | 2 }) {
 const APPLY_TO_OPTIONS: { value: ApplyTo; label: string; description: string }[] = [
   {
     value: "all",
-    label: "All services",
+    label: "All selected services",
     description: "Set or update overrides for all selected services",
   },
   {
@@ -184,7 +184,19 @@ function Step1({
               </div>
             </div>
             <div className="col-span-1 flex flex-col gap-2">
-              <div className="text-sm font-medium">Round to</div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-sm font-medium">Round to</div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-default text-primary"><IconInfoCircle className="size-4" /></span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md max-w-56" hideArrow>
+                      Larger rounding values may result in bigger percentage differences across services
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <RoundingInput value={rounding} onChange={setRounding} />
             </div>
           </div>
@@ -229,8 +241,8 @@ function Step1({
           <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
             <span className="shrink-0">ℹ</span>
             {skippedCount === 1
-              ? "1 selected service uses team member rates and can't have client overrides — it will be skipped."
-              : `${skippedCount} selected services use team member rates and can't have client overrides — they'll be skipped.`}
+              ? "1 selected service will be skipped because it already uses team member rates"
+              : `${skippedCount} selected services will be skipped because they already use team member rates`}
           </div>
         )}
       </div>
@@ -287,7 +299,7 @@ function Step2({
 
   const direction = adjustment > 0 ? "Increased" : "Decreased"
   const roundingPart = rounding > 0 ? `, rounded to $${rounding} increments` : ""
-  const appliedTo = applyTo === "all" ? "all services" : "existing overrides only"
+  const appliedTo = applyTo === "all" ? "all selected services" : "existing overrides only"
   const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart}, applied to ${appliedTo}`
 
   return (
@@ -489,10 +501,10 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 p-0" showCloseButton={false}>
+      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 overflow-hidden p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-xl font-semibold">Update client overrides</span>
+          <span className="text-xl font-semibold">Set client overrides</span>
           <Button size="icon-xl" variant="ghost" onClick={onClose}>
             <IconX className="size-4" />
           </Button>

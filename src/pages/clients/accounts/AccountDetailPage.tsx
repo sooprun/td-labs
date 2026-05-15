@@ -875,6 +875,16 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     return sortDir === "asc" ? cmp : -cmp
   })
 
+  const updatableIds = selectedIds.filter((id) =>
+    !rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+  )
+  const resettableIds = selectedIds.filter((id) => {
+    const svc = services.find((s) => s.id === id)
+    if (!svc) return false
+    const hasTeamRate = rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+    return !hasTeamRate && svc.clientOverridesList.some((o) => o.accountId === accountId)
+  })
+
   const allSelected = displayed.length > 0 && selectedIds.length === displayed.length
   const toggleAll = () => setSelectedIds(allSelected ? [] : displayed.map((s) => s.id))
   const toggleOne = (id: string) => setSelectedIds((prev) =>
@@ -929,31 +939,22 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           actions={[
             {
               icon: IconReceiptDollar,
-              label: "Update client overrides",
-              disabled: selectedIds.every((id) =>
-                rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
-              ),
+              label: (updatableIds.length || selectedIds.length) === 1 ? "Set client override" : "Set client overrides",
+              disabled: updatableIds.length === 0,
               disabledTooltip: "Selected services use team member rates — they can't be overridden per client.",
               onClick: () => setSetOverridesOpen(true),
             },
             {
               icon: IconTableImport,
-              label: "Update client overrides via CSV",
-              disabled: selectedIds.every((id) =>
-                rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
-              ),
+              label: (updatableIds.length || selectedIds.length) === 1 ? "Set client override via CSV" : "Set client overrides via CSV",
+              disabled: updatableIds.length === 0,
               disabledTooltip: "Selected services use team member rates — they can't be overridden per client.",
               onClick: () => setCsvImportOpen(true),
             },
             {
               icon: IconRotate,
-              label: "Reset override",
-              disabled: !selectedIds.some((id) => {
-                const svc = services.find((s) => s.id === id)
-                if (!svc) return false
-                const hasTeamRate = rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
-                return !hasTeamRate && svc.clientOverridesList.some((o) => o.accountId === accountId)
-              }),
+              label: (resettableIds.length || selectedIds.length) === 1 ? "Reset override" : "Reset overrides",
+              disabled: resettableIds.length === 0,
               disabledTooltip: "No overrides to reset",
               onClick: () => setResetConfirmOpen(true),
             },
@@ -1140,12 +1141,6 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
 
       {/* Reset override confirmation */}
       {(() => {
-        const resettableIds = selectedIds.filter((id) => {
-          const svc = services.find((s) => s.id === id)
-          if (!svc) return false
-          const hasTeamRate = rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
-          return !hasTeamRate && svc.clientOverridesList.some((o) => o.accountId === accountId)
-        })
         const n = resettableIds.length
         return (
           <Dialog open={resetConfirmOpen} onOpenChange={(o) => { if (!o) setResetConfirmOpen(false) }}>
