@@ -48,6 +48,7 @@ import { rateGroups } from "@/mock/data/team-member-rates"
 import { StatusTabs } from "@/components/page/StatusTabs"
 import { ProtoPlaceholder } from "@/components/page/ProtoPlaceholder"
 import { UpdateClientOverridesCsvPanel } from "@/features/billing/components/UpdateClientOverridesCsvPanel"
+import { EditClientOverridesPanel } from "@/features/billing/components/EditClientOverridesPanel"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -846,11 +847,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const view = viewParam === "custom" ? "custom" : "all"
   const setView = (v: "all" | "custom") => setViewParam(v)
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
-  const [bulkRateOpen, setBulkRateOpen] = React.useState(false)
+  const [setOverridesOpen, setSetOverridesOpen] = React.useState(false)
   const [csvImportOpen, setCsvImportOpen] = React.useState(false)
-  const [rateMode, setRateMode] = React.useState<"amount" | "percent">("percent")
-  const [rateValue, setRateValue] = React.useState("")
-  const [rateRounding, setRateRounding] = React.useState<"0" | "1" | "5" | "10">("0")
   const [resetConfirmOpen, setResetConfirmOpen] = React.useState(false)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [editingValue, setEditingValue] = React.useState("")
@@ -886,40 +884,6 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const fmt = (n: number, rateType?: string) => {
     const amount = `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     return rateType === "Hour" ? `${amount}/hr` : amount
-  }
-
-  const dialogOpen = bulkRateOpen
-  const targetIds = selectedIds
-
-  const applyRate = () => {
-    const val = parseFloat(rateValue)
-    if (isNaN(val) || targetIds.length === 0) return
-    onServicesChange(services.map((s) => {
-      if (!targetIds.includes(s.id)) return s
-      const existing = s.clientOverridesList.find((o) => o.accountId === accountId)
-      const baseRate = existing?.rate ?? s.defaultRate
-      let newRate: number
-      if (rateMode === "amount") {
-        newRate = val
-      } else {
-        const raw = baseRate * (1 + val / 100)
-        const r = Number(rateRounding)
-        newRate = r === 0 ? Math.round(raw * 100) / 100 : Math.round(raw / r) * r
-      }
-      const newOverrides = existing
-        ? s.clientOverridesList.map((o) => o.accountId === accountId ? { ...o, rate: newRate } : o)
-        : [...s.clientOverridesList, { accountId, accountName: account?.name ?? "", rate: newRate }]
-      return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
-    }))
-    closeDialog()
-    setSelectedIds([])
-  }
-
-  const closeDialog = () => {
-    setBulkRateOpen(false)
-    setRateValue("")
-    setRateMode("percent")
-    setRateRounding("0")
   }
 
   const openEditing = (svc: ServiceItem) => {
@@ -965,12 +929,12 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           actions={[
             {
               icon: IconReceiptDollar,
-              label: "Update overrides",
-              onClick: () => { setRateValue(""); setBulkRateOpen(true) },
+              label: "Update client overrides",
+              onClick: () => setSetOverridesOpen(true),
             },
             {
               icon: IconTableImport,
-              label: "Update overrides via CSV",
+              label: "Update client overrides via CSV",
               onClick: () => setCsvImportOpen(true),
             },
             {
@@ -1195,71 +1159,19 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </DialogContent>
       </Dialog>
 
+      {/* Edit client overrides panel */}
+      {account && (
+        <EditClientOverridesPanel
+          open={setOverridesOpen}
+          account={account}
+          services={services}
+          onClose={() => setSetOverridesOpen(false)}
+          onSave={(updated) => { onServicesChange(updated); setSetOverridesOpen(false); setSelectedIds([]) }}
+        />
+      )}
+
       {/* CSV import panel */}
       <UpdateClientOverridesCsvPanel open={csvImportOpen} onClose={() => setCsvImportOpen(false)} />
-
-      {/* Rate dialog — single item + bulk */}
-      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog() }}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Update rate</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-2">
-            <p className="text-sm text-muted-foreground">
-              Changes will apply to {targetIds.length} selected {targetIds.length === 1 ? "service" : "services"}.
-            </p>
-            <StatusTabs
-              className="w-full"
-              fullWidth
-              tabs={[
-                { label: "Percentage", active: rateMode === "percent", onClick: () => { setRateMode("percent"); setRateValue("") } },
-                { label: "Fixed amount", active: rateMode === "amount", onClick: () => { setRateMode("amount"); setRateValue("") } },
-              ]}
-            />
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="rate-val">
-                Price
-              </Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    {rateMode === "amount" ? "$" : "%"}
-                  </span>
-                  <Input
-                    id="rate-val"
-                    className={rateMode === "amount" ? "pl-6" : "pl-7"}
-                    placeholder={rateMode === "amount" ? "0.00" : "e.g. 10 or -5"}
-                    value={rateValue}
-                    autoFocus
-                    onChange={(e) => setRateValue(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") applyRate() }}
-                  />
-                </div>
-                {rateMode === "percent" && (
-                  <Select value={rateRounding} onValueChange={(v) => setRateRounding(v as typeof rateRounding)}>
-                    <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">No rounding</SelectItem>
-                      <SelectItem value="1">Nearest $1</SelectItem>
-                      <SelectItem value="5">Nearest $5</SelectItem>
-                      <SelectItem value="10">Nearest $10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-              {rateMode === "percent" && (
-                <p className="text-xs text-muted-foreground">
-                  Use positive values to increase (e.g., 10%) or negative to decrease (e.g., -5%).
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button size="xl" disabled={!rateValue || isNaN(parseFloat(rateValue))} onClick={applyRate}>Save</Button>
-            <Button size="xl" variant="outline" onClick={closeDialog}>Cancel</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
