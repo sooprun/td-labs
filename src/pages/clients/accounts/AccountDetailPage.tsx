@@ -930,6 +930,10 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             {
               icon: IconReceiptDollar,
               label: "Update client overrides",
+              disabled: selectedIds.every((id) =>
+                rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+              ),
+              disabledTooltip: "Selected services use team member rates — they can't be overridden per client.",
               onClick: () => setSetOverridesOpen(true),
             },
             {
