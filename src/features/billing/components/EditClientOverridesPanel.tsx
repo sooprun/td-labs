@@ -292,7 +292,7 @@ function Step2({
                   </button>
                 </th>
                 <th className="w-64 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">
-                  Price
+                  Client override
                 </th>
               </tr>
             </thead>
@@ -317,7 +317,7 @@ function Step2({
                     </td>
                     <td className="w-64 px-4 py-2">
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap">{fmtOld(oldPrice)}</span>
+                        <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
                         <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
                         {pct !== null && pct !== 0 && (
                           <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
