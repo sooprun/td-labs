@@ -939,6 +939,10 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             {
               icon: IconTableImport,
               label: "Update client overrides via CSV",
+              disabled: selectedIds.every((id) =>
+                rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+              ),
+              disabledTooltip: "Selected services use team member rates — they can't be overridden per client.",
               onClick: () => setCsvImportOpen(true),
             },
             {
