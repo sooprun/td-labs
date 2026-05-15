@@ -89,7 +89,7 @@ const STEPS = ["Price adjustment", "Review overrides"]
 
 function Stepper({ step }: { step: 1 | 2 }) {
   return (
-    <div className="flex items-center justify-center gap-0 border-b px-6 py-4">
+    <div className="flex shrink-0 items-center justify-center gap-0 border-b px-6 py-4">
       {STEPS.map((label, i) => {
         const num = i + 1
         const isCompleted = num < step
@@ -161,7 +161,7 @@ function Step1({
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
+      <div className="flex flex-1 min-h-0 flex-col gap-6 overflow-y-auto px-6 py-6">
         <h2 className="text-xl font-semibold">Price adjustment</h2>
 
         {/* Calculator */}
@@ -247,7 +247,7 @@ function Step1({
         )}
       </div>
 
-      <div className="flex gap-3 border-t px-6 py-4">
+      <div className="flex shrink-0 gap-3 border-t px-6 py-4">
         <ContinueButton disabled={!valid} onClick={onNext} />
       </div>
     </>
@@ -304,7 +304,7 @@ function Step2({
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
+      <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto px-6 py-6">
         <div className="flex flex-col gap-0">
           <h2 className="text-xl font-semibold">Review overrides</h2>
           <p className="text-sm text-muted-foreground">{summaryLine}</p>
@@ -319,7 +319,7 @@ function Step2({
           <Input className="pl-9" placeholder="Search services" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <div className="overflow-hidden rounded-xl border">
+        <div className="shrink-0 overflow-hidden rounded-xl border">
           <table className="panel-table w-full text-[14px]">
             <thead className="border-b bg-background">
               <tr>
@@ -404,7 +404,7 @@ function Step2({
         </div>
       </div>
 
-      <div className="flex gap-3 border-t px-6 py-4">
+      <div className="flex shrink-0 gap-3 border-t px-6 py-4">
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
@@ -501,7 +501,7 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 overflow-hidden p-0" showCloseButton={false}>
+      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
           <span className="text-xl font-semibold">Set client overrides</span>

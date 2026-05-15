@@ -99,9 +99,9 @@ function Step1({ onFileSelect }: { onFileSelect: (file: File) => void }) {
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
       <div className="flex flex-col gap-0">
-        <h2 className="text-xl font-semibold">Upload CSV file</h2>
+        <h2 className="text-xl font-semibold">Upload your CSV file</h2>
         <p className="text-sm text-muted-foreground">
-          Upload a CSV file to update client overrides in bulk. Download the sample file below to make sure your file matches the required format.
+          Upload a CSV file to set client overrides in bulk. Download the sample file below to make sure your file matches the required format.
         </p>
       </div>
 
@@ -135,7 +135,7 @@ export function UpdateClientOverridesCsvPanel({ open, onClose }: Props) {
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
-          <span className="text-xl font-semibold">Update client overrides</span>
+          <span className="text-xl font-semibold">Set client overrides via CSV</span>
           <Button size="icon-xl" variant="ghost" onClick={handleClose}>
             <IconX className="size-4" />
           </Button>

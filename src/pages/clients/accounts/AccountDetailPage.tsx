@@ -954,6 +954,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             {
               icon: IconRotate,
               label: (resettableIds.length || selectedIds.length) === 1 ? "Reset override" : "Reset overrides",
+              variant: "destructive-ghost",
               disabled: resettableIds.length === 0,
               disabledTooltip: "No overrides to reset",
               onClick: () => setResetConfirmOpen(true),
