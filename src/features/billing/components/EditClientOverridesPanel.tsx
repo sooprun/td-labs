@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconSearch, IconX, IconCheck, IconChevronDown, IconInfoCircle } from "@tabler/icons-react"
+import { IconSearch, IconX, IconCheck, IconChevronDown, IconInfoCircle, IconArrowLeft } from "@tabler/icons-react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -120,14 +120,14 @@ function Stepper({ step }: { step: 1 | 2 }) {
 
 const APPLY_TO_OPTIONS: { value: ApplyTo; label: string; description: string }[] = [
   {
-    value: "overrides",
-    label: "Existing overrides only",
-    description: "Apply the adjustment to services that already have a client override",
-  },
-  {
     value: "all",
     label: "All services",
     description: "Create or update overrides for all services, using the default rate as the base where no override exists",
+  },
+  {
+    value: "overrides",
+    label: "Existing overrides only",
+    description: "Apply the adjustment only to services that already have a client override",
   },
 ]
 
@@ -169,6 +169,7 @@ function Step1({
               <div className="text-sm font-medium">Adjust by</div>
               <div className="relative w-full">
                 <Input
+                  autoFocus
                   type="text"
                   inputMode="decimal"
                   className="pr-8 text-right"
@@ -268,23 +269,19 @@ function Step2({
 
   return (
     <>
-      <div className="flex flex-col gap-0 px-6 pb-2 pt-6">
-        <h2 className="text-xl font-semibold">Set prices</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Review and adjust individual overrides for {account.name}. Clear a field to use the default rate.
-        </p>
-        <div className="relative mt-4">
-          <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            placeholder="Search services"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-semibold">Set prices</h2>
+          <p className="text-sm text-muted-foreground">
+            Review and adjust individual overrides for {account.name}. Clear a field to use the default rate.
+          </p>
         </div>
-      </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-3">
+        <div className="relative">
+          <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input className="pl-9" placeholder="Search services" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+
         <div className="overflow-hidden rounded-xl border">
           <table className="panel-table w-full text-[14px]">
             <thead className="border-b bg-background">
@@ -367,9 +364,11 @@ function Step2({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 border-t px-6 py-4">
-        <Button size="xl" onClick={onSave}>Save</Button>
-        <Button size="xl" variant="outline" onClick={onBack}>Back</Button>
+      <div className="flex gap-3 border-t px-6 py-4">
+        <Button size="icon-xl" variant="outline" onClick={onBack}>
+          <IconArrowLeft className="size-4" />
+        </Button>
+        <Button size="xl" className="px-5" onClick={onSave}>Save</Button>
       </div>
     </>
   )
@@ -389,7 +388,7 @@ export function EditClientOverridesPanel({ open, account, services, onClose, onS
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("")
   const [rounding, setRounding] = React.useState<Rounding>(1)
-  const [applyTo, setApplyTo] = React.useState<ApplyTo>("overrides")
+  const [applyTo, setApplyTo] = React.useState<ApplyTo>("all")
   const [overrides, setOverrides] = React.useState<OverrideMap>({})
 
   const teamRateServiceIds = new Set(
@@ -407,7 +406,7 @@ export function EditClientOverridesPanel({ open, account, services, onClose, onS
     setStep(1)
     setAdjustment("")
     setRounding(1)
-    setApplyTo("overrides")
+    setApplyTo("all")
     setOverrides({})
   }, [open])
 
@@ -457,16 +456,13 @@ export function EditClientOverridesPanel({ open, account, services, onClose, onS
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 p-0">
+      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <span className="text-base font-semibold">Update client overrides</span>
-          <button
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={onClose}
-          >
-            <IconX className="size-5" />
-          </button>
+        <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
+          <span className="text-xl font-semibold">Update client overrides</span>
+          <Button size="icon-xl" variant="ghost" onClick={onClose}>
+            <IconX className="size-4" />
+          </Button>
         </div>
 
         <Stepper step={step} />
