@@ -122,12 +122,12 @@ const APPLY_TO_OPTIONS: { value: ApplyTo; label: string; description: string }[]
   {
     value: "all",
     label: "All services",
-    description: "Create or update overrides for all services, using the default rate as the base where no override exists",
+    description: "Set or update overrides for all selected services",
   },
   {
     value: "overrides",
     label: "Existing overrides only",
-    description: "Apply the adjustment only to services that already have a client override",
+    description: "Update only services that already have client overrides",
   },
 ]
 
