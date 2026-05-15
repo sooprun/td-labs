@@ -1,12 +1,14 @@
 import * as React from "react"
-import { IconX, IconCheck, IconArrowLeft, IconSearch } from "@tabler/icons-react"
+import { IconX, IconCheck, IconArrowLeft, IconSearch, IconInfoCircle } from "@tabler/icons-react"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { ServiceItem } from "@/mock/services"
 import type { Account } from "@/mock/data/accounts"
+import { rateGroups } from "@/mock/data/team-member-rates"
 
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 
@@ -66,6 +68,10 @@ function Step1({
     else { setSortKey(key); setSortDir("asc") }
   }
 
+  const teamRateServiceIds = new Set(
+    rateGroups.filter((g) => !g.archived).flatMap((g) => g.services.map((s) => s.serviceId))
+  )
+
   const filtered = services
     .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
@@ -74,8 +80,9 @@ function Step1({
       return a[sortKey].localeCompare(b[sortKey]) * mul
     })
 
-  const allSelected = filtered.length > 0 && filtered.every((s) => selectedServiceIds.includes(s.id))
-  const someSelected = filtered.some((s) => selectedServiceIds.includes(s.id))
+  const selectableFiltered = filtered.filter((s) => !teamRateServiceIds.has(s.id))
+  const allSelected = selectableFiltered.length > 0 && selectableFiltered.every((s) => selectedServiceIds.includes(s.id))
+  const someSelected = selectableFiltered.some((s) => selectedServiceIds.includes(s.id))
 
   const handleHeaderCheckbox = () => {
     if (allSelected) onClearAll()
@@ -134,28 +141,49 @@ function Step1({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((svc) => (
-                <tr
-                  key={svc.id}
-                  className={`cursor-pointer hover:bg-muted/60 ${filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
-                  onClick={() => onToggle(svc.id)}
-                >
-                  <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      className="table-checkbox"
-                      checked={selectedServiceIds.includes(svc.id)}
-                      onChange={() => onToggle(svc.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                  <td className="px-2 py-3 font-medium truncate">{svc.name}</td>
-                  <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
-                  <td className="w-32 px-4 py-3 text-right tabular-nums">
-                    ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((svc) => {
+                const hasTeamRate = teamRateServiceIds.has(svc.id)
+                return (
+                  <tr
+                    key={svc.id}
+                    className={`${hasTeamRate ? "opacity-50" : "cursor-pointer hover:bg-muted/60"} ${filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
+                    onClick={() => !hasTeamRate && onToggle(svc.id)}
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="table-checkbox"
+                        checked={selectedServiceIds.includes(svc.id)}
+                        disabled={hasTeamRate}
+                        onChange={() => onToggle(svc.id)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </td>
+                    <td className="px-2 py-3">
+                      <div className="font-medium truncate">{svc.name}</div>
+                      {hasTeamRate && (
+                        <div className="mt-0.5 flex items-center gap-1.5">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default text-primary"><IconInfoCircle className="size-4" /></span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md max-w-56" hideArrow>
+                                This service uses team member rates and can't be overridden per client.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <span className="text-sm text-muted-foreground">Unavailable</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
+                    <td className="w-32 px-4 py-3 text-right tabular-nums">
+                      ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
           </div>
@@ -347,7 +375,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
             services={services.filter((s) => !s.archived)}
             selectedServiceIds={selectedServiceIds}
             onToggle={handleToggleService}
-            onSelectAll={() => setSelectedServiceIds(services.filter((s) => !s.archived).map((s) => s.id))}
+            onSelectAll={() => setSelectedServiceIds(services.filter((s) => !s.archived && !rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === s.id))).map((s) => s.id))}
             onClearAll={() => setSelectedServiceIds([])}
             onContinue={handleContinue}
           />
