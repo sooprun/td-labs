@@ -224,8 +224,8 @@ function Step1({
           </div>
         )}
 
-        {/* Info banner — shown when selected services include team-rate (Unavailable) ones */}
-        {skippedCount > 0 && (
+        {/* Info banner — shown when "All services" is selected and some are team-rate */}
+        {skippedCount > 0 && applyTo === "all" && (
           <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
             <span className="shrink-0">ℹ</span>
             {skippedCount === 1
