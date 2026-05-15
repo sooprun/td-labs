@@ -393,7 +393,7 @@ function Step2({
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
-        <Button size="xl" className="px-5" onClick={onSave}>Save</Button>
+        <Button size="xl" className="px-5" onClick={onSave}>Apply overrides</Button>
       </div>
     </>
   )
