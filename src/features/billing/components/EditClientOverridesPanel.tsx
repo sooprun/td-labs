@@ -85,7 +85,7 @@ function RoundingInput({ value, onChange }: { value: number; onChange: (v: numbe
 
 // ─── Stepper ─────────────────────────────────────────────────────────────────
 
-const STEPS = ["Price adjustment", "Set prices"]
+const STEPS = ["Price adjustment", "Review overrides"]
 
 function Stepper({ step }: { step: 1 | 2 }) {
   return (
@@ -283,7 +283,7 @@ function Step2({
     <>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold">Set prices</h2>
+          <h2 className="text-xl font-semibold">Review overrides</h2>
           <p className="text-sm text-muted-foreground">
             Review and adjust individual overrides for {account.name}. Clear a field to use the default rate.
           </p>
