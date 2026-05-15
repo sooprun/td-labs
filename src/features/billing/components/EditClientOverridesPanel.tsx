@@ -250,6 +250,9 @@ function Step2({
   account,
   services,
   overrides,
+  adjustment,
+  rounding,
+  applyTo,
   onOverrideChange,
   onBack,
   onSave,
@@ -257,6 +260,9 @@ function Step2({
   account: Account
   services: ServiceItem[]
   overrides: OverrideMap
+  adjustment: number
+  rounding: Rounding
+  applyTo: ApplyTo
   onOverrideChange: (id: string, value: string) => void
   onBack: () => void
   onSave: () => void
@@ -279,14 +285,18 @@ function Step2({
       return a[sortKey].localeCompare(b[sortKey]) * mul
     })
 
+  const direction = adjustment > 0 ? "Increased" : "Decreased"
+  const roundingPart = rounding > 0 ? `, rounded to $${rounding} increments` : ""
+  const appliedTo = applyTo === "all" ? "all services" : "existing overrides only"
+  const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart}, applied to ${appliedTo}`
+
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold">Review overrides</h2>
-          <p className="text-sm text-muted-foreground">
-            Review and adjust individual overrides for {account.name}. Clear a field to use the default rate.
-          </p>
+          <p className="text-sm text-muted-foreground">{summaryLine}</p>
+          <p className="text-sm text-muted-foreground">Clear a field to use the default rate.</p>
         </div>
 
         <div className="relative">
@@ -498,6 +508,9 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
             account={account}
             services={step2Services}
             overrides={overrides}
+            adjustment={parseFloat(adjustment)}
+            rounding={rounding}
+            applyTo={applyTo}
             onOverrideChange={(id, val) => setOverrides((prev) => ({ ...prev, [id]: val }))}
             onBack={() => setStep(1)}
             onSave={handleSave}
