@@ -965,12 +965,12 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           actions={[
             {
               icon: IconReceiptDollar,
-              label: "Update rate",
+              label: "Update overrides",
               onClick: () => { setRateValue(""); setBulkRateOpen(true) },
             },
             {
               icon: IconTableImport,
-              label: "Update client overrides via CSV",
+              label: "Update overrides via CSV",
               onClick: () => setCsvImportOpen(true),
             },
             {
