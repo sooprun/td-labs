@@ -155,6 +155,10 @@
 .table-checkbox:hover {
   border-color: var(--primary);
 }
+.panel-table tbody tr[data-state="selected"] td {
+  background-color: color-mix(in srgb, var(--primary) 8%, var(--background));
+}
+
 .table-checkbox:disabled {
   cursor: default;
   border-color: #E2E8F0;

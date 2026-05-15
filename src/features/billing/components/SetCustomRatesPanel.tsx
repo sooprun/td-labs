@@ -111,7 +111,7 @@ function Step1({
 
         <div className="px-6 pb-6 -mt-2">
           <div className="rounded-xl border overflow-hidden">
-          <table className="w-full table-fixed text-[14px]">
+          <table className="panel-table w-full table-fixed text-[14px]">
             <thead className="bg-background border-b">
               <tr>
                 <th className="w-12 px-4 py-3 text-left">
@@ -146,7 +146,8 @@ function Step1({
                 return (
                   <tr
                     key={svc.id}
-                    className={`${hasTeamRate ? "" : "cursor-pointer"} ${selectedServiceIds.includes(svc.id) ? "bg-muted" : filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
+                    data-state={selectedServiceIds.includes(svc.id) ? "selected" : undefined}
+                    className={`${hasTeamRate ? "" : "cursor-pointer"} ${selectedServiceIds.includes(svc.id) ? "" : filtered.indexOf(svc) % 2 === 1 ? "bg-muted/50" : ""}`}
                     onClick={() => !hasTeamRate && onToggle(svc.id)}
                   >
                     <td className="px-4 py-3">
@@ -216,69 +217,79 @@ function Step2({
 }) {
   const [focusedKey, setFocusedKey] = React.useState<string | null>(null)
 
+  const multiAccount = accounts.length > 1
+
   return (
-    <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
-      <div className="flex flex-col gap-0">
-        <div className="flex flex-col gap-0">
-          <h2 className="text-xl font-semibold">Set prices</h2>
-          <p className="text-sm text-muted-foreground">{services.length} {services.length === 1 ? "service" : "services"}</p>
-        </div>
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-col gap-0 px-6 pb-4 pt-6">
+        <h2 className="text-xl font-semibold">Set prices</h2>
+        <p className="text-sm text-muted-foreground">{services.length} {services.length === 1 ? "service" : "services"}</p>
         <p className="mt-3 text-sm">Set client overrides for each service. Fields are pre-filled with the default rate — edit any to override.</p>
       </div>
-      {services.map((svc) => (
-        <div key={svc.id} className="flex flex-col gap-3 rounded-xl border bg-background p-4">
-          <div className="flex items-baseline justify-between">
-            <span className="font-medium">{svc.name}</span>
-            <span className="text-xs text-muted-foreground">
-              Default rate: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-            </span>
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+        <div className="flex flex-col gap-3">
+        {services.map((svc) => (
+          <div key={svc.id} className="flex flex-col gap-2">
+            <div className="flex items-baseline justify-between">
+              <span className="font-medium">{svc.name}</span>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                Default: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
+              </span>
+            </div>
+            <div className="overflow-hidden rounded-xl border">
+          <table className="panel-table table-striped w-full text-[14px]">
+            <tbody>
+              {accounts.map((acc) => {
+                const key = `${svc.id}-${acc.id}`
+                const inputVal = rates[svc.id]?.[acc.id] ?? ""
+                const isFocused = focusedKey === key
+                const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
+                  ? parseFloat(inputVal).toFixed(2)
+                  : inputVal
+                const parsed = parseFloat(inputVal)
+                const pct = inputVal !== "" && svc.defaultRate > 0 && !isNaN(parsed)
+                  ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
+                  : null
+                return (
+                  <tr key={acc.id}>
+                    <td className="px-4 py-2.5 text-muted-foreground truncate">{acc.name}</td>
+                    <td className="w-14 px-2 py-2.5 text-center">
+                      {pct !== null && pct !== 0 && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          pct > 0
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}>
+                          {pct > 0 ? "+" : ""}{pct}%
+                        </span>
+                      )}
+                    </td>
+                    <td className="w-36 px-4 py-2">
+                      <div className="relative">
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                        <Input
+                          className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
+                          value={displayVal}
+                          placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                          onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
+                          onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
+                          onBlur={() => setFocusedKey(null)}
+                        />
+                        {svc.rateType === "Hour" && (
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
           </div>
-          <div className="flex flex-col gap-2">
-            {accounts.map((acc) => {
-              const key = `${svc.id}-${acc.id}`
-              const inputVal = rates[svc.id]?.[acc.id] ?? ""
-              const isFocused = focusedKey === key
-              const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
-                ? parseFloat(inputVal).toFixed(2)
-                : inputVal
-              const parsed = parseFloat(inputVal)
-              const pct = inputVal !== "" && svc.defaultRate > 0 && !isNaN(parsed)
-                ? Math.round(((parsed - svc.defaultRate) / svc.defaultRate) * 100)
-                : null
-              return (
-                <div key={acc.id} className="flex items-center gap-3">
-                  <span className="flex-1 truncate text-sm text-muted-foreground">{acc.name}</span>
-                  <span className="inline-flex w-14 shrink-0 justify-center">
-                    {pct !== null && pct !== 0 && (
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        pct > 0
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}>
-                        {pct > 0 ? "+" : ""}{pct}%
-                      </span>
-                    )}
-                  </span>
-                  <div className="relative w-32 shrink-0">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                    <Input
-                      className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                      value={displayVal}
-                      placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                      onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
-                      onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                      onBlur={() => setFocusedKey(null)}
-                    />
-                    {svc.rateType === "Hour" && (
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
           </div>
+        ))}
         </div>
-      ))}
+      </div>
     </div>
   )
 }
