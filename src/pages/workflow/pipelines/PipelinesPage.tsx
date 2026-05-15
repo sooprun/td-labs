@@ -12,58 +12,51 @@ import { protoAction } from "@/lib/proto"
 import { initialStages, pipelineName, type Job, type Stage } from "@/mock/pipelines"
 import { PipelineBoard } from "@/features/pipelines/components/PipelineBoard"
 import { JobDetailSheet } from "@/features/pipelines/components/JobDetailSheet"
+import { DataTableToolbarSlot, DataTableToolbarGroup, DataTableToolbarSpacer } from "@/components/data-table/DataTableToolbar"
 
 export function PipelinesPage() {
   const [stages, setStages] = React.useState<Stage[]>(initialStages)
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null)
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="shrink-0 px-6 pb-3 pt-4">
-        <div className="mb-2.5 flex items-center gap-1">
+    <div className="flex h-full flex-col overflow-hidden bg-workspace">
+      <div className="flex shrink-0 flex-col gap-4 px-6 pb-4 pt-6">
+        <div className="flex items-center gap-1">
           <button
-            className="text-xl font-semibold text-foreground hover:opacity-75"
+            className="text-3xl font-semibold text-foreground hover:opacity-75"
             onClick={protoAction("Switch pipeline")}
           >
             {pipelineName}
           </button>
           <IconChevronDown
-            className="size-4 cursor-pointer text-muted-foreground"
+            className="size-5 cursor-pointer text-muted-foreground"
             onClick={protoAction("Switch pipeline")}
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="-ml-2 flex items-center gap-1">
-            <Button
-              variant="ghost"
-              className="text-primary hover:bg-[#F2F9FF] hover:text-primary"
-              onClick={protoAction("Sort")}
-            >
+        <DataTableToolbarSlot>
+          <DataTableToolbarGroup>
+            <Button size="xl" variant="ghost" className="text-primary hover:text-primary" onClick={protoAction("Sort")}>
               <IconArrowsSort className="size-4" />
               Time in stage, shortest first
             </Button>
-            <Button
-              variant="ghost"
-              className="text-primary hover:bg-[#F2F9FF] hover:text-primary"
-              onClick={protoAction("Filter")}
-            >
+            <Button size="xl" variant="ghost" className="text-primary hover:text-primary" onClick={protoAction("Filter")}>
               <IconFilter className="size-4" />
               Filter
             </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button onClick={protoAction("Add job")}>
+          </DataTableToolbarGroup>
+          <DataTableToolbarSpacer />
+          <DataTableToolbarGroup>
+            <Button size="xl" onClick={protoAction("Add job")}>
               <IconPlus className="size-4" />
               Add job
             </Button>
-            <Button variant="outline" onClick={protoAction("Edit pipeline")}>
+            <Button size="xl" variant="outline" onClick={protoAction("Edit pipeline")}>
               <IconPencil className="size-4" />
               Edit
             </Button>
-          </div>
-        </div>
+          </DataTableToolbarGroup>
+        </DataTableToolbarSlot>
       </div>
 
       <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">

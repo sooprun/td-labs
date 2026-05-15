@@ -733,16 +733,16 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
       {subTab === "Invoices" ? (
         <>
           {/* Summary */}
-          <div className="flex min-h-11 items-center gap-4 text-sm text-muted-foreground">
+          <DataTableToolbarSlot className="gap-4 text-sm text-muted-foreground">
             <span>Invoices: <strong className="text-foreground">{accountInvoices.length}</strong></span>
             <div className="h-4 w-px bg-border" />
             <span>Paid: <strong className="text-foreground">{fmt(paid)}</strong></span>
             <div className="h-4 w-px bg-border" />
             <span>Unpaid: <strong className="text-foreground">{fmt(unpaid)}</strong></span>
-          </div>
+          </DataTableToolbarSlot>
 
           {/* Toolbar */}
-          <div className="flex min-h-11 items-center gap-2">
+          <DataTableToolbarSlot className="gap-2">
             <Button size="xl" variant="ghost" onClick={protoAction("Favorites")}>
               <IconStar className="size-4" />
               Favorites
@@ -766,7 +766,7 @@ function InvoicesTabContent({ accountId, services, onServicesChange }: { account
               <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
             </div>
-          </div>
+          </DataTableToolbarSlot>
 
           {accountInvoices.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">No invoices yet</p>
@@ -852,6 +852,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const [resetConfirmOpen, setResetConfirmOpen] = React.useState(false)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [editingValue, setEditingValue] = React.useState("")
+  const [search, setSearch] = React.useState("")
   const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
 
@@ -865,7 +866,10 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     s.clientOverridesList.some((o) => o.accountId === accountId) &&
     !rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === s.id))
   )
-  const displayed = (view === "all" ? activeServices : withOverride).slice().sort((a, b) => {
+  const searchLower = search.toLowerCase()
+  const displayed = (view === "all" ? activeServices : withOverride).filter((s) =>
+    !searchLower || s.name.toLowerCase().includes(searchLower)
+  ).slice().sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey]
     const cmp = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv))
     return sortDir === "asc" ? cmp : -cmp
@@ -948,7 +952,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-4">
       {/* Toolbar */}
       {selectedIds.length > 0 ? (
         <DataTableBulkActionsBar
@@ -965,9 +969,12 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
             {
               icon: IconRotate,
               label: "Reset override",
-              disabled: !selectedIds.some((id) =>
-                services.find((s) => s.id === id)?.clientOverridesList.some((o) => o.accountId === accountId)
-              ),
+              disabled: !selectedIds.some((id) => {
+                const svc = services.find((s) => s.id === id)
+                if (!svc) return false
+                const hasTeamRate = rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+                return !hasTeamRate && svc.clientOverridesList.some((o) => o.accountId === accountId)
+              }),
               disabledTooltip: "No overrides to reset",
               onClick: () => setResetConfirmOpen(true),
             },
@@ -987,7 +994,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           <DataTableToolbarGroup className="shrink-0">
             <div className="relative w-48">
               <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" />
+              <input className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </DataTableToolbarGroup>
         </DataTableToolbarSlot>

@@ -126,7 +126,7 @@ function TeamMemberRatesTab({ items }: { items: ServiceItem[] }) {
   const selectedGroups = filtered.filter((g) => selectedIds.includes(g.id))
 
   return (
-    <div className="mt-4">
+    <div className="flex flex-col gap-4">
       {selectedIds.length > 0 ? (
         <TeamRatesBulkActionsBar
           selectedCount={selectedIds.length}
@@ -313,7 +313,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
       />
 
       {topTab === "Service items" ? (
-        <div className="mt-4">
+        <div className="flex flex-col gap-4">
           {/* Toolbar */}
           {selectedIds.length > 0 ? (
             <ServicesBulkActionsBar

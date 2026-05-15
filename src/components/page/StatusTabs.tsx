@@ -14,14 +14,14 @@ type StatusTabsProps = {
 
 export function StatusTabs({ tabs, className, fullWidth }: StatusTabsProps) {
   return (
-    <div className={cn("inline-flex w-fit rounded-xl bg-border p-1", className)}>
+    <div className={cn("inline-flex w-fit rounded-lg bg-border p-1", className)}>
       {tabs.map((tab) => (
         <button
           key={tab.label}
           type="button"
           onClick={tab.onClick}
           className={cn(
-            "rounded-lg px-5 py-2 text-sm font-medium transition-colors",
+            "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
             fullWidth && "flex-1",
             tab.active
               ? "bg-background text-primary shadow-sm"

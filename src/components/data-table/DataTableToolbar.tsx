@@ -17,7 +17,7 @@ export function DataTableToolbarSlot({
   return (
     <div
       className={cn(
-        "mb-4 flex min-h-11 w-full min-w-0 items-center gap-3",
+        "flex min-h-10 w-full min-w-0 items-center gap-3",
         className
       )}
     >

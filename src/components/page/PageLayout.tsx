@@ -9,7 +9,7 @@ type PageLayoutProps = {
 
 export function PageLayout({ children, className }: PageLayoutProps) {
   return (
-    <div className={cn("min-h-full w-full bg-workspace p-6", className)}>
+    <div className={cn("min-h-full w-full bg-workspace p-6 flex flex-col gap-4", className)}>
       {children}
     </div>
   )
@@ -23,7 +23,7 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, action, children }: PageHeaderProps) {
   return (
-    <div className="mb-4 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex min-w-0 items-center gap-3">
         <h1 className="truncate text-3xl font-semibold tracking-normal">
           {title}
