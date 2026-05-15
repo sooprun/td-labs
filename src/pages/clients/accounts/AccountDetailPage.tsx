@@ -1139,33 +1139,44 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
       )}
 
       {/* Reset override confirmation */}
-      <Dialog open={resetConfirmOpen} onOpenChange={(o) => { if (!o) setResetConfirmOpen(false) }}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Reset {selectedIds.length === 1 ? "override" : "overrides"}?</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm">
-            Client overrides for {selectedIds.length} selected {selectedIds.length === 1 ? "service" : "services"} will be removed. The default rate will apply instead.
-          </p>
-          <DialogFooter>
-            <Button
-              variant="destructive-solid"
-              onClick={() => {
-                onServicesChange(services.map((s) => {
-                  if (!selectedIds.includes(s.id)) return s
-                  const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
-                  return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
-                }))
-                setSelectedIds([])
-                setResetConfirmOpen(false)
-              }}
-            >
-              Reset {selectedIds.length === 1 ? "override" : "overrides"}
-            </Button>
-            <Button variant="outline" onClick={() => setResetConfirmOpen(false)}>Cancel</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {(() => {
+        const resettableIds = selectedIds.filter((id) => {
+          const svc = services.find((s) => s.id === id)
+          if (!svc) return false
+          const hasTeamRate = rateGroups.some((g) => !g.archived && g.services.some((sv) => sv.serviceId === id))
+          return !hasTeamRate && svc.clientOverridesList.some((o) => o.accountId === accountId)
+        })
+        const n = resettableIds.length
+        return (
+          <Dialog open={resetConfirmOpen} onOpenChange={(o) => { if (!o) setResetConfirmOpen(false) }}>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Reset {n === 1 ? "override" : "overrides"}?</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm">
+                Client {n === 1 ? "override" : "overrides"} for {n} {n === 1 ? "service" : "services"} will be removed. The default rate will apply instead.
+              </p>
+              <DialogFooter>
+                <Button
+                  variant="destructive-solid"
+                  onClick={() => {
+                    onServicesChange(services.map((s) => {
+                      if (!resettableIds.includes(s.id)) return s
+                      const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
+                      return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
+                    }))
+                    setSelectedIds([])
+                    setResetConfirmOpen(false)
+                  }}
+                >
+                  Reset {n === 1 ? "override" : "overrides"}
+                </Button>
+                <Button variant="outline" onClick={() => setResetConfirmOpen(false)}>Cancel</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )
+      })()}
 
       {/* Edit client overrides panel */}
       {account && (
