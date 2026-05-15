@@ -339,16 +339,22 @@ function Step2({
                     </td>
                     <td className="w-64 px-4 py-2">
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
-                        <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
-                        {pct !== null && pct !== 0 && (
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
-                            pct > 0
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}>
-                            {pct > 0 ? "+" : ""}{pct}%
-                          </span>
+                        {raw === "" ? (
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">Default rate:</span>
+                        ) : (
+                          <>
+                            <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
+                            <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
+                            {pct !== null && pct !== 0 && (
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
+                                pct > 0
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              }`}>
+                                {pct > 0 ? "+" : ""}{pct}%
+                              </span>
+                            )}
+                          </>
                         )}
                         <div className="relative w-28 shrink-0">
                           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
