@@ -145,20 +145,20 @@ export function CurrencyCell({
   // proportional fonts (commas and periods are narrower than "0", causing gaps before suffix)
   React.useLayoutEffect(() => {
     if (mirrorRef.current) {
-      setInputWidth(Math.max(mirrorRef.current.offsetWidth + 2, 24))
+      setInputWidth(mirrorRef.current.offsetWidth + 2)
     }
   }, [displayVal])
 
   return (
     <div
-      className="group flex h-full w-full cursor-text items-center justify-end gap-2 border-b-2 border-transparent px-3 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
+      className="group flex h-full w-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent px-3 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
       onClick={() => inputRef.current?.focus()}
     >
       {/* $ + value grouped together, right-aligned */}
       <div className="flex items-center gap-0.5">
         {/* Hidden mirror — renders same text/font as input for exact width measurement */}
         <span ref={mirrorRef} className="pointer-events-none invisible absolute whitespace-pre text-sm" aria-hidden>
-          {displayVal || "0"}
+          {displayVal || formatCurrency(0, decimals)}
         </span>
         <span className="pointer-events-none text-sm text-muted-foreground">$</span>
         <input
@@ -186,7 +186,7 @@ export function CurrencyCell({
           <span className="pointer-events-none text-xs text-muted-foreground">{suffix}</span>
         )}
       </div>
-      <IconPencil className="size-3.5 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary group-focus-within:text-primary" />
+      <IconPencil className="size-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary group-focus-within:text-primary" />
     </div>
   )
 }
