@@ -19,7 +19,6 @@ import { PageTabs } from "@/components/page/PageTabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTableBulkActionsBar, DataTableToolbarSlot, DataTableToolbarGroup, DataTableToolbarSpacer } from "@/components/data-table/DataTableToolbar"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
@@ -49,6 +48,7 @@ import { StatusTabs } from "@/components/page/StatusTabs"
 import { ProtoPlaceholder } from "@/components/page/ProtoPlaceholder"
 import { UpdateClientOverridesCsvPanel } from "@/features/billing/components/UpdateClientOverridesCsvPanel"
 import { EditClientOverridesPanel } from "@/features/billing/components/EditClientOverridesPanel"
+import { CurrencyCell } from "@/features/billing/components/RateInputs"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -850,8 +850,12 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
   const [setOverridesOpen, setSetOverridesOpen] = React.useState(false)
   const [csvImportOpen, setCsvImportOpen] = React.useState(false)
   const [resetConfirmOpen, setResetConfirmOpen] = React.useState(false)
-  const [editingId, setEditingId] = React.useState<string | null>(null)
-  const [editingValue, setEditingValue] = React.useState("")
+  const [overrideInputs, setOverrideInputs] = React.useState<Record<string, string>>(() =>
+    Object.fromEntries(services.flatMap((s) => {
+      const o = s.clientOverridesList.find((o) => o.accountId === accountId)
+      return o ? [[s.id, String(o.rate)]] : []
+    }))
+  )
   const [search, setSearch] = React.useState("")
   const [sortKey, setSortKey] = React.useState<keyof Pick<ServiceItem, "name" | "category" | "defaultRate" | "rateType">>("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
@@ -896,35 +900,31 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
     return rateType === "Hour" ? `${amount}/hr` : amount
   }
 
-  const openEditing = (svc: ServiceItem) => {
-    const override = svc.clientOverridesList.find((o) => o.accountId === accountId)
-    setEditingId(svc.id)
-    setEditingValue(override ? String(override.rate) : "")
+  const handleOverrideChange = (svcId: string, value: string) => {
+    setOverrideInputs((prev) => ({ ...prev, [svcId]: value }))
   }
 
-  const commitEditing = (svc: ServiceItem) => {
-    const trimmed = editingValue.trim()
-    if (trimmed === "") {
+  const commitOverride = (svc: ServiceItem) => {
+    const raw = (overrideInputs[svc.id] ?? "").replace(/,/g, "").trim()
+    const parsed = parseFloat(raw)
+    if (!raw || isNaN(parsed) || parsed === 0) {
+      // Empty or zero → remove override
       onServicesChange(services.map((s) => {
         if (s.id !== svc.id) return s
         const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
         return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
       }))
+      setOverrideInputs((prev) => { const next = { ...prev }; delete next[svc.id]; return next })
     } else {
-      const parsed = parseFloat(trimmed)
-      if (!isNaN(parsed)) {
-        onServicesChange(services.map((s) => {
-          if (s.id !== svc.id) return s
-          const existing = s.clientOverridesList.find((o) => o.accountId === accountId)
-          const newOverrides = existing
-            ? s.clientOverridesList.map((o) => o.accountId === accountId ? { ...o, rate: parsed } : o)
-            : [...s.clientOverridesList, { accountId, accountName: account?.name ?? "", rate: parsed }]
-          return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
-        }))
-      }
+      onServicesChange(services.map((s) => {
+        if (s.id !== svc.id) return s
+        const existing = s.clientOverridesList.find((o) => o.accountId === accountId)
+        const newOverrides = existing
+          ? s.clientOverridesList.map((o) => o.accountId === accountId ? { ...o, rate: parsed } : o)
+          : [...s.clientOverridesList, { accountId, accountName: account?.name ?? "", rate: parsed }]
+        return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
+      }))
     }
-    setEditingId(null)
-    setEditingValue("")
   }
 
   return (
@@ -1046,10 +1046,11 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   <TableCell className="text-muted-foreground">{svc.category}</TableCell>
                   <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                   <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate, svc.rateType)}</TableCell>
-                  <TableCell className="w-44">
+                  <TableCell className="w-44 p-0 h-px">
                     {hasTeamRate ? (() => {
                       return (
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex h-full items-center justify-end gap-1.5 px-4 py-2">
+                          <span className="text-sm text-muted-foreground">Unavailable</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1062,52 +1063,31 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                          <span className="text-sm text-muted-foreground">Unavailable</span>
                         </div>
                       )
                     })() : (() => {
-                      const isEditing = editingId === svc.id
-                      const liveParsed = parseFloat(editingValue)
-                      const pct = isEditing
-                        ? (!isNaN(liveParsed) && svc.defaultRate > 0 ? Math.round(((liveParsed - svc.defaultRate) / svc.defaultRate) * 100) : null)
-                        : (override && svc.defaultRate > 0 ? Math.round(((override.rate - svc.defaultRate) / svc.defaultRate) * 100) : null)
+                      const inputVal = overrideInputs[svc.id] ?? ""
+                      const liveParsed = parseFloat(inputVal.replace(/,/g, ""))
+                      const pct = !isNaN(liveParsed) && liveParsed > 0 && svc.defaultRate > 0
+                        ? Math.round(((liveParsed - svc.defaultRate) / svc.defaultRate) * 100)
+                        : null
                       const badgeColor = pct !== null && pct > 0
                         ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                         : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
                       return (
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex h-full items-stretch justify-end">
                           {pct !== null && pct !== 0 && (
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
+                            <span className={`self-center shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
                               {pct > 0 ? "+" : ""}{pct}%
                             </span>
                           )}
-                          <div className="relative">
-                            {isEditing ? (
-                              <div className="animate-in zoom-in-95 fade-in-0 duration-150 origin-right">
-                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                                <Input
-                                  autoFocus
-                                  className={`w-24 pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                                  value={editingValue}
-                                  placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                                  onChange={(e) => setEditingValue(e.target.value)}
-                                  onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                                  onBlur={() => commitEditing(svc)}
-                                  onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") { setEditingId(null); setEditingValue("") } }}
-                                />
-                                {svc.rateType === "Hour" && (
-                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                                )}
-                              </div>
-                            ) : (
-                              <button
-                                className={`flex h-8 items-center text-sm text-primary hover:underline decoration-dashed decoration-primary/50 underline-offset-4 ${override ? "font-medium" : ""}`}
-                                onClick={() => openEditing(svc)}
-                              >
-                                {override ? fmt(override.rate, svc.rateType) : "Set override"}
-                              </button>
-                            )}
-                          </div>
+                          <CurrencyCell
+                            value={inputVal}
+                            onChange={(v) => handleOverrideChange(svc.id, v)}
+                            onBlur={() => commitOverride(svc)}
+                            placeholder={svc.defaultRate > 0 ? String(svc.defaultRate) : "0.00"}
+                            suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                          />
                         </div>
                       )
                     })()}

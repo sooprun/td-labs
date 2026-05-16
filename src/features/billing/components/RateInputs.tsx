@@ -117,13 +117,17 @@ export function CurrencyInput({
 type CurrencyCellProps = {
   value: string
   onChange: (v: string) => void
-  suffix?: string    // e.g. "/hr"
-  decimals?: number  // default 2
+  onBlur?: () => void
+  placeholder?: string  // shown when empty, e.g. default rate — also disables reset-to-zero on blur
+  suffix?: string       // e.g. "/hr"
+  decimals?: number     // default 2
 }
 
 export function CurrencyCell({
   value,
   onChange,
+  onBlur,
+  placeholder,
   suffix,
   decimals = 2,
 }: CurrencyCellProps) {
@@ -151,7 +155,7 @@ export function CurrencyCell({
 
   return (
     <div
-      className="group flex h-full w-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent px-3 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
+      className="group flex h-full w-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent pl-3 pr-4 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
       onClick={() => inputRef.current?.focus()}
     >
       {/* $ + value grouped together, right-aligned */}
@@ -167,6 +171,7 @@ export function CurrencyCell({
           inputMode="decimal"
           className="min-w-0 bg-transparent text-right text-sm outline-none"
           style={{ width: inputWidth }}
+          placeholder={placeholder}
           value={displayVal}
           onChange={(e) => {
             setIsTyping(true)
@@ -179,7 +184,8 @@ export function CurrencyCell({
           }}
           onBlur={() => {
             setIsTyping(false)
-            if (!value.trim()) onChange("0")
+            if (!value.trim() && !placeholder) onChange("0")
+            onBlur?.()
           }}
         />
         {suffix && (
