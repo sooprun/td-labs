@@ -997,25 +997,25 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
         </div>
       ) : (
       <div className="table-striped overflow-x-auto rounded-lg border bg-background">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader className="sticky top-0 z-40 bg-background">
             <TableRow>
               <TableHead className="w-12">
                 <input type="checkbox" className="table-checkbox" checked={allSelected} onChange={toggleAll} />
               </TableHead>
-              <TableHead className="min-w-0 w-full cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("name")}>
+              <TableHead className="w-full cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("name")}>
                 <span className="inline-flex items-center">Name<DataTableSortIcon col="name" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-32 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("category")}>
+              <TableHead className="whitespace-nowrap cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("category")}>
                 <span className="inline-flex items-center">Category<DataTableSortIcon col="category" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("rateType")}>
+              <TableHead className="whitespace-nowrap cursor-pointer select-none hover:text-foreground" onClick={() => handleSort("rateType")}>
                 <span className="inline-flex items-center">Type<DataTableSortIcon col="rateType" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-36 cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
+              <TableHead className="whitespace-nowrap cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
                 <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-44 text-right">Client override</TableHead>
+              <TableHead className="w-full text-right">Client override</TableHead>
               {/* <TableHead className="w-36">Team rate</TableHead> */}
               <TableHead className="w-10 px-0">
                 <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
@@ -1039,14 +1039,16 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   <TableCell className="w-12">
                     <input type="checkbox" className="table-checkbox" checked={selectedIds.includes(svc.id)} onChange={() => toggleOne(svc.id)} />
                   </TableCell>
-                  <TableCell>
-                    <div className="font-medium">{svc.name}</div>
-                    {svc.description && <div className="text-xs text-muted-foreground">{svc.description}</div>}
+                  <TableCell className="w-full max-w-0">
+                    <div className="truncate font-medium">{svc.name}</div>
+                    {svc.description && <div className="truncate text-xs text-muted-foreground">{svc.description}</div>}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{svc.category}</TableCell>
-                  <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
-                  <TableCell className="w-36 text-right text-muted-foreground">{fmt(svc.defaultRate, svc.rateType)}</TableCell>
-                  <TableCell className="w-44 p-0 h-px">
+                  <TableCell className="whitespace-nowrap text-muted-foreground">{svc.category}</TableCell>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">{svc.rateType}</TableCell>
+                  <TableCell className="whitespace-nowrap text-right text-muted-foreground">
+                    <span className={override && !hasTeamRate ? "line-through" : ""}>{fmt(svc.defaultRate, svc.rateType)}</span>
+                  </TableCell>
+                  <TableCell className="w-full p-0 h-px">
                     {hasTeamRate ? (() => {
                       return (
                         <div className="flex h-full items-center justify-end gap-1.5 px-4 py-2">
@@ -1075,7 +1077,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                         ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                         : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
                       return (
-                        <div className="flex h-full items-stretch justify-end">
+                        <div className="flex h-full items-stretch justify-end gap-2">
                           {pct !== null && pct !== 0 && (
                             <span className={`self-center shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
                               {pct > 0 ? "+" : ""}{pct}%
@@ -1087,6 +1089,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                             onBlur={() => commitOverride(svc)}
                             placeholder={svc.defaultRate > 0 ? String(svc.defaultRate) : "0.00"}
                             suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                            className=""
                           />
                         </div>
                       )

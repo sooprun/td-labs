@@ -121,6 +121,7 @@ type CurrencyCellProps = {
   placeholder?: string  // shown when empty, e.g. default rate — also disables reset-to-zero on blur
   suffix?: string       // e.g. "/hr"
   decimals?: number     // default 2
+  className?: string    // override root width; default "w-full" fills the cell, pass "" to hug content
 }
 
 export function CurrencyCell({
@@ -130,6 +131,7 @@ export function CurrencyCell({
   placeholder,
   suffix,
   decimals = 2,
+  className = "w-full",
 }: CurrencyCellProps) {
   // isTyping: true only after the first keystroke — until then we keep showing the formatted value
   const [isTyping, setIsTyping] = React.useState(false)
@@ -155,7 +157,7 @@ export function CurrencyCell({
 
   return (
     <div
-      className="group flex h-full w-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent pl-3 pr-4 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
+      className={`group flex h-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent pl-3 pr-4 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent ${className}`}
       onClick={() => inputRef.current?.focus()}
     >
       {/* $ + value grouped together, right-aligned */}
