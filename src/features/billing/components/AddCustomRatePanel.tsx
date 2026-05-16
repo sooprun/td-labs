@@ -3,8 +3,8 @@ import { IconX, IconChevronRight, IconChevronDown } from "@tabler/icons-react"
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import type { ServiceItem } from "@/mock/services"
+import { CurrencyInput } from "./RateInputs"
 
 type Props = {
   open: boolean
@@ -36,14 +36,9 @@ function CategoryGroup({
   onRateChange: (id: string, value: string) => void
 }) {
   const [open, setOpen] = React.useState(true)
-  const inputRefs = React.useRef<Record<string, HTMLInputElement | null>>({})
 
   const handleToggle = (id: string) => {
-    const wasSelected = rows[id]?.selected
     onToggle(id)
-    if (!wasSelected) {
-      setTimeout(() => inputRefs.current[id]?.focus(), 0)
-    }
   }
 
   return (
@@ -85,21 +80,12 @@ function CategoryGroup({
                 <span className="shrink-0 text-xs text-muted-foreground">
                   ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
                 </span>
-                <div className="relative w-28 shrink-0">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                  <Input
-                    ref={(el) => { inputRefs.current[svc.id] = el }}
-                    className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                    disabled={!row.selected}
-                    value={row.rateInput}
-                    placeholder="0.00"
-                    onChange={(e) => onRateChange(svc.id, e.target.value)}
-                    onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                  />
-                  {svc.rateType === "Hour" && (
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                  )}
-                </div>
+                <CurrencyInput
+                  value={row.rateInput}
+                  onChange={(v) => onRateChange(svc.id, v)}
+                  suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                  className="w-28"
+                />
               </label>
             )
           })}

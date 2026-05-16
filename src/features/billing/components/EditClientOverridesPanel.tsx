@@ -4,6 +4,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
+import { CurrencyInput } from "./RateInputs"
 import type { ServiceItem } from "@/mock/services"
 import type { Account } from "@/mock/data/accounts"
 import { rateGroups } from "@/mock/data/team-member-rates"
@@ -175,7 +176,6 @@ function Step2({
   const [search, setSearch] = React.useState("")
   const [sortKey, setSortKey] = React.useState<"name" | "category" | "defaultRate">("name")
   const [sortDir, setSortDir] = React.useState<SortDir>("asc")
-  const [focusedId, setFocusedId] = React.useState<string | null>(null)
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"))
@@ -233,9 +233,7 @@ function Step2({
                 const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
 
                 const raw = overrides[svc.id] ?? ""
-                const isFocused = focusedId === svc.id
                 const parsed = parseFloat(raw)
-                const displayVal = !isFocused && raw && !isNaN(parsed) ? parsed.toFixed(2) : raw
                 const pct = raw !== "" && oldPrice > 0 && !isNaN(parsed)
                   ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
                   : null
@@ -264,26 +262,13 @@ function Step2({
                             )}
                           </>
                         )}
-                        <div className="relative w-28 shrink-0">
-                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                            value={displayVal}
-                            placeholder={oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"}
-                            onChange={(e) => onOverrideChange(svc.id, e.target.value)}
-                            onFocus={(e) => {
-                              setFocusedId(svc.id)
-                              const t = e.target
-                              requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length))
-                            }}
-                            onBlur={() => setFocusedId(null)}
-                          />
-                          {svc.rateType === "Hour" && (
-                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                          )}
-                        </div>
+                        <CurrencyInput
+                          value={raw}
+                          onChange={(v) => onOverrideChange(svc.id, v)}
+                          placeholder={oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"}
+                          suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                          className="w-28"
+                        />
                       </div>
                     </td>
                   </tr>

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconCheck, IconArrowLeft, IconSearch, IconInfoCircle } from "@tabler/icons-react"
+import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch, IconInfoCircle } from "@tabler/icons-react"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { ServiceItem } from "@/mock/services"
+import { CurrencyInput } from "./RateInputs"
 import type { Account } from "@/mock/data/accounts"
 import { rateGroups } from "@/mock/data/team-member-rates"
 
@@ -213,7 +214,6 @@ function Step2({
   onBack: () => void
   onSave: () => void
 }) {
-  const [focusedKey, setFocusedKey] = React.useState<string | null>(null)
   const [search, setSearch] = React.useState("")
 
   const filtered = accounts.filter((a) =>
@@ -254,12 +254,7 @@ function Step2({
                   </thead>
                   <tbody>
                     {filtered.map((acc, i) => {
-                      const key = `${svc.id}-${acc.id}`
                       const inputVal = rates[svc.id]?.[acc.id] ?? ""
-                      const isFocused = focusedKey === key
-                      const displayVal = !isFocused && inputVal && !isNaN(parseFloat(inputVal))
-                        ? parseFloat(inputVal).toFixed(2)
-                        : inputVal
                       const parsed = parseFloat(inputVal)
                       const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
                       const oldPrice = existingOverride?.rate ?? svc.defaultRate
@@ -278,6 +273,7 @@ function Step2({
                               {inputVal === "" ? null : !isNaN(parsed) && parsed === oldPrice ? null : (
                                 <>
                                   <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
+                                  <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
                                   {pct !== null && pct !== 0 && (
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
                                       pct > 0
@@ -289,22 +285,13 @@ function Step2({
                                   )}
                                 </>
                               )}
-                              <div className="relative w-28 shrink-0">
-                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                                <Input
-                                  type="text"
-                                  inputMode="decimal"
-                                  className={`pl-6 text-right text-sm ${svc.rateType === "Hour" ? "pr-8" : ""}`}
-                                  value={displayVal}
-                                  placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
-                                  onChange={(e) => onRateChange(svc.id, acc.id, e.target.value)}
-                                  onFocus={(e) => { setFocusedKey(key); const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
-                                  onBlur={() => setFocusedKey(null)}
-                                />
-                                {svc.rateType === "Hour" && (
-                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                                )}
-                              </div>
+                              <CurrencyInput
+                                value={inputVal}
+                                onChange={(v) => onRateChange(svc.id, acc.id, v)}
+                                placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                                suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                                className="w-28"
+                              />
                             </div>
                           </td>
                         </tr>

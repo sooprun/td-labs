@@ -482,7 +482,7 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
 
       <BulkUpdateRatesPanel
         open={bulkUpdateOpen}
-        services={items.filter((s) => selectedIds.includes(s.id))}
+        services={filtered.filter((s) => selectedIds.includes(s.id))}
         onClose={() => setBulkUpdateOpen(false)}
         onConfirm={(updates) => {
           onItemsChange(items.map((svc) => {

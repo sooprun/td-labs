@@ -9,7 +9,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import type { ServiceItem, ClientOverride } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
+import { CurrencyCell } from "./RateInputs"
 
 type Props = {
   service: ServiceItem | null
@@ -87,53 +87,65 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
             <span className="font-medium">{service ? fmt(service.defaultRate, service.rateType) : "—"}</span>
           </div>
 
-          {/* Overrides list */}
-          {overrides.map((o) => {
-            const pct = service && service.defaultRate > 0
-              ? ((o.rate - service.defaultRate) / service.defaultRate) * 100
-              : null
-            return (
-              <div key={o.accountId} className="flex items-center gap-3">
-                <span className="flex-1 truncate text-sm">{o.accountName}</span>
-                {pct !== null && (
-                  <span className="inline-flex w-14 shrink-0 justify-center">
-                    {Math.round(pct) !== 0 && (
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        pct > 0
-                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                      }`}>
-                        {pct > 0 ? "+" : ""}{Math.round(pct)}%
-                      </span>
-                    )}
-                  </span>
-                )}
-                <div className="relative w-28 shrink-0">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                  <Input
-                    className={`pl-6 text-right text-sm ${service?.rateType === "Hour" ? "pr-8" : ""}`}
-                    value={o.rateInput}
-                    onChange={(e) => handleRateChange(o.accountId, e.target.value)}
-                    onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                    placeholder="0.00"
-                  />
-                  {service?.rateType === "Hour" && (
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                  )}
-                </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleRemove(o.accountId)}
-                >
-                  <IconTrash className="size-3.5" />
-                </Button>
-              </div>
-            )
-          })}
+          {/* Overrides table */}
+          {overrides.length > 0 && (
+            <div className="overflow-hidden rounded-xl border">
+              <table className="w-full table-fixed text-sm">
+                <thead className="border-b bg-background">
+                  <tr>
+                    <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-secondary-foreground">Account</th>
+                    <th className="w-40 py-2.5 pr-3 text-right text-[13px] font-semibold text-secondary-foreground">Rate</th>
+                    <th className="w-8" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {overrides.map((o, i) => {
+                    const pct = service && service.defaultRate > 0
+                      ? Math.round(((o.rate - service.defaultRate) / service.defaultRate) * 100)
+                      : null
 
-          {/* Persistent add row */}
+                    return (
+                      <tr key={o.accountId} className={`border-t ${i % 2 === 1 ? "bg-workspace" : ""}`}>
+                        <td className="max-w-0 px-3 py-0">
+                          <div className="flex items-center gap-2 py-2">
+                            <span className="truncate">{o.accountName}</span>
+                            {pct !== null && pct !== 0 && (
+                              <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                                pct > 0
+                                  ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                              }`}>
+                                {pct > 0 ? "+" : ""}{pct}%
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="w-40 p-0">
+                          <CurrencyCell
+                            value={o.rateInput}
+                            onChange={(v) => handleRateChange(o.accountId, v)}
+                            suffix={service?.rateType === "Hour" ? "/hr" : undefined}
+                          />
+                        </td>
+                        <td className="w-8 px-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemove(o.accountId)}
+                          >
+                            <IconTrash className="size-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Add client row */}
           {availableAccounts.length > 0 && (
             <Select value="" onValueChange={handleSelectAccount}>
               <SelectTrigger className="h-8 text-sm text-muted-foreground">

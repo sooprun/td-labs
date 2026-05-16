@@ -1,8 +1,8 @@
 import * as React from "react"
 import { IconChevronDown, IconInfoCircle } from "@tabler/icons-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { CurrencyInput, PercentInput } from "./RateInputs"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,32 +35,29 @@ export function RoundingInput({ value, onChange }: { value: number; onChange: (v
   }
 
   return (
-    <div className="relative flex w-full items-center">
-      <span className="pointer-events-none absolute left-3 text-sm text-muted-foreground">$</span>
-      <Input
-        type="text"
-        inputMode="decimal"
-        className="pl-6 pr-9 text-right"
-        value={input}
-        placeholder="0"
-        onChange={(e) => handleChange(e.target.value)}
-        onFocus={(e) => { const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="absolute right-2 flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:text-foreground">
-            <IconChevronDown className="size-4" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
-          {ROUNDING_PRESETS.map((p) => (
-            <DropdownMenuItem key={p.value} onSelect={() => { handleChange(p.value === 0 ? "" : String(p.value)) }}>
-              {p.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <CurrencyInput
+      value={input}
+      onChange={handleChange}
+      placeholder="0"
+      className="w-full"
+      decimals={0}
+      trailing={
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:text-foreground">
+              <IconChevronDown className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            {ROUNDING_PRESETS.map((p) => (
+              <DropdownMenuItem key={p.value} onSelect={() => { handleChange(p.value === 0 ? "" : String(p.value)) }}>
+                {p.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      }
+    />
   )
 }
 
@@ -90,19 +87,12 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-1 flex flex-col gap-2">
           <div className="text-sm font-medium">Adjust by</div>
-          <div className="relative w-full">
-            <Input
-              autoFocus={autoFocus}
-              type="text"
-              inputMode="decimal"
-              className="pr-8 text-right"
-              value={adjustment}
-              onChange={(e) => setAdjustment(e.target.value)}
-              onFocus={(e) => { const t = e.target; requestAnimationFrame(() => t.setSelectionRange(t.value.length, t.value.length)) }}
-              placeholder="0"
-            />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
-          </div>
+          <PercentInput
+            value={adjustment}
+            onChange={setAdjustment}
+            autoFocus={autoFocus}
+            placeholder="0"
+          />
         </div>
         <div className="col-span-1 flex flex-col gap-2">
           <div className="flex items-center gap-1.5">

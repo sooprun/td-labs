@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { CurrencyInput } from "./RateInputs"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -152,20 +153,12 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
           <div className="flex items-end gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="svc-rate">Rate</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                <Input
-                  id="svc-rate"
-                  className={`pl-6 w-40 text-right ${rateType === "Hour" ? "pr-8" : ""}`}
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                  onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                  placeholder="0.00"
-                />
-                {rateType === "Hour" && (
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                )}
-              </div>
+              <CurrencyInput
+                value={rate}
+                onChange={setRate}
+                suffix={rateType === "Hour" ? "/hr" : undefined}
+                className="w-40"
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Rate type</Label>
@@ -241,19 +234,12 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
                         </span>
                       )}
                     </span>
-                    <div className="relative w-28 shrink-0">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                      <Input
-                        className={`pl-6 text-right text-sm ${rateType === "Hour" ? "pr-8" : ""}`}
-                        value={o.rateInput}
-                        onChange={(e) => handleOverrideRateChange(o.accountId, e.target.value)}
-                        onFocus={(e) => { const t = e.target; requestAnimationFrame(() => { t.setSelectionRange(t.value.length, t.value.length) }) }}
-                        placeholder="0.00"
-                      />
-                      {rateType === "Hour" && (
-                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">/hr</span>
-                      )}
-                    </div>
+                    <CurrencyInput
+                      value={o.rateInput}
+                      onChange={(v) => handleOverrideRateChange(o.accountId, v)}
+                      suffix={rateType === "Hour" ? "/hr" : undefined}
+                      className="w-28"
+                    />
                     <Button
                       size="icon"
                       variant="ghost"

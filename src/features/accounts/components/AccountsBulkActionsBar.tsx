@@ -2,7 +2,7 @@ import {
   IconAt,
   IconClipboardPlus,
   IconListDetails,
-  IconReceiptDollar,
+  IconCurrencyDollar,
   IconTags,
   IconUsers,
 } from "@tabler/icons-react"
@@ -27,7 +27,7 @@ export function AccountsBulkActionsBar({
     <DataTableBulkActionsBar
       actions={[
         {
-          icon: IconReceiptDollar,
+          icon: IconCurrencyDollar,
           label: "Set client overrides",
           onClick: onSetCustomRates,
         },

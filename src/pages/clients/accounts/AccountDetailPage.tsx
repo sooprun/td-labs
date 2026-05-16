@@ -5,7 +5,7 @@ import {
   IconChevronRight,
   IconCirclePlus,
   IconCopy,
-  IconReceiptDollar,
+  IconCurrencyDollar,
   IconStar,
   IconFilter,
   IconPrinter,
@@ -451,7 +451,7 @@ function LeftPanel({
               </table>
             ) : (
               <div className="flex flex-col items-center gap-2 py-4">
-                <IconReceiptDollar className="size-10 text-muted-foreground/40" strokeWidth={1} />
+                <IconCurrencyDollar className="size-10 text-muted-foreground/40" strokeWidth={1} />
                 <p className="text-sm text-muted-foreground">Set client overrides for this client</p>
               </div>
             )}
@@ -938,7 +938,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           selectAllLabel="Select all"
           actions={[
             {
-              icon: IconReceiptDollar,
+              icon: IconCurrencyDollar,
               label: (updatableIds.length || selectedIds.length) === 1 ? "Set client override" : "Set client overrides",
               disabled: updatableIds.length === 0,
               disabledTooltip: "Selected services use team member rates — they can't be overridden per client.",
@@ -983,7 +983,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
 
       {displayed.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
-          <IconReceiptDollar className="mb-4 size-12 text-muted-foreground/40" strokeWidth={1.25} />
+          <IconCurrencyDollar className="mb-4 size-12 text-muted-foreground/40" strokeWidth={1.25} />
           <h3 className="text-base font-semibold">Set client overrides for this client</h3>
           <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
             Any service rate you customize here will be used instead of the default on invoices and proposals.
