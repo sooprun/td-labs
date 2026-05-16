@@ -2,11 +2,22 @@ import * as React from "react"
 import { IconPencil } from "@tabler/icons-react"
 import { Input } from "@/components/ui/input"
 
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+function parseCurrency(v: string) {
+  return parseFloat(v.replace(/,/g, ""))
+}
+
+function formatCurrency(n: number, decimals: number) {
+  return n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+}
+
 // ─── CurrencyInput ────────────────────────────────────────────────────────────
 //
 // Input for monetary values. Built-in UX rules:
-// - Clicks select all text (makes editing fast — no need to triple-click)
-// - On blur: formats to N decimal places via `decimals` prop (default 2, e.g. "150" → "150.00")
+// - On focus: shows formatted value selected ("5,000.00" highlighted) — what you see is what you select
+// - While typing: shows raw input (no formatting interference)
+// - On blur: formats with thousands separator + N decimal places ("5000" → "5,000.00")
 // - $ prefix is always shown
 // - Optional text suffix (e.g. "/hr") via `suffix` prop
 // - Optional interactive trailing slot (e.g. dropdown) via `trailing` prop
@@ -30,15 +41,23 @@ export function CurrencyInput({
   onChange,
   onFocus,
   onBlur,
-  placeholder = "0.00",
+  placeholder,  // if set → show placeholder when empty; if omitted → reset to "0" on blur
   suffix,
   trailing,
   className = "w-28",
   decimals = 2,
   autoFocus,
 }: CurrencyInputProps) {
-  const parsed = parseFloat(value)
-  const displayVal = value && !isNaN(parsed) ? parsed.toFixed(decimals) : value
+  // isTyping: true only after the first keystroke — until then we keep showing the formatted value
+  const [isTyping, setIsTyping] = React.useState(false)
+
+  const parsed = parseCurrency(value)
+  const formatted = value && !isNaN(parsed) ? formatCurrency(parsed, decimals) : value
+
+  // Focused but not yet typing → show formatted ("5,000.00") so select-all shows what user saw
+  // Typing → show raw (no interference while entering digits)
+  // Blurred → show formatted
+  const displayVal = isTyping ? value : formatted
 
   const hasRight = suffix || trailing
   return (
@@ -51,13 +70,23 @@ export function CurrencyInput({
         className={`pl-6 text-right text-sm ${hasRight ? (trailing ? "pr-9" : "pr-8") : ""}`}
         value={displayVal}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          setIsTyping(true)
+          onChange(e.target.value)
+        }}
         onFocus={(e) => {
+          setIsTyping(false)  // reset so we show formatted on each new focus
           onFocus?.()
           const t = e.target
           requestAnimationFrame(() => t.select())
         }}
-        onBlur={() => onBlur?.()}
+        onBlur={() => {
+          setIsTyping(false)
+          // No placeholder → reset empty to "0" so field never stays blank
+          // Placeholder set → leave empty so placeholder is visible
+          if (!value.trim() && !placeholder) onChange("0")
+          onBlur?.()
+        }}
       />
       {suffix && (
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
@@ -76,9 +105,11 @@ export function CurrencyInput({
 // ─── CurrencyCell ─────────────────────────────────────────────────────────────
 //
 // Inline-editable currency cell for tables. Built-in UX rules:
-// - No border/radius — fills the table cell flush
-// - Clicks select all text
-// - Formats to N decimal places via `decimals` prop (default 2)
+// - Entire highlighted area is clickable (not just the narrow input width)
+// - On focus: shows formatted value selected ("5,000.00" highlighted) — what you see is what you select
+// - While typing: shows raw input (no formatting interference)
+// - On blur: formats with thousands separator + N decimal places ("5000" → "5,000.00")
+// - $ hugs the digits — input width shrinks to content via ch units
 // - Pencil icon indicates editability (gray → blue on hover/focus)
 // - Hover: light blue background + 2px blue bottom border
 // - Focus: transparent background + 2px blue bottom border
@@ -96,23 +127,59 @@ export function CurrencyCell({
   suffix,
   decimals = 2,
 }: CurrencyCellProps) {
-  const parsed = parseFloat(value)
-  const displayVal = value && !isNaN(parsed) ? parsed.toFixed(decimals) : value
+  // isTyping: true only after the first keystroke — until then we keep showing the formatted value
+  const [isTyping, setIsTyping] = React.useState(false)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const mirrorRef = React.useRef<HTMLSpanElement>(null)
+  const [inputWidth, setInputWidth] = React.useState(24)
+
+  const parsed = parseCurrency(value)
+  const formatted = value && !isNaN(parsed) ? formatCurrency(parsed, decimals) : value
+
+  // Focused but not yet typing → show formatted ("5,000.00") so select-all shows what user saw
+  // Typing → show raw (no interference while entering digits)
+  // Blurred → show formatted
+  const displayVal = isTyping ? value : formatted
+
+  // Measure exact pixel width from a hidden mirror span — ch units are inaccurate for
+  // proportional fonts (commas and periods are narrower than "0", causing gaps before suffix)
+  React.useLayoutEffect(() => {
+    if (mirrorRef.current) {
+      setInputWidth(Math.max(mirrorRef.current.offsetWidth + 2, 24))
+    }
+  }, [displayVal])
 
   return (
-    <div className="group flex h-full w-full items-center justify-end gap-2 border-b-2 border-transparent px-3 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent">
+    <div
+      className="group flex h-full w-full cursor-text items-center justify-end gap-2 border-b-2 border-transparent px-3 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent"
+      onClick={() => inputRef.current?.focus()}
+    >
       {/* $ + value grouped together, right-aligned */}
       <div className="flex items-center gap-0.5">
+        {/* Hidden mirror — renders same text/font as input for exact width measurement */}
+        <span ref={mirrorRef} className="pointer-events-none invisible absolute whitespace-pre text-sm" aria-hidden>
+          {displayVal || "0"}
+        </span>
         <span className="pointer-events-none text-sm text-muted-foreground">$</span>
         <input
+          ref={inputRef}
           type="text"
           inputMode="decimal"
-          className="w-20 min-w-0 bg-transparent text-right text-sm outline-none"
+          className="min-w-0 bg-transparent text-right text-sm outline-none"
+          style={{ width: inputWidth }}
           value={displayVal}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            setIsTyping(true)
+            onChange(e.target.value)
+          }}
           onFocus={(e) => {
+            setIsTyping(false)  // reset so we show formatted on each new focus
             const t = e.target
             requestAnimationFrame(() => t.select())
+          }}
+          onBlur={() => {
+            setIsTyping(false)
+            if (!value.trim()) onChange("0")
           }}
         />
         {suffix && (
