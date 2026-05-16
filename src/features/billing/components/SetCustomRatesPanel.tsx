@@ -1,9 +1,8 @@
 import * as React from "react"
-import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch, IconInfoCircle } from "@tabler/icons-react"
+import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch } from "@tabler/icons-react"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { ServiceItem } from "@/mock/services"

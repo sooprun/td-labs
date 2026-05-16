@@ -15,17 +15,6 @@ import { rateGroups } from "@/mock/data/team-member-rates"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatRate(rate: number) {
-  return `$${rate.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-}
-
-function pctBadge(oldRate: number, newRate: number) {
-  if (oldRate === 0) return null
-  const pct = ((newRate - oldRate) / oldRate) * 100
-  const sign = pct >= 0 ? "+" : ""
-  return `${sign}${Math.round(pct)}%`
-}
-
 // ─── Stepper ─────────────────────────────────────────────────────────────────
 
 const STEPS = ["Price adjustment", "Preview changes"]
