@@ -390,9 +390,8 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
             )
           })()}
 
-          {/* Team member rates */}
-          {(() => {
-            const hasClientOverrides = overrides.length > 0
+          {/* Team member rates — hidden when client overrides are set (mutually exclusive) */}
+          {overrides.length === 0 && (() => {
             const teamEntries = rateGroups
               .filter((g) => !g.archived)
               .flatMap((g) => {
@@ -402,21 +401,14 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
               })
             return (
               <div className="flex flex-col gap-3">
-                {!hasClientOverrides && (
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-base font-semibold">Team member rates</p>
-                      <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold">Team member rates</p>
+                    <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
                   </div>
-                )}
-                {hasClientOverrides ? (
-                  <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-                    <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
-                    <span>Team member rates can&apos;t be applied to services that already have client overrides. Remove all client overrides first to enable team member rates.</span>
-                  </div>
-                ) : (
+                  <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
+                </div>
+                {(
                   <div className={`rounded-xl overflow-hidden ${teamEntries.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
                     {teamEntries.length === 0 ? (
                       <div className="flex flex-col items-center gap-2 py-6">
