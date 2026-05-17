@@ -134,6 +134,7 @@ type EditableMaps = {
 
 type Step2Props = {
   services: ServiceItem[]
+  rateGroups: RateGroup[]
   adjustment: number
   rounding: Rounding
   rateTypes: Record<RateTypeKey, boolean>
@@ -145,7 +146,7 @@ type Step2Props = {
   onConfirm: () => void
 }
 
-function Step2({ services, adjustment, rounding, rateTypes, editableMaps, onDefaultChange, onClientChange, onTeamChange, onBack, onConfirm }: Step2Props) {
+function Step2({ services, rateGroups, adjustment, rounding, rateTypes, editableMaps, onDefaultChange, onClientChange, onTeamChange, onBack, onConfirm }: Step2Props) {
   const hasTeamRate = (svc: ServiceItem) =>
     rateGroups.some((g) => !g.archived && g.services.some((s) => s.serviceId === svc.id))
 
@@ -488,6 +489,7 @@ export function BulkUpdateRatesPanel({ open, services, rateGroups, onClose, onCo
         ) : (
           <Step2
             services={services}
+            rateGroups={rateGroups}
             adjustment={parseFloat(adjustment)}
             rounding={rounding}
             rateTypes={rateTypes}
