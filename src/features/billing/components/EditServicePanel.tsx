@@ -391,6 +391,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
           })()}
 
           {/* Team member rates — hidden when client overrides are set (mutually exclusive) */}
+          {/* NOTE: also hidden when teamEntries is empty (no rates assigned yet) — empty state commented out for now */}
           {overrides.length === 0 && (() => {
             const teamEntries = rateGroups
               .filter((g) => !g.archived)
@@ -399,6 +400,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
                 if (!svc) return []
                 return [{ group: g.id, groupName: g.name, members: g.members, rate: svc.rate, rateType: service?.rateType ?? "" }]
               })
+            if (teamEntries.length === 0) return null
             return (
               <div className="flex flex-col gap-3">
                 <div>
