@@ -1013,7 +1013,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               <TableHead className="whitespace-nowrap cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
                 <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className="w-full text-right">Client override</TableHead>
+              <TableHead className="w-px min-w-[100px] pr-[38px] text-right">Client override</TableHead>
               {/* <TableHead className="w-36">Team rate</TableHead> */}
               <TableHead className="w-10 px-0">
                 <Button size="icon-xl" variant="ghost" onClick={protoAction("Table settings")}>
@@ -1046,7 +1046,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   <TableCell className="whitespace-nowrap text-right text-muted-foreground">
                     <span className={override && !hasTeamRate ? "line-through" : ""}>{fmt(svc.defaultRate, svc.rateType)}</span>
                   </TableCell>
-                  <TableCell className="w-full p-0 h-px">
+                  <TableCell className="w-px min-w-[100px] p-0 h-px">
                     {hasTeamRate ? (() => {
                       return (
                         <div className="flex h-full items-center justify-end gap-1.5 px-4 py-2">
