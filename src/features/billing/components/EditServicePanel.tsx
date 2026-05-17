@@ -484,7 +484,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
           {/* Rate change info banner */}
           {rateChanged && (
             <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-              <span className="shrink-0">ℹ</span>
+              <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
               Your changes will apply to new invoices, proposals, and time entries
             </div>
           )}

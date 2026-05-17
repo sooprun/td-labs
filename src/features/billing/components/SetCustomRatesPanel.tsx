@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch } from "@tabler/icons-react"
+import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch, IconInfoCircle } from "@tabler/icons-react"
 import { IconLock, IconChevronDown } from "@tabler/icons-react"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
@@ -108,7 +108,7 @@ function Step1({
           </div>
           {skippedCount > 0 && (
             <div className="mt-4 flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-              <span className="shrink-0 mt-px">ℹ</span>
+              <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
               <span>
                 {skippedCount === 1
                   ? "1 service below can't be overridden — it uses team member rates."
@@ -336,7 +336,7 @@ function Step2({
         />
 
         <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-          <span className="mt-px shrink-0">ℹ</span>
+          <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
           <span>Manual entries won&apos;t be overwritten by the price adjustment</span>
         </div>
 

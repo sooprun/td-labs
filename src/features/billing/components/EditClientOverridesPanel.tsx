@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconSearch, IconX, IconCheck, IconArrowLeft, IconArrowRight } from "@tabler/icons-react"
+import { IconSearch, IconX, IconCheck, IconArrowLeft, IconArrowRight, IconInfoCircle } from "@tabler/icons-react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -133,7 +133,7 @@ function Step1({
         {/* Info banner — shown when "All services" is selected and some are team-rate */}
         {skippedCount > 0 && applyTo === "all" && (
           <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-            <span className="shrink-0">ℹ</span>
+            <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
             {skippedCount === 1
               ? "1 selected service will be skipped because it already uses team member rates"
               : `${skippedCount} selected services will be skipped because they already use team member rates`}
@@ -223,7 +223,7 @@ function Step2({
           <h2 className="text-xl font-semibold">Review overrides</h2>
           <p className="text-sm text-muted-foreground">{summaryLine}</p>
           <div className="mt-3 flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-            <span className="mt-px shrink-0">ℹ</span>
+            <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
             Manual entries won&apos;t be overwritten by the price adjustment
           </div>
         </div>
