@@ -399,7 +399,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
               .flatMap((g) => {
                 const svc = g.services.find((s) => s.serviceId === service?.id)
                 if (!svc) return []
-                return [{ group: g.id, groupName: g.name, members: g.members, rate: svc.rate, rateType: service?.rateType ?? "" }]
+                return [{ group: g.id, groupName: g.name, members: g.members, rate: svc.rate, rateType }]
               })
             if (teamEntries.length === 0) return null
             return (
