@@ -223,6 +223,7 @@ type RateMap = Record<string, Record<string, string>> // serviceId → accountId
 function Step2({
   services,
   accounts,
+  initialRates,
   rates,
   onRateChange,
   onBack,
@@ -230,17 +231,17 @@ function Step2({
 }: {
   services: ServiceItem[]
   accounts: Account[]
-  rates: RateMap
+  initialRates: RateMap   // existing overrides — read-only, used only for baseline
+  rates: RateMap          // manual user entries only
   onRateChange: (serviceId: string, accountId: string, value: string) => void
   onBack: () => void
-  onSave: () => void
+  onSave: (finalRates: RateMap) => void
 }) {
   const [search, setSearch] = React.useState("")
   const [adjustment, setAdjustment] = React.useState("")
   const [rounding, setRounding] = React.useState<Rounding>(1)
-  const [pinned, setPinned] = React.useState<Set<string>>(new Set())
+  const [calculatedRates, setCalculatedRates] = React.useState<Record<string, Record<string, number>>>({})
   const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
-  const [savedAccounts, setSavedAccounts] = React.useState<Set<string>>(new Set())
 
   const toggleCollapsed = (accId: string) =>
     setCollapsed((prev) => {
@@ -256,7 +257,7 @@ function Step2({
     for (const svc of services) {
       base[svc.id] = {}
       for (const acc of accounts) {
-        const raw = rates[svc.id]?.[acc.id] ?? ""
+        const raw = initialRates[svc.id]?.[acc.id] ?? ""
         const parsed = parseFloat(raw)
         base[svc.id][acc.id] = !isNaN(parsed) && raw !== "" ? parsed : svc.defaultRate
       }
@@ -265,86 +266,51 @@ function Step2({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Apply calculator to all non-pinned cells whenever adjustment or rounding changes
+  // Update calculatedRates whenever adjustment or rounding changes
   React.useEffect(() => {
     const pct = parseFloat(adjustment)
+    if (adjustment === "" || isNaN(pct)) {
+      setCalculatedRates({})
+      return
+    }
+    const calc: Record<string, Record<string, number>> = {}
     for (const svc of services) {
+      calc[svc.id] = {}
       for (const acc of accounts) {
-        const key = `${svc.id}:${acc.id}`
-        if (pinned.has(key)) continue
-        if (adjustment === "" || isNaN(pct)) {
-          // Reset to baseline: show existing override if there was one, else empty
-          const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
-          const base = baseRates.current[svc.id]?.[acc.id]
-          onRateChange(svc.id, acc.id, existingOverride && base != null ? String(base) : "")
-        } else {
-          const base = baseRates.current[svc.id]?.[acc.id] ?? svc.defaultRate
-          const newRate = applyAdjustment(base, pct, rounding)
-          onRateChange(svc.id, acc.id, String(newRate))
-        }
+        const base = baseRates.current[svc.id]?.[acc.id] ?? svc.defaultRate
+        calc[svc.id][acc.id] = applyAdjustment(base, pct, rounding)
       }
     }
+    setCalculatedRates(calc)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustment, rounding])
 
-  const handleSaveAccount = (accId: string) => {
-    setPinned((prev) => {
-      const next = new Set(prev)
-      for (const svc of services) next.add(`${svc.id}:${accId}`)
-      return next
-    })
-    setSavedAccounts((prev) => new Set([...prev, accId]))
-  }
-
-  const handleResetAccount = (accId: string) => {
-    setPinned((prev) => {
-      const next = new Set(prev)
-      for (const svc of services) next.delete(`${svc.id}:${accId}`)
-      return next
-    })
-    setSavedAccounts((prev) => { const s = new Set(prev); s.delete(accId); return s })
-    // Restore calculator values (or baseline) for all cells
-    const pct = parseFloat(adjustment)
-    for (const svc of services) {
-      if (!isNaN(pct) && adjustment !== "") {
-        const base = baseRates.current[svc.id]?.[accId] ?? svc.defaultRate
-        onRateChange(svc.id, accId, String(applyAdjustment(base, pct, rounding)))
-      } else {
-        const existingOverride = svc.clientOverridesList.find((o) => o.accountId === accId)
-        const base = baseRates.current[svc.id]?.[accId]
-        onRateChange(svc.id, accId, existingOverride && base != null ? String(base) : "")
-      }
-    }
-  }
-
   const handleManualChange = (serviceId: string, accountId: string, value: string) => {
-    const key = `${serviceId}:${accountId}`
+    onRateChange(serviceId, accountId, value)
+  }
 
-    if (value !== "") {
-      // Pin this cell
-      const newPinned = new Set([...pinned, key])
-      setPinned(newPinned)
-      // Auto-save account if all its cells are now pinned
-      const allPinned = services.every((svc) => newPinned.has(`${svc.id}:${accountId}`))
-      if (allPinned) setSavedAccounts((prev) => new Set([...prev, accountId]))
-      onRateChange(serviceId, accountId, value)
-    } else {
-      // Clear: unpin, unsave account
-      setPinned((prev) => { const s = new Set(prev); s.delete(key); return s })
-      setSavedAccounts((prev) => { const s = new Set(prev); s.delete(accountId); return s })
-      // Show calculator value if active, otherwise reset to baseline
-      const pct = parseFloat(adjustment)
-      if (!isNaN(pct) && adjustment !== "") {
-        const base = baseRates.current[serviceId]?.[accountId]
-          ?? services.find((s) => s.id === serviceId)?.defaultRate ?? 0
-        onRateChange(serviceId, accountId, String(applyAdjustment(base, pct, rounding)))
-      } else {
-        const svc = services.find((s) => s.id === serviceId)
-        const existingOverride = svc?.clientOverridesList.find((o) => o.accountId === accountId)
-        const base = baseRates.current[serviceId]?.[accountId]
-        onRateChange(serviceId, accountId, existingOverride && base != null ? String(base) : "")
+  const handleSave = () => {
+    // Merge: manual entries take priority; calculated fills the rest; fall back to baseline for existing overrides
+    const merged: RateMap = {}
+    for (const svc of services) {
+      merged[svc.id] = {}
+      for (const acc of accounts) {
+        const manual = rates[svc.id]?.[acc.id] ?? ""
+        if (manual !== "") {
+          merged[svc.id][acc.id] = manual
+        } else {
+          const calc = calculatedRates[svc.id]?.[acc.id]
+          if (calc !== undefined) {
+            merged[svc.id][acc.id] = String(calc)
+          } else {
+            // No adjustment active — restore existing override if there was one
+            const initial = initialRates[svc.id]?.[acc.id] ?? ""
+            merged[svc.id][acc.id] = initial
+          }
+        }
       }
     }
+    onSave(merged)
   }
 
   const filtered = accounts.filter((a) =>
@@ -368,57 +334,35 @@ function Step2({
           setRounding={setRounding}
           autoFocus={true}
         />
-        <div className={`flex items-start gap-2 rounded-xl px-4 py-3 text-sm transition-colors ${pinned.size > 0 ? "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" : "invisible"}`}>
+
+        <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
           <span className="mt-px shrink-0">ℹ</span>
-          <span>Saved and edited values won&apos;t be affected by the adjustment — use Reset to undo.</span>
+          <span>Manual entries won&apos;t be overwritten by the price adjustment</span>
         </div>
 
+        {/* Search — commented out for now, may not be needed
         <div className="relative">
           <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input className="pl-9" placeholder="Search clients" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
+        */}
 
         <div className="flex flex-col gap-4">
-          {filtered.map((acc) => {
+          {accounts.map((acc) => {
             const isCollapsed = collapsed.has(acc.id)
             return (
             <div key={acc.id} className="flex flex-col gap-0 overflow-hidden rounded-xl border">
-              <div className="flex items-center justify-between pr-3">
-                <button
-                  type="button"
-                  className="flex flex-1 items-center gap-2 px-4 py-3 text-left hover:bg-accent/50"
-                  onClick={() => toggleCollapsed(acc.id)}
-                >
-                  <IconChevronDown
-                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
-                    style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
-                  />
-                  <span className="text-sm font-semibold">{acc.name}</span>
-                </button>
-                <div className="flex shrink-0 items-center gap-3">
-                  {savedAccounts.has(acc.id) ? (
-                    <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                      <IconCheck className="size-3.5" />
-                      Saved
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-primary hover:underline"
-                      onClick={() => handleSaveAccount(acc.id)}
-                    >
-                      Save
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline"
-                    onClick={() => handleResetAccount(acc.id)}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-4 py-3 text-left hover:bg-accent/50"
+                onClick={() => toggleCollapsed(acc.id)}
+              >
+                <IconChevronDown
+                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                  style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                />
+                <span className="text-sm font-semibold">{acc.name}</span>
+              </button>
               <div
                 style={{
                   display: "grid",
@@ -437,13 +381,22 @@ function Step2({
                   </thead>
                   <tbody>
                     {services.map((svc, i) => {
-                      const inputVal = rates[svc.id]?.[acc.id] ?? ""
-                      const parsed = parseFloat(inputVal)
+                      const manualVal = rates[svc.id]?.[acc.id] ?? ""
+                      const calcVal = calculatedRates[svc.id]?.[acc.id]
                       const oldPrice = baseRates.current[svc.id]?.[acc.id] ?? svc.defaultRate
-                      const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
-                      const pct = inputVal !== "" && oldPrice > 0 && !isNaN(parsed)
-                        ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
+
+                      // Effective price for delta display: manual if typed, else calculated
+                      const effectiveParsed = manualVal !== "" ? parseFloat(manualVal) : calcVal
+                      const showDelta = effectiveParsed !== undefined && !isNaN(effectiveParsed) && effectiveParsed !== oldPrice
+                      const pct = showDelta && oldPrice > 0
+                        ? Math.round(((effectiveParsed! - oldPrice) / oldPrice) * 100)
                         : null
+                      const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
+
+                      // Placeholder: calculated value if active, else baseline
+                      const placeholder = calcVal !== undefined
+                        ? calcVal % 1 === 0 ? String(calcVal) : calcVal.toFixed(2)
+                        : oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"
 
                       return (
                         <tr key={svc.id} className={i % 2 === 1 ? "bg-workspace" : ""}>
@@ -455,7 +408,7 @@ function Step2({
                           </td>
                           <td className="w-52 px-4 py-2">
                             <div className="flex items-center justify-end gap-2">
-                              {inputVal === "" ? null : !isNaN(parsed) && parsed === oldPrice ? null : (
+                              {showDelta && (
                                 <>
                                   <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
                                   <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
@@ -471,9 +424,9 @@ function Step2({
                                 </>
                               )}
                               <CurrencyInput
-                                value={inputVal}
+                                value={manualVal}
                                 onChange={(v) => handleManualChange(svc.id, acc.id, v)}
-                                placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
+                                placeholder={placeholder}
                                 suffix={svc.rateType === "Hour" ? "/hr" : undefined}
                                 className="w-28"
                               />
@@ -497,7 +450,7 @@ function Step2({
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
-        <Button size="xl" className="px-5" onClick={onSave}>Apply overrides</Button>
+        <Button size="xl" className="px-5" onClick={handleSave}>Apply overrides</Button>
       </div>
     </>
   )
@@ -516,11 +469,13 @@ type Props = {
 export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose, onSave }: Props) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [selectedServiceIds, setSelectedServiceIds] = React.useState<string[]>([])
-  const [rates, setRates] = React.useState<RateMap>({})
+  const [initialRates, setInitialRates] = React.useState<RateMap>({}) // existing overrides — baseline for step 2
+  const [rates, setRates] = React.useState<RateMap>({})               // manual entries only
 
   const reset = () => {
     setStep(1)
     setSelectedServiceIds([])
+    setInitialRates({})
     setRates({})
   }
 
@@ -533,7 +488,8 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
   }
 
   const handleContinue = () => {
-    // Pre-fill rates: existing override if any, else default rate
+    // Capture existing overrides as the baseline for step 2's calculator.
+    // rates stays empty — it will only hold manual user edits.
     const initial: RateMap = {}
     for (const svcId of selectedServiceIds) {
       const svc = services.find((s) => s.id === svcId)!
@@ -543,7 +499,8 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
         initial[svcId][acc.id] = (existing && existing.rate > 0) ? String(existing.rate) : ""
       }
     }
-    setRates(initial)
+    setInitialRates(initial)
+    setRates({})
     setStep(2)
   }
 
@@ -554,10 +511,10 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
     }))
   }
 
-  const handleSave = () => {
+  const handleSave = (finalRates: RateMap) => {
     const updated = services.map((svc) => {
       if (!selectedServiceIds.includes(svc.id)) return svc
-      const accRates = rates[svc.id] ?? {}
+      const accRates = finalRates[svc.id] ?? {}
       // Merge new overrides with existing ones (overwrite if account already has one)
       const newOverrides = selectedAccounts
         .map((acc) => ({
@@ -603,6 +560,7 @@ export function SetCustomRatesPanel({ open, selectedAccounts, services, onClose,
           <Step2
             services={selectedServices}
             accounts={selectedAccounts}
+            initialRates={initialRates}
             rates={rates}
             onRateChange={handleRateChange}
             onBack={() => setStep(1)}

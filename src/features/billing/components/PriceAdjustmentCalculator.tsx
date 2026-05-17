@@ -21,7 +21,7 @@ export const ROUNDING_PRESETS: { value: number; label: string }[] = [
 export function applyAdjustment(rate: number, pct: number, rounding: Rounding): number {
   const raw = rate * (1 + pct / 100)
   if (rounding === 0) return Math.round(raw * 100) / 100
-  if (rounding === 1) return Math.round(raw)
+  // if (rounding === 1) return Math.round(raw)  // $1 — math rounding (temporarily disabled)
   return pct >= 0
     ? Math.ceil(raw / rounding) * rounding
     : Math.floor(raw / rounding) * rounding

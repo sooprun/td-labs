@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconTrash, IconChevronDown, IconChevronRight } from "@tabler/icons-react"
+import { IconX, IconChevronDown, IconChevronRight, IconCirclePlus, IconSearch, IconTrash, IconCurrencyDollar, IconUsers } from "@tabler/icons-react"
 
 import {
   Sheet,
@@ -7,10 +7,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CurrencyInput } from "./RateInputs"
+import { CurrencyInput, CurrencyCell } from "./RateInputs"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -23,6 +30,80 @@ import {
 import type { ServiceItem, RateType, ClientOverride } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
 import { rateGroups } from "@/mock/data/team-member-rates"
+
+// ─── AddClientModal ───────────────────────────────────────────────────────────
+
+function AddClientModal({
+  open,
+  onClose,
+  availableAccounts,
+  onAdd,
+}: {
+  open: boolean
+  onClose: () => void
+  availableAccounts: typeof accounts
+  onAdd: (ids: string[]) => void
+}) {
+  const [selected, setSelected] = React.useState<string[]>([])
+  const [search, setSearch] = React.useState("")
+
+  React.useEffect(() => {
+    if (open) { setSelected([]); setSearch("") }
+  }, [open])
+
+  const toggle = (id: string) =>
+    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+
+  const filtered = availableAccounts.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DialogContent className="flex max-w-sm flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="shrink-0 border-b px-4 pb-3 pt-4">
+          <DialogTitle>Choose client</DialogTitle>
+        </DialogHeader>
+        <div className="relative shrink-0 border-b px-3 py-2">
+          <IconSearch className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div className="max-h-64 overflow-y-auto py-1">
+          {filtered.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">No clients found</p>
+          ) : filtered.map((acc) => (
+            <label key={acc.id} className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-accent">
+              <input
+                type="checkbox"
+                className="table-checkbox shrink-0"
+                checked={selected.includes(acc.id)}
+                onChange={() => toggle(acc.id)}
+              />
+              <span className="text-sm">{acc.name}</span>
+            </label>
+          ))}
+        </div>
+        <div className="flex shrink-0 gap-3 border-t px-4 py-3">
+          <Button
+            size="xl"
+            className="px-5"
+            disabled={selected.length === 0}
+            onClick={() => { onAdd(selected); onClose() }}
+          >
+            Add {selected.length > 0 ? selected.length : ""} client{selected.length !== 1 ? "s" : ""}
+          </Button>
+          <Button size="xl" className="px-5" variant="outline" onClick={onClose}>Cancel</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 const CATEGORIES = ["Advisory", "Bookkeeping", "Payroll", "Tax"]
 const MAX_DESCRIPTION = 4000
@@ -45,6 +126,8 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
   const [teamRatesOpen, setTeamRatesOpen] = React.useState(false)
   const [originalRate, setOriginalRate] = React.useState("")
   const [overrides, setOverrides] = React.useState<(ClientOverride & { rateInput: string })[]>([])
+  const [addClientOpen, setAddClientOpen] = React.useState(false)
+  const [teamRateInputs, setTeamRateInputs] = React.useState<Record<string, string>>({})
 
   // Sync form when service changes
   React.useEffect(() => {
@@ -60,6 +143,12 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
       setUpdateTemplates(false)
       setOverrides(service.clientOverridesList.map((o) => ({ ...o, rateInput: String(o.rate) })))
       setOverridesOpen(false)
+      const inputs: Record<string, string> = {}
+      rateGroups.filter((g) => !g.archived).forEach((g) => {
+        const svc = g.services.find((s) => s.serviceId === service.id)
+        if (svc) inputs[g.name] = String(svc.rate)
+      })
+      setTeamRateInputs(inputs)
     }
   }, [service])
 
@@ -68,21 +157,26 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
   const usedAccountIds = overrides.map((o) => o.accountId)
   const availableAccounts = accounts.filter((a) => !usedAccountIds.includes(a.id))
 
-  const handleSelectAccount = (accountId: string) => {
-    const account = accounts.find((a) => a.id === accountId)
-    if (!account) return
+  const handleAddClients = (ids: string[]) => {
     const defaultRate = parseFloat(rate) || 0
-    setOverrides((prev) => [...prev, {
-      accountId: account.id,
-      accountName: account.name,
-      rate: defaultRate,
-      rateInput: defaultRate > 0 ? String(defaultRate) : "",
-    }])
+    const newOverrides = ids.flatMap((accountId) => {
+      const account = accounts.find((a) => a.id === accountId)
+      if (!account) return []
+      return [{
+        accountId: account.id,
+        accountName: account.name,
+        rate: defaultRate,
+        rateInput: defaultRate > 0 ? String(defaultRate) : "",
+      }]
+    })
+    setOverrides((prev) => [...prev, ...newOverrides])
   }
 
-  const handleRemoveOverride = (accountId: string) => {
+  // Keep for backwards compat (used by Select if still present)
+  const handleSelectAccount = (accountId: string) => handleAddClients([accountId])
+
+  const handleRemoveOverride = (accountId: string) =>
     setOverrides((prev) => prev.filter((o) => o.accountId !== accountId))
-  }
 
   const handleOverrideRateChange = (accountId: string, value: string) => {
     setOverrides((prev) => prev.map((o) =>
@@ -98,7 +192,7 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
         showCloseButton={false}
       >
         {/* Header */}
-        <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-muted/40 px-4 py-0">
+        <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-slate-50 px-4 py-0">
           <SheetTitle className="text-xl">Edit service</SheetTitle>
           <Button size="icon-xl" variant="ghost" onClick={onClose}>
             <IconX className="size-4" />
@@ -182,145 +276,170 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             </div>
           </div>
 
-          {/* Client overrides + Team member rates group */}
-          <div className="rounded-xl border bg-background">
-
-            {/* Client overrides (collapsible) */}
-            <div className="flex flex-col px-4 py-3">
-            <button
-              className="flex min-w-0 items-center gap-2 text-left"
-              onClick={() => setOverridesOpen((o) => !o)}
-            >
-              {overridesOpen
-                ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
-                : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              }
-              <span className="text-sm font-medium">Client overrides</span>
-              {overrides.length > 0 && (
-                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                  {overrides.length}
-                </span>
-              )}
-            </button>
-
-            {/* Animated content */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateRows: overridesOpen ? "1fr" : "0fr",
-                transition: "grid-template-rows 200ms ease",
-              }}
-            >
-              <div className="overflow-hidden" style={{ minHeight: 0 }}><div className="flex flex-col gap-3 pt-3">
-                {overrides.length === 0 && (
-                  <p className="pl-6 text-sm text-muted-foreground">No client overrides set</p>
-                )}
-
-                {overrides.map((o) => {
-                  const defaultRate = parseFloat(rate) || 0
-                  const pct = defaultRate > 0 ? ((o.rate - defaultRate) / defaultRate) * 100 : null
-                  const rounded = pct !== null ? Math.round(pct) : null
-                  return (
-                  <div key={o.accountId} className="flex items-center gap-3">
-                    <span className="flex-1 truncate text-sm">{o.accountName}</span>
-                    <span className="inline-flex w-14 shrink-0 justify-center">
-                      {rounded !== null && rounded !== 0 && (
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          rounded > 0
-                            ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                        }`}>
-                          {rounded > 0 ? "+" : ""}{rounded}%
-                        </span>
+          {/* Client overrides */}
+          <div className="flex flex-col gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="text-base font-semibold">Client overrides</p>
+                <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Set custom rates for specific clients</p>
+            </div>
+            <div className={`rounded-xl overflow-hidden ${overrides.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
+                  {overrides.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-6">
+                      <IconCurrencyDollar className="size-8 text-muted-foreground/40" strokeWidth={1} />
+                      <p className="text-sm text-muted-foreground">No client overrides set</p>
+                      {availableAccounts.length > 0 && (
+                        <Button variant="link" size="default" className="h-auto gap-2 p-0 text-primary hover:text-primary" onClick={() => setAddClientOpen(true)}>
+                          <IconCirclePlus className="size-4" />
+                          Add client
+                        </Button>
                       )}
-                    </span>
-                    <CurrencyInput
-                      value={o.rateInput}
-                      onChange={(v) => handleOverrideRateChange(o.accountId, v)}
-                      suffix={rateType === "Hour" ? "/hr" : undefined}
-                      className="w-28"
-                    />
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleRemoveOverride(o.accountId)}
-                    >
-                      <IconTrash className="size-3.5" />
-                    </Button>
-                  </div>
-                )})}
+                    </div>
+                  ) : (
+                    <table className="panel-table w-full text-[14px]">
+                      <thead className="bg-background border-b">
+                        <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
+                          <th className="px-4 text-left text-[14px] font-semibold">Client</th>
+                          <th className="w-px" />
+                          <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold">Override</th>
+                          <th className="w-px" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {overrides.map((o, i) => {
+                          const defaultRate = parseFloat(rate) || 0
+                          const parsed = parseFloat(o.rateInput)
+                          const hasValue = o.rateInput.trim() !== "" && !isNaN(parsed)
+                          const pct = hasValue && defaultRate > 0
+                            ? Math.round(((parsed - defaultRate) / defaultRate) * 100)
+                            : null
+                          const fmtDefault = `$${defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${rateType === "Hour" ? "/hr" : ""}`
 
-                {/* Persistent add row */}
-                {availableAccounts.length > 0 && (
-                  <Select value="" onValueChange={handleSelectAccount}>
-                    <SelectTrigger className="h-8 text-sm text-muted-foreground">
-                      <SelectValue placeholder="Add client…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableAccounts.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div></div>
+                          return (
+                            <tr key={o.accountId} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
+                              <td className="px-4 text-sm">{o.accountName}</td>
+                              <td className="w-px px-2 text-center whitespace-nowrap">
+                                {hasValue && pct !== null && pct !== 0 && (
+                                  <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
+                                    pct > 0
+                                      ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                                      : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                                  }`}>
+                                    {pct > 0 ? "+" : ""}{pct}%
+                                  </span>
+                                )}
+                              </td>
+                              <td className="w-px min-w-[100px] p-0">
+                                <CurrencyCell
+                                  value={o.rateInput}
+                                  onChange={(v) => handleOverrideRateChange(o.accountId, v)}
+                                  placeholder={defaultRate > 0 ? defaultRate.toFixed(2) : "0.00"}
+                                  suffix={rateType === "Hour" ? "/hr" : undefined}
+                                  className="w-full"
+                                />
+                              </td>
+                              <td className="w-px px-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleRemoveOverride(o.accountId)}
+                                >
+                                  <IconTrash className="size-4" />
+                                </Button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  )}
             </div>
-            </div>
-
-            {/* Team member rates (collapsible) */}
-            {(() => {
-              const teamEntries = rateGroups
-                .filter((g) => !g.archived)
-                .flatMap((g) => {
-                  const svc = g.services.find((s) => s.serviceId === service?.id)
-                  if (!svc) return []
-                  return g.members.map((m) => ({ member: m, rate: svc.rate, rateType: service?.rateType ?? "", group: g.name }))
-                })
-              return (
-                <div className="flex flex-col border-t px-4 py-3">
-                  <button
-                    className="flex min-w-0 items-center gap-2 text-left"
-                    onClick={() => setTeamRatesOpen((o) => !o)}
-                  >
-                    {teamRatesOpen
-                      ? <IconChevronDown className="size-4 shrink-0 text-muted-foreground" />
-                      : <IconChevronRight className="size-4 shrink-0 text-muted-foreground" />
-                    }
-                    <span className="text-sm font-medium">Team member rates</span>
-                    {teamEntries.length > 0 && (
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {teamEntries.length}
-                      </span>
-                    )}
-                  </button>
-                  <div style={{ display: "grid", gridTemplateRows: teamRatesOpen ? "1fr" : "0fr", transition: "grid-template-rows 200ms ease" }}>
-                    <div className="overflow-hidden" style={{ minHeight: 0 }}><div className="flex flex-col gap-2 pt-3">
-                      {teamEntries.length === 0 ? (
-                        <p className="pl-6 text-sm text-muted-foreground">No team member rates set</p>
-                      ) : teamEntries.map((entry, i) => (
-                        <div key={i} className="flex items-center gap-3 pl-2">
-                          <span
-                            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                            style={{ backgroundColor: entry.member.color }}
-                            title={entry.member.name}
-                          >
-                            {entry.member.initials}
-                          </span>
-                          <span className="flex-1 truncate text-sm">{entry.member.name}</span>
-                          <span className="text-xs text-muted-foreground">{entry.group}</span>
-                          <span className="text-sm font-medium shrink-0">
-                            ${entry.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{entry.rateType === "Hour" ? "/hr" : ""}
-                          </span>
-                        </div>
-                      ))}
-                    </div></div>
-                  </div>
-                </div>
-              )
-            })()}
-
+            {overrides.length > 0 && availableAccounts.length > 0 && (
+              <Button
+                type="button"
+                variant="link"
+                size="default"
+                className="h-auto gap-2 p-0 text-primary hover:text-primary self-start"
+                onClick={() => setAddClientOpen(true)}
+              >
+                <IconCirclePlus className="size-4" />
+                Add client
+              </Button>
+            )}
           </div>
+
+          {/* Team member rates */}
+          {(() => {
+            const teamEntries = rateGroups
+              .filter((g) => !g.archived)
+              .flatMap((g) => {
+                const svc = g.services.find((s) => s.serviceId === service?.id)
+                if (!svc) return []
+                return [{ group: g.name, members: g.members, rate: svc.rate, rateType: service?.rateType ?? "" }]
+              })
+            return (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold">Team member rates</p>
+                    <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
+                </div>
+                <div className={`rounded-xl overflow-hidden ${teamEntries.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
+                  {teamEntries.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-6">
+                      <IconUsers className="size-8 text-muted-foreground/40" strokeWidth={1} />
+                      <p className="text-sm text-muted-foreground">No team member rates set</p>
+                    </div>
+                  ) : (
+                    <table className="panel-table w-full text-[14px]">
+                      <thead className="bg-background border-b">
+                        <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
+                          <th className="px-4 text-left text-[14px] font-semibold">Team name</th>
+                          <th className="w-px px-4 text-left text-[14px] font-semibold whitespace-nowrap">Team members</th>
+                          <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold whitespace-nowrap">Team member rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {teamEntries.map((entry, i) => (
+                          <tr key={i} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
+                            <td className="px-4 text-sm">{entry.group}</td>
+                            <td className="w-px px-4">
+                              <div className="flex items-center">
+                                {entry.members.map((m, mi) => (
+                                  <span
+                                    key={m.name}
+                                    className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white"
+                                    style={{ backgroundColor: m.color, marginLeft: mi > 0 ? "-8px" : 0 }}
+                                    title={m.name}
+                                  >
+                                    {m.initials}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="w-px min-w-[100px] p-0">
+                              <CurrencyCell
+                                value={teamRateInputs[entry.group] ?? String(entry.rate)}
+                                onChange={(v) => setTeamRateInputs((prev) => ({ ...prev, [entry.group]: v }))}
+                                suffix={entry.rateType === "Hour" ? "/hr" : undefined}
+                                className="w-full"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Update templates checkbox */}
           <label className="flex cursor-pointer items-start gap-3">
@@ -351,7 +470,9 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
         <div className="flex gap-3 border-t px-6 py-4">
           <Button size="xl" className="px-5" onClick={() => {
             if (!service) return
-            const savedOverrides = overrides.map(({ rateInput: _, ...o }) => o)
+            const savedOverrides = overrides
+              .filter((o) => o.rateInput.trim() !== "" && !isNaN(parseFloat(o.rateInput)))
+              .map(({ rateInput: _, ...o }) => o)
             onSave({
               ...service,
               name,
@@ -366,6 +487,13 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
           }}>Save</Button>
           <Button size="xl" className="px-5" variant="outline" onClick={onClose}>Cancel</Button>
         </div>
+
+        <AddClientModal
+          open={addClientOpen}
+          onClose={() => setAddClientOpen(false)}
+          availableAccounts={availableAccounts}
+          onAdd={handleAddClients}
+        />
       </SheetContent>
     </Sheet>
   )

@@ -148,14 +148,18 @@ function Step1({
   )
 }
 
-// ─── Step 2: Set prices ───────────────────────────────────────────────────────
+// ─── Step 2: Review overrides ─────────────────────────────────────────────────
 
-type OverrideMap = Record<string, string>
+type OverrideMap = Record<string, string>  // manual entries only
+type BaselineMap = Record<string, number>  // per-service baseline (existing override or default)
+type CalcMap     = Record<string, number>  // calculator-computed values
 
 function Step2({
   account,
   services,
   overrides,
+  baselineRates,
+  calculatedRates,
   adjustment,
   rounding,
   applyTo,
@@ -166,12 +170,14 @@ function Step2({
   account: Account
   services: ServiceItem[]
   overrides: OverrideMap
+  baselineRates: BaselineMap
+  calculatedRates: CalcMap
   adjustment: number
   rounding: Rounding
   applyTo: ApplyTo
   onOverrideChange: (id: string, value: string) => void
   onBack: () => void
-  onSave: () => void
+  onSave: (finalOverrides: OverrideMap) => void
 }) {
   const [search, setSearch] = React.useState("")
   const [sortKey, setSortKey] = React.useState<"name" | "category" | "defaultRate">("name")
@@ -195,15 +201,30 @@ function Step2({
   const appliedTo = applyTo === "all" ? "all selected services" : "existing overrides only"
   const summaryLine = `${direction} by ${Math.abs(adjustment)}%${roundingPart}, applied to ${appliedTo}`
 
+  const handleSave = () => {
+    // Merge: manual entries take priority, calculated fills the rest
+    const merged: OverrideMap = {}
+    for (const svc of services) {
+      const manual = overrides[svc.id] ?? ""
+      if (manual !== "") {
+        merged[svc.id] = manual
+      } else {
+        const calc = calculatedRates[svc.id]
+        merged[svc.id] = calc !== undefined ? String(calc) : ""
+      }
+    }
+    onSave(merged)
+  }
+
   return (
     <>
       <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto px-6 py-6">
         <div className="flex flex-col gap-0">
           <h2 className="text-xl font-semibold">Review overrides</h2>
           <p className="text-sm text-muted-foreground">{summaryLine}</p>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-            <span className="shrink-0">ℹ</span>
-            Clear a field to use the default rate.
+          <div className="mt-3 flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+            <span className="mt-px shrink-0">ℹ</span>
+            Manual entries won&apos;t be overwritten by the price adjustment
           </div>
         </div>
 
@@ -228,15 +249,22 @@ function Step2({
             </thead>
             <tbody>
               {filtered.map((svc, i) => {
-                const existingOverride = svc.clientOverridesList.find((o) => o.accountId === account.id)
-                const oldPrice = existingOverride?.rate ?? svc.defaultRate
+                const manualVal = overrides[svc.id] ?? ""
+                const calcVal = calculatedRates[svc.id]
+                const oldPrice = baselineRates[svc.id] ?? svc.defaultRate
                 const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
 
-                const raw = overrides[svc.id] ?? ""
-                const parsed = parseFloat(raw)
-                const pct = raw !== "" && oldPrice > 0 && !isNaN(parsed)
-                  ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
+                // Effective value for delta: manual if typed, else calculated
+                const effectiveParsed = manualVal !== "" ? parseFloat(manualVal) : calcVal
+                const showDelta = effectiveParsed !== undefined && !isNaN(effectiveParsed) && effectiveParsed !== oldPrice
+                const pct = showDelta && oldPrice > 0
+                  ? Math.round(((effectiveParsed! - oldPrice) / oldPrice) * 100)
                   : null
+
+                // Placeholder: calculated value if available, else baseline
+                const placeholder = calcVal !== undefined
+                  ? calcVal % 1 === 0 ? String(calcVal) : calcVal.toFixed(2)
+                  : oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"
 
                 return (
                   <tr key={svc.id} className={i % 2 === 1 ? "bg-workspace" : ""}>
@@ -245,9 +273,7 @@ function Step2({
                     </td>
                     <td className="w-64 px-4 py-2">
                       <div className="flex items-center justify-end gap-2">
-                        {raw === "" ? (
-                          <span className="text-sm text-muted-foreground whitespace-nowrap">Default rate:</span>
-                        ) : !isNaN(parsed) && parsed === oldPrice ? null : (
+                        {showDelta && (
                           <>
                             <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap line-through">{fmtOld(oldPrice)}</span>
                             <IconArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
@@ -263,9 +289,9 @@ function Step2({
                           </>
                         )}
                         <CurrencyInput
-                          value={raw}
+                          value={manualVal}
                           onChange={(v) => onOverrideChange(svc.id, v)}
-                          placeholder={oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"}
+                          placeholder={placeholder}
                           suffix={svc.rateType === "Hour" ? "/hr" : undefined}
                           className="w-28"
                         />
@@ -286,7 +312,7 @@ function Step2({
         <Button size="icon-xl" variant="outline" onClick={onBack}>
           <IconArrowLeft className="size-4" />
         </Button>
-        <Button size="xl" className="px-5" onClick={onSave}>Apply overrides</Button>
+        <Button size="xl" className="px-5" onClick={handleSave}>Apply overrides</Button>
       </div>
     </>
   )
@@ -308,12 +334,14 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
   const [adjustment, setAdjustment] = React.useState("")
   const [rounding, setRounding] = React.useState<Rounding>(1)
   const [applyTo, setApplyTo] = React.useState<ApplyTo>("all")
-  const [overrides, setOverrides] = React.useState<OverrideMap>({})
+  const [overrides, setOverrides] = React.useState<OverrideMap>({})        // manual entries only
+  const [baselineRates, setBaselineRates] = React.useState<BaselineMap>({}) // existing override or default rate
+  const [calculatedRates, setCalculatedRates] = React.useState<CalcMap>({}) // calculator output → shown as placeholders
+  const [step2Services, setStep2Services] = React.useState<ServiceItem[]>([])
 
   const teamRateServiceIds = new Set(
     rateGroups.filter((g) => !g.archived).flatMap((g) => g.services.map((s) => s.serviceId))
   )
-  // Only operate on the services selected in the table
   const activeServices = services.filter((s) =>
     selectedIds.includes(s.id) && !teamRateServiceIds.has(s.id)
   )
@@ -321,7 +349,6 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
   const servicesWithOverride = activeServices.filter((s) =>
     s.clientOverridesList.some((o) => o.accountId === account.id)
   )
-  // Show "Apply to" only when there's a mix — some services have overrides, some don't
   const showApplyTo = servicesWithOverride.length > 0 && servicesWithOverride.length < activeServices.length
 
   React.useEffect(() => {
@@ -331,35 +358,37 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
     setRounding(1)
     setApplyTo("all")
     setOverrides({})
+    setBaselineRates({})
+    setCalculatedRates({})
+    setStep2Services([])
   }, [open])
 
   const handleContinue = () => {
     const pct = parseFloat(adjustment)
-    const initial: OverrideMap = {}
+    const targetServices = showApplyTo && applyTo === "overrides" ? servicesWithOverride : activeServices
 
-    // Which services to include in step 2:
-    // - "overrides": only services that already have an override
-    // - "all" (or no choice shown): all active non-team-rate services
-    const targetServices = showApplyTo && applyTo === "overrides"
-      ? servicesWithOverride
-      : activeServices
-
+    const baseline: BaselineMap = {}
+    const calculated: CalcMap = {}
     targetServices.forEach((svc) => {
       const existing = svc.clientOverridesList.find((o) => o.accountId === account.id)
       const base = existing?.rate ?? svc.defaultRate
-      const result = applyAdjustment(base, pct, rounding)
-      initial[svc.id] = String(result)
+      baseline[svc.id] = base
+      calculated[svc.id] = applyAdjustment(base, pct, rounding)
     })
-    setOverrides(initial)
+
+    setBaselineRates(baseline)
+    setCalculatedRates(calculated)
+    setOverrides({})  // manual entries start empty
+    setStep2Services(targetServices)
     setStep(2)
   }
 
-  const handleSave = () => {
+  const handleSave = (finalOverrides: OverrideMap) => {
     const updated = services.map((svc) => {
       if (teamRateServiceIds.has(svc.id)) return svc
-      const raw = overrides[svc.id]
       // Service not included in step 2 — leave untouched
-      if (raw === undefined) return svc
+      if (!step2Services.some((s) => s.id === svc.id)) return svc
+      const raw = finalOverrides[svc.id] ?? ""
       const parsed = parseFloat(raw)
       if (raw.trim() === "" || isNaN(parsed)) {
         const newOverrides = svc.clientOverridesList.filter((o) => o.accountId !== account.id)
@@ -373,9 +402,6 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
     })
     onSave(updated)
   }
-
-  // Step 2 shows only services that were included in the calculation
-  const step2Services = activeServices.filter((s) => overrides[s.id] !== undefined)
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
@@ -407,6 +433,8 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
             account={account}
             services={step2Services}
             overrides={overrides}
+            baselineRates={baselineRates}
+            calculatedRates={calculatedRates}
             adjustment={parseFloat(adjustment)}
             rounding={rounding}
             applyTo={applyTo}
