@@ -1139,6 +1139,11 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                       const newOverrides = s.clientOverridesList.filter((o) => o.accountId !== accountId)
                       return { ...s, clientOverridesList: newOverrides, customRates: newOverrides.length }
                     }))
+                    setOverrideInputs((prev) => {
+                      const next = { ...prev }
+                      resettableIds.forEach((id) => delete next[id])
+                      return next
+                    })
                     setSelectedIds([])
                     setResetConfirmOpen(false)
                   }}
