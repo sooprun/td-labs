@@ -4,6 +4,7 @@ import { IconTrash, IconCirclePlus, IconSearch, IconCurrencyDollar, IconInfoCirc
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -42,35 +43,37 @@ function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent className="flex max-w-sm flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="shrink-0 border-b px-4 pb-3 pt-4">
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
           <DialogTitle>Choose client</DialogTitle>
         </DialogHeader>
-        <div className="relative shrink-0 border-b px-3 py-2">
-          <IconSearch className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} autoFocus />
+        <div className="flex flex-col gap-3">
+          <div className="relative">
+            <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} autoFocus />
+          </div>
+          <div className="max-h-64 overflow-y-auto rounded-xl border">
+            {filtered.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">No clients found</p>
+            ) : filtered.map((acc) => (
+              <label key={acc.id} className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-accent">
+                <input
+                  type="checkbox"
+                  className="table-checkbox shrink-0"
+                  checked={selected.includes(acc.id)}
+                  onChange={() => toggle(acc.id)}
+                />
+                <span className="text-sm">{acc.name}</span>
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="max-h-64 overflow-y-auto py-1">
-          {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No clients found</p>
-          ) : filtered.map((acc) => (
-            <label key={acc.id} className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-accent">
-              <input
-                type="checkbox"
-                className="table-checkbox shrink-0"
-                checked={selected.includes(acc.id)}
-                onChange={() => toggle(acc.id)}
-              />
-              <span className="text-sm">{acc.name}</span>
-            </label>
-          ))}
-        </div>
-        <div className="flex shrink-0 gap-3 border-t px-4 py-3">
-          <Button size="xl" className="px-5" disabled={selected.length === 0} onClick={() => { onAdd(selected); onClose() }}>
+        <DialogFooter>
+          <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button size="xl" disabled={selected.length === 0} onClick={() => { onAdd(selected); onClose() }}>
             Add {selected.length > 0 ? selected.length : ""} client{selected.length !== 1 ? "s" : ""}
           </Button>
-          <Button size="xl" variant="outline" className="px-5" onClick={onClose}>Cancel</Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
@@ -131,12 +134,12 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
   return (
     <>
       <Dialog open={!!service} onOpenChange={(o) => { if (!o) onClose() }}>
-        <DialogContent className="flex sm:max-w-md flex-col gap-0 overflow-hidden p-0">
-          <DialogHeader className="shrink-0 border-b px-6 pb-4 pt-5">
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
             <DialogTitle>Client overrides — {service?.name}</DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col gap-3 px-6 py-5">
+          <div className="flex flex-col gap-3">
             {overrides.length === 0 ? (
               <div className="flex flex-col items-center gap-2 rounded-xl bg-slate-50 py-6">
                 <IconCurrencyDollar className="size-8 text-muted-foreground/40" strokeWidth={1} />
@@ -224,10 +227,10 @@ export function ClientRatesModal({ service, onClose, onSave }: Props) {
             )}
           </div>
 
-          <div className="flex shrink-0 gap-3 border-t px-6 py-4">
-            <Button size="xl" className="px-5" onClick={handleSave}>Save</Button>
-            <Button size="xl" variant="outline" className="px-5" onClick={onClose}>Cancel</Button>
-          </div>
+          <DialogFooter>
+            <Button size="xl" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button size="xl" onClick={handleSave}>Save</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
