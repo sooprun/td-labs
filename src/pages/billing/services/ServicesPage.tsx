@@ -381,10 +381,10 @@ export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsCha
                     </span>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer select-none hover:text-foreground"
+                    className="text-right cursor-pointer select-none hover:text-foreground"
                     onClick={() => handleSort("defaultRate")}
                   >
-                    <span className="inline-flex items-center">
+                    <span className="inline-flex items-center justify-end w-full">
                       Default rate
                       <DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} />
                     </span>
@@ -434,7 +434,7 @@ export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsCha
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{svc.category}</TableCell>
-                    <TableCell>{formatRate(svc.defaultRate, svc.rateType)}</TableCell>
+                    <TableCell className="text-right">{formatRate(svc.defaultRate, svc.rateType)}</TableCell>
                     <TableCell className="text-muted-foreground">{svc.rateType}</TableCell>
                     <TableCell>
                       {svc.customRates > 0 ? (
