@@ -187,7 +187,9 @@ export function CurrencyCell({
         /* $ hugs the digits — input sized to content via mirror span */
         <div className="flex items-center gap-0.5">
           <span ref={mirrorRef} className="pointer-events-none invisible absolute whitespace-pre text-sm" aria-hidden>
-            {displayVal || placeholder || formatCurrency(0, decimals)}
+            {(displayVal?.length ?? 0) > ((placeholder || formatCurrency(0, decimals)).length)
+              ? displayVal
+              : (placeholder || formatCurrency(0, decimals))}
           </span>
           <span className="pointer-events-none text-sm text-muted-foreground">$</span>
           <input
