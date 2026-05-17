@@ -141,6 +141,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
       setRate(r)
       setOriginalRate(r)
       setRateType(service.rateType)
+      setOriginalRateType(service.rateType)
       setTax(false)
       setUpdateTemplates(false)
       setOverrides(service.clientOverridesList.map((o) => ({ ...o, rateInput: String(o.rate) })))
@@ -154,7 +155,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
     }
   }, [service])
 
-  const rateChanged = rate !== originalRate
+  const [originalRateType, setOriginalRateType] = React.useState<RateType>("")
 
   const usedAccountIds = overrides.map((o) => o.accountId)
   const availableAccounts = accounts.filter((a) => !usedAccountIds.includes(a.id))
@@ -480,7 +481,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
           </label>
 
           {/* Rate change info banner */}
-          {rateChanged && (
+          {(rate !== originalRate || rateType !== originalRateType) && (
             <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
               <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
               Your changes will apply to new invoices, proposals, and time entries
