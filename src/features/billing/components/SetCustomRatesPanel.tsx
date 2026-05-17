@@ -1,5 +1,6 @@
 import * as React from "react"
 import { IconX, IconCheck, IconArrowLeft, IconArrowRight, IconSearch } from "@tabler/icons-react"
+import { IconLock, IconChevronDown } from "@tabler/icons-react"
 import { DataTableSortIcon, type SortDir } from "@/components/data-table/DataTableSortIcon"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -9,6 +10,7 @@ import type { ServiceItem } from "@/mock/services"
 import { CurrencyInput } from "./RateInputs"
 import type { Account } from "@/mock/data/accounts"
 import { rateGroups } from "@/mock/data/team-member-rates"
+import { PriceAdjustmentCalculator, applyAdjustment, type Rounding } from "./PriceAdjustmentCalculator"
 
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 
@@ -81,8 +83,9 @@ function Step1({
     })
 
   const filtered = allFiltered.filter((s) => !teamRateServiceIds.has(s.id))
+  const teamRateServices = allFiltered.filter((s) => teamRateServiceIds.has(s.id))
   const skippedCount = search
-    ? allFiltered.filter((s) => teamRateServiceIds.has(s.id)).length
+    ? teamRateServices.length
     : services.filter((s) => teamRateServiceIds.has(s.id)).length
 
   const selectableFiltered = filtered
@@ -104,11 +107,13 @@ function Step1({
             <p className="mt-3 text-sm">Choose which services should use client-specific pricing on invoices and proposals.</p>
           </div>
           {skippedCount > 0 && (
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-              <span className="shrink-0">ℹ</span>
-              {skippedCount === 1
-                ? "1 service is unavailable for client overrides because it uses team member rates"
-                : `${skippedCount} services are unavailable for client overrides because they use team member rates`}
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+              <span className="shrink-0 mt-px">ℹ</span>
+              <span>
+                {skippedCount === 1
+                  ? "1 service below can't be overridden — it uses team member rates."
+                  : `${skippedCount} services below can't be overridden — they use team member rates.`}
+              </span>
             </div>
           )}
           <div className="relative mt-4">
@@ -179,6 +184,23 @@ function Step1({
                   </td>
                 </tr>
               ))}
+              {teamRateServices.map((svc) => (
+                <tr key={svc.id} className="cursor-not-allowed opacity-50">
+                  <td className="px-4 py-3">
+                    <input type="checkbox" className="table-checkbox" disabled />
+                  </td>
+                  <td className="px-2 py-3">
+                    <div className="font-medium truncate">{svc.name}</div>
+                  </td>
+                  <td className="w-32 px-2 py-3 text-muted-foreground truncate">{svc.category}</td>
+                  <td className="w-32 px-4 py-3 text-right">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      <IconLock className="size-3 shrink-0" />
+                      Team rates
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
           </div>
@@ -214,6 +236,66 @@ function Step2({
   onSave: () => void
 }) {
   const [search, setSearch] = React.useState("")
+  const [adjustment, setAdjustment] = React.useState("")
+  const [rounding, setRounding] = React.useState<Rounding>(0)
+  const [pinned, setPinned] = React.useState<Set<string>>(new Set())
+  const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
+
+  const toggleCollapsed = (accId: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(accId) ? next.delete(accId) : next.add(accId)
+      return next
+    })
+
+  // Freeze baseline on mount — calculator always computes relative to this
+  const baseRates = React.useRef<Record<string, Record<string, number>>>({})
+  React.useEffect(() => {
+    const base: Record<string, Record<string, number>> = {}
+    for (const svc of services) {
+      base[svc.id] = {}
+      for (const acc of accounts) {
+        const raw = rates[svc.id]?.[acc.id] ?? ""
+        const parsed = parseFloat(raw)
+        base[svc.id][acc.id] = !isNaN(parsed) && raw !== "" ? parsed : svc.defaultRate
+      }
+    }
+    baseRates.current = base
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Apply calculator to all non-pinned cells whenever adjustment or rounding changes
+  React.useEffect(() => {
+    const pct = parseFloat(adjustment)
+    for (const svc of services) {
+      for (const acc of accounts) {
+        const key = `${svc.id}:${acc.id}`
+        if (pinned.has(key)) continue
+        if (adjustment === "" || isNaN(pct)) {
+          // Reset to baseline: show existing override if there was one, else empty
+          const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
+          const base = baseRates.current[svc.id]?.[acc.id]
+          onRateChange(svc.id, acc.id, existingOverride && base != null ? String(base) : "")
+        } else {
+          const base = baseRates.current[svc.id]?.[acc.id] ?? svc.defaultRate
+          const newRate = applyAdjustment(base, pct, rounding)
+          onRateChange(svc.id, acc.id, String(newRate))
+        }
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adjustment, rounding])
+
+  const handleManualChange = (serviceId: string, accountId: string, value: string) => {
+    const key = `${serviceId}:${accountId}`
+    setPinned((prev) => {
+      const next = new Set(prev)
+      if (value !== "") next.add(key)
+      else next.delete(key) // cleared → unpin, let calculator take over
+      return next
+    })
+    onRateChange(serviceId, accountId, value)
+  }
 
   const filtered = accounts.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
@@ -229,30 +311,55 @@ function Step2({
           </p>
         </div>
 
+        <PriceAdjustmentCalculator
+          adjustment={adjustment}
+          setAdjustment={setAdjustment}
+          rounding={rounding}
+          setRounding={setRounding}
+          autoFocus={true}
+        />
+
         <div className="relative">
           <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search accounts" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-9" placeholder="Search clients" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
         <div className="flex flex-col gap-6">
-          {services.map((svc) => (
-            <div key={svc.id} className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm font-semibold">{svc.name}</span>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  Default: ${svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{svc.rateType === "Hour" ? "/hr" : ""}
-                </span>
-              </div>
-              <div className="shrink-0 overflow-hidden rounded-xl border">
+          {filtered.map((acc) => {
+            const isCollapsed = collapsed.has(acc.id)
+            return (
+            <div key={acc.id} className="flex flex-col gap-0 overflow-hidden rounded-xl border">
+              <button
+                type="button"
+                className="flex items-center gap-2 px-4 py-3 text-left hover:bg-accent/50"
+                onClick={() => toggleCollapsed(acc.id)}
+              >
+                <IconChevronDown
+                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                  style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                />
+                <span className="text-sm font-semibold">{acc.name}</span>
+              </button>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateRows: isCollapsed ? "0fr" : "1fr",
+                  transition: "grid-template-rows 200ms ease",
+                }}
+              >
+              <div className="overflow-hidden">
+              <div className="shrink-0 border-t">
                 <table className="panel-table w-full text-[14px]">
                   <thead className="border-b bg-background">
                     <tr>
-                      <th className="px-4 py-3 text-left text-[13px] font-semibold text-secondary-foreground">Account</th>
+                      <th className="px-4 py-3 text-left text-[13px] font-semibold text-secondary-foreground">Service</th>
                       <th className="w-52 px-4 py-3 text-right text-[13px] font-semibold text-secondary-foreground">Client override</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((acc, i) => {
+                    {services.map((svc, i) => {
+                      const key = `${svc.id}:${acc.id}`
+                      const isPinned = pinned.has(key)
                       const inputVal = rates[svc.id]?.[acc.id] ?? ""
                       const parsed = parseFloat(inputVal)
                       const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
@@ -263,9 +370,12 @@ function Step2({
                         : null
 
                       return (
-                        <tr key={acc.id} className={i % 2 === 1 ? "bg-workspace" : ""}>
+                        <tr key={svc.id} className={i % 2 === 1 ? "bg-workspace" : ""}>
                           <td className="px-4 py-2.5">
-                            <div className="font-medium truncate">{acc.name}</div>
+                            <div className="font-medium truncate">{svc.name}</div>
+                            {svc.description && (
+                              <div className="text-xs text-muted-foreground truncate">{svc.description}</div>
+                            )}
                           </td>
                           <td className="w-52 px-4 py-2">
                             <div className="flex items-center justify-end gap-2">
@@ -286,10 +396,10 @@ function Step2({
                               )}
                               <CurrencyInput
                                 value={inputVal}
-                                onChange={(v) => onRateChange(svc.id, acc.id, v)}
+                                onChange={(v) => handleManualChange(svc.id, acc.id, v)}
                                 placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                                 suffix={svc.rateType === "Hour" ? "/hr" : undefined}
-                                className="w-28"
+                                className={`w-28 ${isPinned ? "ring-1 ring-primary/40" : ""}`}
                               />
                             </div>
                           </td>
@@ -299,8 +409,11 @@ function Step2({
                   </tbody>
                 </table>
               </div>
+              </div>
+              </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 

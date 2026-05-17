@@ -80,6 +80,9 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
   const afterRound = afterPct !== null && rounding > 0
     ? (pct >= 0 ? Math.ceil(afterPct / rounding) * rounding : Math.floor(afterPct / rounding) * rounding)
     : afterPct
+  const mathRound = afterPct !== null && rounding > 0
+    ? Math.round(afterPct / rounding) * rounding
+    : null
   const fmt = (n: number) => n % 1 === 0 ? `$${n}` : `$${n.toFixed(2)}`
 
   return (
@@ -103,7 +106,7 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
                   <span className="cursor-default text-primary"><IconInfoCircle className="size-4" /></span>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md max-w-56" hideArrow>
-                  Larger rounding values may result in bigger percentage differences across services
+                  Prices are rounded up or down based on the adjustment. Larger rounding values may result in bigger percentage differences.
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -116,7 +119,10 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
         <p className="text-xs text-muted-foreground">Enter a positive or negative percentage to see how prices will change</p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Example: {[fmt(example), fmt(afterPct), rounding > 0 ? fmt(afterRound!) : null].filter(Boolean).join(" → ")}
+          Example: {[fmt(example), rounding > 0 ? fmt(afterPct) : null, rounding > 0 ? fmt(afterRound!) : fmt(afterPct)].filter(Boolean).join(" → ")}
+          {mathRound !== null && mathRound !== afterRound && (
+            <span className="text-muted-foreground/60"> (not {fmt(mathRound)})</span>
+          )}
         </p>
       )}
     </div>

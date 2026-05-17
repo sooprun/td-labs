@@ -64,7 +64,7 @@ function GlobalSearch({ onNavigate }: { onNavigate: (path: string) => void }) {
   }
 
   return (
-    <div ref={containerRef} className="relative hidden w-48 lg:block xl:w-72">
+    <div ref={containerRef} className="relative hidden min-w-0 flex-1 lg:block">
       <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         className="border-0 bg-transparent pl-9 shadow-none"
@@ -136,15 +136,11 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
         <span className="ml-3 truncate text-sm font-semibold text-foreground">TrueDraft Firm</span>
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2 pl-6 pr-8">
-        <div className="flex shrink-0 items-center gap-5">
-          <Button className="h-10 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button" onClick={protoAction("New")}>
-            New
-          </Button>
-          <GlobalSearch onNavigate={onNavigate} />
-        </div>
-
-        <div className="min-w-6 flex-1" />
+      <div className="flex min-w-0 flex-1 items-center gap-3 pl-6 pr-4">
+        <Button className="h-10 shrink-0 bg-[#24C875] px-6 text-white hover:bg-[#1DB866]" type="button" onClick={protoAction("New")}>
+          New
+        </Button>
+        <GlobalSearch onNavigate={onNavigate} />
 
         <div className="flex shrink-0 items-center text-sm font-medium text-foreground">
           <button type="button" className="hidden h-10 shrink-0 items-center gap-1.5 rounded-md px-2 hover:bg-accent hover:text-foreground xl:flex" onClick={protoAction("Time entry")}>
@@ -172,7 +168,7 @@ export function AppTopbar({ onNavigate }: AppTopbarProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-auto xl:justify-start xl:px-2">
+            <button className="flex h-10 w-10 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg text-left hover:bg-accent data-[state=open]:bg-accent xl:w-auto xl:max-w-[200px] xl:justify-start xl:px-2">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#E8813A] text-xs font-semibold text-white">
                 AS
               </span>
