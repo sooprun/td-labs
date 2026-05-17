@@ -111,7 +111,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
     <Sheet open={!!service} onOpenChange={(open) => { if (!open) onClose() }}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0"
+        className="flex flex-col gap-0 p-0"
         showCloseButton={false}
       >
         {/* Header */}

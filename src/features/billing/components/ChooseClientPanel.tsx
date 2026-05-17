@@ -47,7 +47,7 @@ export function ChooseClientPanel({ open, onClose, availableAccounts, onAdd }: P
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex flex-col gap-0 p-0" width={400} showCloseButton={false}>
+      <SheetContent side="right" className="flex flex-col gap-0 p-0" width={520} showCloseButton={false}>
 
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center gap-2 border-b bg-muted/40 px-4">

@@ -152,7 +152,7 @@ export function AddCustomRatePanel({ open, accountId, accountName, services, onC
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0" showCloseButton={false}>
+      <SheetContent side="right" className="flex flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <SheetHeader className="h-14 shrink-0 flex-row items-center justify-between border-b bg-muted/40 px-4 py-0">
           <SheetTitle className="text-base">Set client overrides</SheetTitle>

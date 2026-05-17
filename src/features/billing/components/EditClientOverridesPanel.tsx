@@ -405,7 +405,7 @@ export function EditClientOverridesPanel({ open, account, services, selectedIds,
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <SheetContent side="right" className="flex w-[520px] max-w-full flex-col gap-0 p-0" showCloseButton={false}>
+      <SheetContent side="right" className="flex flex-col gap-0 p-0" showCloseButton={false}>
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b bg-muted/40 px-4">
           <span className="text-xl font-semibold">Set client overrides</span>
