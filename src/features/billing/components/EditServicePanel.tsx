@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CurrencyInput, CurrencyCell } from "./RateInputs"
-import { AddClientModal } from "./AddClientModal"
+import { ChooseClientPanel } from "./ChooseClientPanel"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -441,7 +441,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
           <Button size="xl" className="px-5" variant="outline" onClick={onClose}>Cancel</Button>
         </div>
 
-        <AddClientModal
+        <ChooseClientPanel
           open={addClientOpen}
           onClose={() => setAddClientOpen(false)}
           availableAccounts={availableAccounts}
