@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconChevronDown, IconChevronRight, IconCirclePlus, IconSearch, IconTrash, IconCurrencyDollar, IconUsers } from "@tabler/icons-react"
+import { IconX, IconChevronDown, IconChevronRight, IconCirclePlus, IconSearch, IconTrash, IconCurrencyDollar, IconUsers, IconInfoCircle } from "@tabler/icons-react"
 
 import {
   Sheet,
@@ -279,103 +279,118 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
           </div>
 
           {/* Client overrides */}
-          <div className="flex flex-col gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-base font-semibold">Client overrides</p>
-                <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Set custom rates for specific clients</p>
-            </div>
-            <div className={`rounded-xl overflow-hidden ${overrides.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
-                  {overrides.length === 0 ? (
-                    <div className="flex flex-col items-center gap-2 py-6">
-                      <IconCurrencyDollar className="size-8 text-muted-foreground/40" strokeWidth={1} />
-                      <p className="text-sm text-muted-foreground">No client overrides set</p>
-                      {availableAccounts.length > 0 && (
-                        <Button variant="link" size="default" className="h-auto gap-2 p-0 text-primary hover:text-primary" onClick={() => setAddClientOpen(true)}>
-                          <IconCirclePlus className="size-4" />
-                          Add client
-                        </Button>
+          {/* NOTE: simultaneous client overrides + team rates is intentionally disabled — they are mutually exclusive.
+              When hasTeamRates, an info banner is shown instead of the editor. */}
+          {(() => {
+            const hasTeamRates = rateGroups.some((g) => !g.archived && g.services.some((s) => s.serviceId === service?.id))
+            return (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold">Client overrides</p>
+                    <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Set custom rates for specific clients</p>
+                </div>
+                {hasTeamRates ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                    <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
+                    <span>Client overrides can&apos;t be set for services with active team member rates. To use client overrides, remove this service from all rate groups first.</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className={`rounded-xl overflow-hidden ${overrides.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
+                      {overrides.length === 0 ? (
+                        <div className="flex flex-col items-center gap-2 py-6">
+                          <IconCurrencyDollar className="size-8 text-muted-foreground/40" strokeWidth={1} />
+                          <p className="text-sm text-muted-foreground">No client overrides set</p>
+                          {availableAccounts.length > 0 && (
+                            <Button variant="link" size="default" className="h-auto gap-2 p-0 text-primary hover:text-primary" onClick={() => setAddClientOpen(true)}>
+                              <IconCirclePlus className="size-4" />
+                              Add client
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <table className="panel-table w-full text-[14px]">
+                          <thead className="bg-background border-b">
+                            <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
+                              <th className="px-4 text-left text-[14px] font-semibold">Client</th>
+                              <th className="w-px" />
+                              <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold">Override</th>
+                              <th className="w-px" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {overrides.map((o, i) => {
+                              const defaultRate = parseFloat(rate) || 0
+                              const parsed = parseFloat(o.rateInput)
+                              const hasValue = o.rateInput.trim() !== "" && !isNaN(parsed)
+                              const pct = hasValue && defaultRate > 0
+                                ? Math.round(((parsed - defaultRate) / defaultRate) * 100)
+                                : null
+                              return (
+                                <tr key={o.accountId} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
+                                  <td className="px-4 text-sm">{o.accountName}</td>
+                                  <td className="w-px px-2 text-center whitespace-nowrap">
+                                    {hasValue && pct !== null && pct !== 0 && (
+                                      <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
+                                        pct > 0
+                                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                                          : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                                      }`}>
+                                        {pct > 0 ? "+" : ""}{pct}%
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="w-px min-w-[100px] p-0">
+                                    <CurrencyCell
+                                      value={o.rateInput}
+                                      onChange={(v) => handleOverrideRateChange(o.accountId, v)}
+                                      placeholder={defaultRate > 0 ? defaultRate.toFixed(2) : "0.00"}
+                                      suffix={rateType === "Hour" ? "/hr" : undefined}
+                                      className="w-full"
+                                    />
+                                  </td>
+                                  <td className="w-px px-2">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => handleRemoveOverride(o.accountId)}
+                                    >
+                                      <IconTrash className="size-4" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
                       )}
                     </div>
-                  ) : (
-                    <table className="panel-table w-full text-[14px]">
-                      <thead className="bg-background border-b">
-                        <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
-                          <th className="px-4 text-left text-[14px] font-semibold">Client</th>
-                          <th className="w-px" />
-                          <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold">Override</th>
-                          <th className="w-px" />
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {overrides.map((o, i) => {
-                          const defaultRate = parseFloat(rate) || 0
-                          const parsed = parseFloat(o.rateInput)
-                          const hasValue = o.rateInput.trim() !== "" && !isNaN(parsed)
-                          const pct = hasValue && defaultRate > 0
-                            ? Math.round(((parsed - defaultRate) / defaultRate) * 100)
-                            : null
-                          const fmtDefault = `$${defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${rateType === "Hour" ? "/hr" : ""}`
-
-                          return (
-                            <tr key={o.accountId} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
-                              <td className="px-4 text-sm">{o.accountName}</td>
-                              <td className="w-px px-2 text-center whitespace-nowrap">
-                                {hasValue && pct !== null && pct !== 0 && (
-                                  <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
-                                    pct > 0
-                                      ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                                      : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                                  }`}>
-                                    {pct > 0 ? "+" : ""}{pct}%
-                                  </span>
-                                )}
-                              </td>
-                              <td className="w-px min-w-[100px] p-0">
-                                <CurrencyCell
-                                  value={o.rateInput}
-                                  onChange={(v) => handleOverrideRateChange(o.accountId, v)}
-                                  placeholder={defaultRate > 0 ? defaultRate.toFixed(2) : "0.00"}
-                                  suffix={rateType === "Hour" ? "/hr" : undefined}
-                                  className="w-full"
-                                />
-                              </td>
-                              <td className="w-px px-2">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={() => handleRemoveOverride(o.accountId)}
-                                >
-                                  <IconTrash className="size-4" />
-                                </Button>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-            </div>
-            {overrides.length > 0 && availableAccounts.length > 0 && (
-              <Button
-                type="button"
-                variant="link"
-                size="default"
-                className="h-auto gap-2 p-0 text-primary hover:text-primary self-start"
-                onClick={() => setAddClientOpen(true)}
-              >
-                <IconCirclePlus className="size-4" />
-                Add client
-              </Button>
-            )}
-          </div>
+                    {overrides.length > 0 && availableAccounts.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="default"
+                        className="h-auto gap-2 p-0 text-primary hover:text-primary self-start"
+                        onClick={() => setAddClientOpen(true)}
+                      >
+                        <IconCirclePlus className="size-4" />
+                        Add client
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Team member rates */}
           {(() => {
+            const hasClientOverrides = overrides.length > 0
             const teamEntries = rateGroups
               .filter((g) => !g.archived)
               .flatMap((g) => {
@@ -392,53 +407,60 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
                   </div>
                   <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
                 </div>
-                <div className={`rounded-xl overflow-hidden ${teamEntries.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
-                  {teamEntries.length === 0 ? (
-                    <div className="flex flex-col items-center gap-2 py-6">
-                      <IconUsers className="size-8 text-muted-foreground/40" strokeWidth={1} />
-                      <p className="text-sm text-muted-foreground">No team member rates set</p>
-                    </div>
-                  ) : (
-                    <table className="panel-table w-full text-[14px]">
-                      <thead className="bg-background border-b">
-                        <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
-                          <th className="px-4 text-left text-[14px] font-semibold">Team name</th>
-                          <th className="w-px px-4 text-left text-[14px] font-semibold whitespace-nowrap">Team members</th>
-                          <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold whitespace-nowrap">Team member rate</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {teamEntries.map((entry, i) => (
-                          <tr key={i} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
-                            <td className="px-4 text-sm">{entry.groupName}</td>
-                            <td className="w-px px-4">
-                              <div className="flex items-center">
-                                {entry.members.map((m, mi) => (
-                                  <span
-                                    key={m.name}
-                                    className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white"
-                                    style={{ backgroundColor: m.color, marginLeft: mi > 0 ? "-8px" : 0 }}
-                                    title={m.name}
-                                  >
-                                    {m.initials}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="w-px min-w-[100px] p-0">
-                              <CurrencyCell
-                                value={teamRateInputs[entry.group] ?? String(entry.rate)}
-                                onChange={(v) => setTeamRateInputs((prev) => ({ ...prev, [entry.group]: v }))}
-                                suffix={entry.rateType === "Hour" ? "/hr" : undefined}
-                                className="w-full"
-                              />
-                            </td>
+                {hasClientOverrides ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                    <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
+                    <span>Team member rates can&apos;t be applied to services that already have client overrides. Remove all client overrides first to enable team member rates.</span>
+                  </div>
+                ) : (
+                  <div className={`rounded-xl overflow-hidden ${teamEntries.length === 0 ? "bg-slate-50" : "border bg-background"}`}>
+                    {teamEntries.length === 0 ? (
+                      <div className="flex flex-col items-center gap-2 py-6">
+                        <IconUsers className="size-8 text-muted-foreground/40" strokeWidth={1} />
+                        <p className="text-sm text-muted-foreground">No team member rates set</p>
+                      </div>
+                    ) : (
+                      <table className="panel-table w-full text-[14px]">
+                        <thead className="bg-background border-b">
+                          <tr className="h-12" style={{ color: "rgb(38,51,77)" }}>
+                            <th className="px-4 text-left text-[14px] font-semibold">Team name</th>
+                            <th className="w-px px-4 text-left text-[14px] font-semibold whitespace-nowrap">Team members</th>
+                            <th className="w-px min-w-[100px] pr-[38px] text-right text-[14px] font-semibold whitespace-nowrap">Team member rate</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                        </thead>
+                        <tbody>
+                          {teamEntries.map((entry, i) => (
+                            <tr key={i} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
+                              <td className="px-4 text-sm">{entry.groupName}</td>
+                              <td className="w-px px-4">
+                                <div className="flex items-center">
+                                  {entry.members.map((m, mi) => (
+                                    <span
+                                      key={m.name}
+                                      className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white"
+                                      style={{ backgroundColor: m.color, marginLeft: mi > 0 ? "-8px" : 0 }}
+                                      title={m.name}
+                                    >
+                                      {m.initials}
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="w-px min-w-[100px] p-0">
+                                <CurrencyCell
+                                  value={teamRateInputs[entry.group] ?? String(entry.rate)}
+                                  onChange={(v) => setTeamRateInputs((prev) => ({ ...prev, [entry.group]: v }))}
+                                  suffix={entry.rateType === "Hour" ? "/hr" : undefined}
+                                  className="w-full"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })()}
