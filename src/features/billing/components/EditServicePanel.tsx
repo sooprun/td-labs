@@ -285,13 +285,15 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
             const hasTeamRates = rateGroups.some((g) => !g.archived && g.services.some((s) => s.serviceId === service?.id))
             return (
               <div className="flex flex-col gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-base font-semibold">Client overrides</p>
-                    <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                {!hasTeamRates && (
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-base font-semibold">Client overrides</p>
+                      <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Set custom rates for specific clients</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Set custom rates for specific clients</p>
-                </div>
+                )}
                 {hasTeamRates ? (
                   <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
                     <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
@@ -400,13 +402,15 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
               })
             return (
               <div className="flex flex-col gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-base font-semibold">Team member rates</p>
-                    <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                {!hasClientOverrides && (
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-base font-semibold">Team member rates</p>
+                      <span className="inline-flex items-center rounded-full bg-[#7C3AED] px-2 py-0.5 text-[10px] font-bold text-white">New</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Rates applied based on team member billing groups</p>
-                </div>
+                )}
                 {hasClientOverrides ? (
                   <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
                     <IconInfoCircle className="size-4 shrink-0 mt-0.5" />
