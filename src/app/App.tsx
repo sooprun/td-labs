@@ -11,12 +11,15 @@ import { ServicesPage } from "@/pages/billing/services/ServicesPage"
 import { InvoicesPage } from "@/pages/billing/invoices/InvoicesPage"
 import { serviceItems } from "@/mock/services"
 import type { ServiceItem } from "@/mock/services"
+import { rateGroups as initialRateGroups } from "@/mock/data/team-member-rates"
+import type { RateGroup } from "@/mock/data/team-member-rates"
 import { accounts } from "@/mock/accounts"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
 import { UIKitPage } from "@/pages/ui-kit/UIKitPage"
 
 export function App() {
   const [services, setServices] = React.useState<ServiceItem[]>(serviceItems)
+  const [rateGroups, setRateGroups] = React.useState<RateGroup[]>(initialRateGroups)
   const [followedIds, setFollowedIds] = React.useState<Set<string>>(
     () => new Set(accounts.filter((a) => a.followed).map((a) => a.id))
   )
@@ -98,7 +101,7 @@ export function App() {
     "/app/clients": <AccountsPage onNavigate={handleNavigate} services={services} onServicesChange={setServices} followedIds={followedIds} />,
     "/app/workflow/pipelines": <PipelinesPage />,
     "/app/billing": <InvoicesPage />,
-    "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} />,
+    "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} rateGroups={rateGroups} onRateGroupsChange={setRateGroups} />,
     "/app/ui-kit": <UIKitPage />,
   }
 

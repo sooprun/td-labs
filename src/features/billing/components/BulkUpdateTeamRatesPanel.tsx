@@ -223,7 +223,7 @@ type Props = {
   groups: RateGroup[]
   services: ServiceItem[]
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: (updatedGroups: RateGroup[]) => void
 }
 
 export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onConfirm }: Props) {
@@ -234,7 +234,15 @@ export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onCo
   const reset = () => { setStep(1); setAdjustment("10"); setRounding(5) }
   const handleClose = () => { onClose(); setTimeout(reset, 300) }
   const handleConfirm = () => {
-    onConfirm()
+    const pct = parseFloat(adjustment)
+    const updatedGroups = groups.map((g) => ({
+      ...g,
+      services: g.services.map((s) => ({
+        ...s,
+        rate: applyAdjustment(s.rate, pct, rounding),
+      })),
+    }))
+    onConfirm(updatedGroups)
     handleClose()
     toast.success(`Rates updated for ${groups.length} rate group${groups.length === 1 ? "" : "s"}`)
   }

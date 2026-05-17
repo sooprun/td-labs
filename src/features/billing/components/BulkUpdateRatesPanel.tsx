@@ -11,7 +11,7 @@ import { protoAction } from "@/lib/proto"
 import { CurrencyInput } from "./RateInputs"
 import { PriceAdjustmentCalculator, applyAdjustment, type Rounding } from "./PriceAdjustmentCalculator"
 import type { ServiceItem } from "@/mock/services"
-import { rateGroups } from "@/mock/data/team-member-rates"
+import type { RateGroup } from "@/mock/data/team-member-rates"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -368,11 +368,12 @@ function Step2({ services, adjustment, rounding, rateTypes, editableMaps, onDefa
 type BulkUpdateRatesPanelProps = {
   open: boolean
   services: ServiceItem[]
+  rateGroups: RateGroup[]
   onClose: () => void
-  onConfirm: (updates: { id: string; defaultRate: number; clientOverridesList: ServiceItem["clientOverridesList"] }[]) => void
+  onConfirm: (updates: { id: string; defaultRate: number; clientOverridesList: ServiceItem["clientOverridesList"] }[], updatedRateGroups?: RateGroup[]) => void
 }
 
-export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: BulkUpdateRatesPanelProps) {
+export function BulkUpdateRatesPanel({ open, services, rateGroups, onClose, onConfirm }: BulkUpdateRatesPanelProps) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("")
   const [rounding, setRounding] = React.useState<Rounding>(1)
@@ -445,7 +446,17 @@ export function BulkUpdateRatesPanel({ open, services, onClose, onConfirm }: Bul
         : svc.clientOverridesList,
     }))
 
-    onConfirm(updates)
+    const updatedRateGroups = rateTypes.team
+      ? rateGroups.map((g) => ({
+          ...g,
+          services: g.services.map((s) => {
+            const newRate = parseFloat(teamRates[s.serviceId]?.[g.id] ?? "")
+            return isNaN(newRate) ? s : { ...s, rate: newRate }
+          }),
+        }))
+      : undefined
+
+    onConfirm(updates, updatedRateGroups)
     handleClose()
     toast.success(`Rates updated for ${updates.length} service${updates.length === 1 ? "" : "s"}`)
   }

@@ -7,7 +7,7 @@ import {
   IconChevronDown,
   IconStar,
 } from "@tabler/icons-react"
-import { rateGroups, type RateGroup } from "@/mock/data/team-member-rates"
+import type { RateGroup } from "@/mock/data/team-member-rates"
 import { useQueryParam } from "@/hooks/useQueryParam"
 import { TeamRatesBulkActionsBar } from "@/features/billing/components/TeamRatesBulkActionsBar"
 import { BulkUpdateTeamRatesPanel } from "@/features/billing/components/BulkUpdateTeamRatesPanel"
@@ -110,7 +110,7 @@ function ServiceChips({ services: groupServices, allItems }: { services: RateGro
   )
 }
 
-function TeamMemberRatesTab({ items }: { items: ServiceItem[] }) {
+function TeamMemberRatesTab({ items, rateGroups, onRateGroupsChange }: { items: ServiceItem[]; rateGroups: RateGroup[]; onRateGroupsChange: (g: RateGroup[]) => void }) {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
 
@@ -220,7 +220,11 @@ function TeamMemberRatesTab({ items }: { items: ServiceItem[] }) {
         groups={selectedGroups}
         services={items}
         onClose={() => setBulkUpdateOpen(false)}
-        onConfirm={() => { setSelectedIds([]); setBulkUpdateOpen(false) }}
+        onConfirm={(updatedGroups) => {
+          onRateGroupsChange(rateGroups.map((g) => updatedGroups.find((ug) => ug.id === g.id) ?? g))
+          setSelectedIds([])
+          setBulkUpdateOpen(false)
+        }}
       />
     </div>
   )
@@ -231,6 +235,8 @@ function TeamMemberRatesTab({ items }: { items: ServiceItem[] }) {
 type ServicesPageProps = {
   items: ServiceItem[]
   onItemsChange: (items: ServiceItem[]) => void
+  rateGroups: RateGroup[]
+  onRateGroupsChange: (groups: RateGroup[]) => void
 }
 
 const TOP_TAB_SLUGS: Record<string, TopTab> = {
@@ -242,7 +248,7 @@ const TOP_TAB_SLUG_REV: Record<TopTab, string> = {
   "Team member rates": "custom_rates",
 }
 
-export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
+export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsChange }: ServicesPageProps) {
   const [tabSlug, setTabSlug] = useQueryParam("tab", "service_items")
   const topTab: TopTab = TOP_TAB_SLUGS[tabSlug] ?? "Services"
   const setTopTab = (tab: TopTab) => setTabSlug(TOP_TAB_SLUG_REV[tab])
@@ -467,12 +473,14 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
           </div>
         </div>
       ) : (
-        <TeamMemberRatesTab items={items} />
+        <TeamMemberRatesTab items={items} rateGroups={rateGroups} onRateGroupsChange={onRateGroupsChange} />
       )}
 
       <EditServicePanel
         service={editingService}
         onClose={() => setEditingService(null)}
+        rateGroups={rateGroups}
+        onRateGroupsChange={onRateGroupsChange}
         onSave={(updated) => {
           onItemsChange(items.map((s) => s.id === updated.id ? updated : s))
           setEditingService(null)
@@ -483,12 +491,14 @@ export function ServicesPage({ items, onItemsChange }: ServicesPageProps) {
       <BulkUpdateRatesPanel
         open={bulkUpdateOpen}
         services={filtered.filter((s) => selectedIds.includes(s.id))}
+        rateGroups={rateGroups}
         onClose={() => setBulkUpdateOpen(false)}
-        onConfirm={(updates) => {
+        onConfirm={(updates, updatedRateGroups) => {
           onItemsChange(items.map((svc) => {
             const upd = updates.find((u) => u.id === svc.id)
             return upd ? { ...svc, defaultRate: upd.defaultRate, clientOverridesList: upd.clientOverridesList } : svc
           }))
+          if (updatedRateGroups) onRateGroupsChange(updatedRateGroups)
           setSelectedIds([])
           setBulkUpdateOpen(false)
         }}

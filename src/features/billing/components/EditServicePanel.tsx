@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import type { ServiceItem, RateType, ClientOverride } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
-import { rateGroups } from "@/mock/data/team-member-rates"
+import type { RateGroup } from "@/mock/data/team-member-rates"
 
 // ─── AddClientModal ───────────────────────────────────────────────────────────
 
@@ -112,9 +112,11 @@ type EditServicePanelProps = {
   service: ServiceItem | null
   onClose: () => void
   onSave: (updated: ServiceItem) => void
+  rateGroups: RateGroup[]
+  onRateGroupsChange: (groups: RateGroup[]) => void
 }
 
-export function EditServicePanel({ service, onClose, onSave }: EditServicePanelProps) {
+export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateGroupsChange }: EditServicePanelProps) {
   const [name, setName] = React.useState("")
   const [category, setCategory] = React.useState("")
   const [description, setDescription] = React.useState("")
@@ -473,6 +475,16 @@ export function EditServicePanel({ service, onClose, onSave }: EditServicePanelP
             const savedOverrides = overrides
               .filter((o) => o.rateInput.trim() !== "" && !isNaN(parseFloat(o.rateInput)))
               .map(({ rateInput: _, ...o }) => o)
+            // Save team member rates
+            const updatedRateGroups = rateGroups.map((g) => ({
+              ...g,
+              services: g.services.map((s) => {
+                if (s.serviceId !== service.id) return s
+                const newRate = parseFloat(teamRateInputs[g.id] ?? "")
+                return isNaN(newRate) ? s : { ...s, rate: newRate }
+              }),
+            }))
+            onRateGroupsChange(updatedRateGroups)
             onSave({
               ...service,
               name,
