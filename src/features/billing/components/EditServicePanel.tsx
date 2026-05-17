@@ -334,7 +334,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
                               return (
                                 <tr key={o.accountId} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
                                   <td className="px-4 text-sm">{o.accountName}</td>
-                                  <td className="w-px px-2 text-center whitespace-nowrap">
+                                  <td className="w-px px-2 text-right whitespace-nowrap">
                                     {hasValue && pct !== null && pct !== 0 && (
                                       <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
                                         pct > 0

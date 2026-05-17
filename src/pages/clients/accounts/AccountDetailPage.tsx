@@ -1013,6 +1013,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
               <TableHead className="whitespace-nowrap cursor-pointer select-none text-right hover:text-foreground" onClick={() => handleSort("defaultRate")}>
                 <span className="inline-flex items-center justify-end w-full">Default rate<DataTableSortIcon col="defaultRate" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
+              <TableHead className="w-px" />
               <TableHead className="w-px min-w-[100px] pr-[38px] text-right">Client override</TableHead>
               {/* <TableHead className="w-36">Team rate</TableHead> */}
               <TableHead className="w-10 px-0">
@@ -1046,26 +1047,8 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                   <TableCell className="whitespace-nowrap text-right text-muted-foreground">
                     <span className={override && !hasTeamRate ? "line-through" : ""}>{fmt(svc.defaultRate, svc.rateType)}</span>
                   </TableCell>
-                  <TableCell className="w-px min-w-[100px] p-0 h-px">
-                    {hasTeamRate ? (() => {
-                      return (
-                        <div className="flex h-full items-center justify-end gap-1.5 px-4 py-2">
-                          <span className="text-sm text-muted-foreground">Unavailable</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-default text-primary transition-colors">
-                                  <IconInfoCircle className="size-4" />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
-                                This service uses team member rates — it can't be overridden per client. Default or team member rate will apply on invoices and proposals.
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      )
-                    })() : (() => {
+                  <TableCell className="w-px px-2 text-right whitespace-nowrap">
+                    {!hasTeamRate && (() => {
                       const inputVal = overrideInputs[svc.id] ?? ""
                       const liveParsed = parseFloat(inputVal.replace(/,/g, ""))
                       const pct = !isNaN(liveParsed) && liveParsed > 0 && svc.defaultRate > 0
@@ -1074,24 +1057,40 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                       const badgeColor = pct !== null && pct > 0
                         ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                         : "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                      return (
-                        <div className="flex h-full items-stretch justify-end gap-2">
-                          {pct !== null && pct !== 0 && (
-                            <span className={`self-center shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
-                              {pct > 0 ? "+" : ""}{pct}%
-                            </span>
-                          )}
-                          <CurrencyCell
-                            value={inputVal}
-                            onChange={(v) => handleOverrideChange(svc.id, v)}
-                            onBlur={() => commitOverride(svc)}
-                            placeholder={svc.defaultRate > 0 ? svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
-                            suffix={svc.rateType === "Hour" ? "/hr" : undefined}
-                            className="min-w-[100px]"
-                          />
-                        </div>
-                      )
+                      return pct !== null && pct !== 0 ? (
+                        <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${badgeColor}`}>
+                          {pct > 0 ? "+" : ""}{pct}%
+                        </span>
+                      ) : null
                     })()}
+                  </TableCell>
+                  <TableCell className="w-px min-w-[100px] p-0 h-px">
+                    {hasTeamRate ? (
+                      <div className="flex h-full items-center justify-end gap-1.5 px-4 py-2">
+                        <span className="text-sm text-muted-foreground">Unavailable</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-default text-primary transition-colors">
+                                <IconInfoCircle className="size-4" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md" hideArrow>
+                              This service uses team member rates — it can't be overridden per client. Default or team member rate will apply on invoices and proposals.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    ) : (
+                      <CurrencyCell
+                        value={overrideInputs[svc.id] ?? ""}
+                        onChange={(v) => handleOverrideChange(svc.id, v)}
+                        onBlur={() => commitOverride(svc)}
+                        placeholder={svc.defaultRate > 0 ? svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                        suffix={svc.rateType === "Hour" ? "/hr" : undefined}
+                        className="w-full"
+                      />
+                    )}
                   </TableCell>
                   {/* <TableCell className="w-36">
                     {(() => {
