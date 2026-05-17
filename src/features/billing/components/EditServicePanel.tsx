@@ -54,9 +54,9 @@ function AddClientModal({
   const toggle = (id: string) =>
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
 
-  const filtered = availableAccounts.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = availableAccounts
+    .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
