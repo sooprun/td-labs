@@ -148,7 +148,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
       const inputs: Record<string, string> = {}
       rateGroups.filter((g) => !g.archived).forEach((g) => {
         const svc = g.services.find((s) => s.serviceId === service.id)
-        if (svc) inputs[g.name] = String(svc.rate)
+        if (svc) inputs[g.id] = String(svc.rate)
       })
       setTeamRateInputs(inputs)
     }
@@ -381,7 +381,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
               .flatMap((g) => {
                 const svc = g.services.find((s) => s.serviceId === service?.id)
                 if (!svc) return []
-                return [{ group: g.name, members: g.members, rate: svc.rate, rateType: service?.rateType ?? "" }]
+                return [{ group: g.id, groupName: g.name, members: g.members, rate: svc.rate, rateType: service?.rateType ?? "" }]
               })
             return (
               <div className="flex flex-col gap-3">
@@ -410,7 +410,7 @@ export function EditServicePanel({ service, onClose, onSave, rateGroups, onRateG
                       <tbody>
                         {teamEntries.map((entry, i) => (
                           <tr key={i} className={`h-10 text-[14px] ${i % 2 === 1 ? "bg-workspace" : ""}`}>
-                            <td className="px-4 text-sm">{entry.group}</td>
+                            <td className="px-4 text-sm">{entry.groupName}</td>
                             <td className="w-px px-4">
                               <div className="flex items-center">
                                 {entry.members.map((m, mi) => (
