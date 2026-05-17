@@ -426,21 +426,19 @@ function LeftPanel({
                     return (
                       <tr key={o.name} className="border-b last:border-0">
                         <td className="py-2.5 pr-4 truncate max-w-0 w-full">{o.name}</td>
-                        <td className="py-2.5 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {pct !== null && pct !== 0 && (
-                              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                                pct > 0
-                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              }`}>
-                                {pct > 0 ? "+" : ""}{pct}%
-                              </span>
-                            )}
-                            <span className="text-sm font-medium">
-                              ${o.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{o.rateType === "Hour" ? "/hr" : ""}
+                        <td className="w-px whitespace-nowrap py-2.5 pr-2 text-right">
+                          {pct !== null && pct !== 0 && (
+                            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                              pct > 0
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}>
+                              {pct > 0 ? "+" : ""}{pct}%
                             </span>
-                          </div>
+                          )}
+                        </td>
+                        <td className="w-px whitespace-nowrap py-2.5 text-right text-sm font-medium">
+                          ${o.rate.toLocaleString("en-US", { minimumFractionDigits: 0 })}{o.rateType === "Hour" ? "/hr" : ""}
                         </td>
                       </tr>
                     )
