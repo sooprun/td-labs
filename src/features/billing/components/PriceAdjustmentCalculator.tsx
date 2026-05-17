@@ -9,15 +9,19 @@ import { CurrencyInput, PercentInput } from "./RateInputs"
 export type Rounding = number
 
 export const ROUNDING_PRESETS: { value: number; label: string }[] = [
-  { value: 0,  label: "No rounding" },
-  { value: 1,  label: "$1" },
-  { value: 5,  label: "$5" },
-  { value: 10, label: "$10" },
+  { value: 0,   label: "No rounding" },
+  { value: 1,   label: "$1" },
+  { value: 5,   label: "$5" },
+  { value: 10,  label: "$10" },
+  { value: 25,  label: "$25" },
+  { value: 50,  label: "$50" },
+  { value: 100, label: "$100" },
 ]
 
 export function applyAdjustment(rate: number, pct: number, rounding: Rounding): number {
   const raw = rate * (1 + pct / 100)
   if (rounding === 0) return Math.round(raw * 100) / 100
+  if (rounding === 1) return Math.round(raw)
   return pct >= 0
     ? Math.ceil(raw / rounding) * rounding
     : Math.floor(raw / rounding) * rounding
@@ -78,7 +82,9 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
   const example = 137.50
   const afterPct = valid ? example * (1 + pct / 100) : null
   const afterRound = afterPct !== null && rounding > 0
-    ? (pct >= 0 ? Math.ceil(afterPct / rounding) * rounding : Math.floor(afterPct / rounding) * rounding)
+    ? rounding === 1
+      ? Math.round(afterPct)
+      : (pct >= 0 ? Math.ceil(afterPct / rounding) * rounding : Math.floor(afterPct / rounding) * rounding)
     : afterPct
   const mathRound = afterPct !== null && rounding > 0
     ? Math.round(afterPct / rounding) * rounding
@@ -106,7 +112,7 @@ export function PriceAdjustmentCalculator({ adjustment, setAdjustment, rounding,
                   <span className="cursor-default text-primary"><IconInfoCircle className="size-4" /></span>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={6} className="bg-background text-foreground text-xs border shadow-md max-w-56" hideArrow>
-                  Prices are rounded up or down based on the adjustment. Larger rounding values may result in bigger percentage differences.
+                  Prices are rounded up or down based on the adjustment, so larger rounding values may result in bigger percentage differences
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

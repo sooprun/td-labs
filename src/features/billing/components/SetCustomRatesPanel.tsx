@@ -237,9 +237,10 @@ function Step2({
 }) {
   const [search, setSearch] = React.useState("")
   const [adjustment, setAdjustment] = React.useState("")
-  const [rounding, setRounding] = React.useState<Rounding>(0)
+  const [rounding, setRounding] = React.useState<Rounding>(1)
   const [pinned, setPinned] = React.useState<Set<string>>(new Set())
   const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
+  const [savedAccounts, setSavedAccounts] = React.useState<Set<string>>(new Set())
 
   const toggleCollapsed = (accId: string) =>
     setCollapsed((prev) => {
@@ -286,15 +287,64 @@ function Step2({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustment, rounding])
 
-  const handleManualChange = (serviceId: string, accountId: string, value: string) => {
-    const key = `${serviceId}:${accountId}`
+  const handleSaveAccount = (accId: string) => {
     setPinned((prev) => {
       const next = new Set(prev)
-      if (value !== "") next.add(key)
-      else next.delete(key) // cleared → unpin, let calculator take over
+      for (const svc of services) next.add(`${svc.id}:${accId}`)
       return next
     })
-    onRateChange(serviceId, accountId, value)
+    setSavedAccounts((prev) => new Set([...prev, accId]))
+  }
+
+  const handleResetAccount = (accId: string) => {
+    setPinned((prev) => {
+      const next = new Set(prev)
+      for (const svc of services) next.delete(`${svc.id}:${accId}`)
+      return next
+    })
+    setSavedAccounts((prev) => { const s = new Set(prev); s.delete(accId); return s })
+    // Restore calculator values (or baseline) for all cells
+    const pct = parseFloat(adjustment)
+    for (const svc of services) {
+      if (!isNaN(pct) && adjustment !== "") {
+        const base = baseRates.current[svc.id]?.[accId] ?? svc.defaultRate
+        onRateChange(svc.id, accId, String(applyAdjustment(base, pct, rounding)))
+      } else {
+        const existingOverride = svc.clientOverridesList.find((o) => o.accountId === accId)
+        const base = baseRates.current[svc.id]?.[accId]
+        onRateChange(svc.id, accId, existingOverride && base != null ? String(base) : "")
+      }
+    }
+  }
+
+  const handleManualChange = (serviceId: string, accountId: string, value: string) => {
+    const key = `${serviceId}:${accountId}`
+
+    if (value !== "") {
+      // Pin this cell
+      const newPinned = new Set([...pinned, key])
+      setPinned(newPinned)
+      // Auto-save account if all its cells are now pinned
+      const allPinned = services.every((svc) => newPinned.has(`${svc.id}:${accountId}`))
+      if (allPinned) setSavedAccounts((prev) => new Set([...prev, accountId]))
+      onRateChange(serviceId, accountId, value)
+    } else {
+      // Clear: unpin, unsave account
+      setPinned((prev) => { const s = new Set(prev); s.delete(key); return s })
+      setSavedAccounts((prev) => { const s = new Set(prev); s.delete(accountId); return s })
+      // Show calculator value if active, otherwise reset to baseline
+      const pct = parseFloat(adjustment)
+      if (!isNaN(pct) && adjustment !== "") {
+        const base = baseRates.current[serviceId]?.[accountId]
+          ?? services.find((s) => s.id === serviceId)?.defaultRate ?? 0
+        onRateChange(serviceId, accountId, String(applyAdjustment(base, pct, rounding)))
+      } else {
+        const svc = services.find((s) => s.id === serviceId)
+        const existingOverride = svc?.clientOverridesList.find((o) => o.accountId === accountId)
+        const base = baseRates.current[serviceId]?.[accountId]
+        onRateChange(serviceId, accountId, existingOverride && base != null ? String(base) : "")
+      }
+    }
   }
 
   const filtered = accounts.filter((a) =>
@@ -318,28 +368,57 @@ function Step2({
           setRounding={setRounding}
           autoFocus={true}
         />
+        <div className={`flex items-start gap-2 rounded-xl px-4 py-3 text-sm transition-colors ${pinned.size > 0 ? "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" : "invisible"}`}>
+          <span className="mt-px shrink-0">ℹ</span>
+          <span>Saved and edited values won&apos;t be affected by the adjustment — use Reset to undo.</span>
+        </div>
 
         <div className="relative">
           <IconSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input className="pl-9" placeholder="Search clients" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {filtered.map((acc) => {
             const isCollapsed = collapsed.has(acc.id)
             return (
             <div key={acc.id} className="flex flex-col gap-0 overflow-hidden rounded-xl border">
-              <button
-                type="button"
-                className="flex items-center gap-2 px-4 py-3 text-left hover:bg-accent/50"
-                onClick={() => toggleCollapsed(acc.id)}
-              >
-                <IconChevronDown
-                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
-                  style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
-                />
-                <span className="text-sm font-semibold">{acc.name}</span>
-              </button>
+              <div className="flex items-center justify-between pr-3">
+                <button
+                  type="button"
+                  className="flex flex-1 items-center gap-2 px-4 py-3 text-left hover:bg-accent/50"
+                  onClick={() => toggleCollapsed(acc.id)}
+                >
+                  <IconChevronDown
+                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                    style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                  />
+                  <span className="text-sm font-semibold">{acc.name}</span>
+                </button>
+                <div className="flex shrink-0 items-center gap-3">
+                  {savedAccounts.has(acc.id) ? (
+                    <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                      <IconCheck className="size-3.5" />
+                      Saved
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-primary hover:underline"
+                      onClick={() => handleSaveAccount(acc.id)}
+                    >
+                      Save
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline"
+                    onClick={() => handleResetAccount(acc.id)}
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
               <div
                 style={{
                   display: "grid",
@@ -358,12 +437,9 @@ function Step2({
                   </thead>
                   <tbody>
                     {services.map((svc, i) => {
-                      const key = `${svc.id}:${acc.id}`
-                      const isPinned = pinned.has(key)
                       const inputVal = rates[svc.id]?.[acc.id] ?? ""
                       const parsed = parseFloat(inputVal)
-                      const existingOverride = svc.clientOverridesList.find((o) => o.accountId === acc.id)
-                      const oldPrice = existingOverride?.rate ?? svc.defaultRate
+                      const oldPrice = baseRates.current[svc.id]?.[acc.id] ?? svc.defaultRate
                       const fmtOld = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${svc.rateType === "Hour" ? "/hr" : ""}`
                       const pct = inputVal !== "" && oldPrice > 0 && !isNaN(parsed)
                         ? Math.round(((parsed - oldPrice) / oldPrice) * 100)
@@ -399,7 +475,7 @@ function Step2({
                                 onChange={(v) => handleManualChange(svc.id, acc.id, v)}
                                 placeholder={svc.defaultRate > 0 ? svc.defaultRate.toFixed(2) : "0.00"}
                                 suffix={svc.rateType === "Hour" ? "/hr" : undefined}
-                                className={`w-28 ${isPinned ? "ring-1 ring-primary/40" : ""}`}
+                                className="w-28"
                               />
                             </div>
                           </td>

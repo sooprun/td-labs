@@ -229,7 +229,7 @@ type Props = {
 export function BulkUpdateTeamRatesPanel({ open, groups, services, onClose, onConfirm }: Props) {
   const [step, setStep] = React.useState<1 | 2>(1)
   const [adjustment, setAdjustment] = React.useState("10")
-  const [rounding, setRounding] = React.useState<Rounding>(5)
+  const [rounding, setRounding] = React.useState<Rounding>(1)
 
   const reset = () => { setStep(1); setAdjustment("10"); setRounding(5) }
   const handleClose = () => { onClose(); setTimeout(reset, 300) }
