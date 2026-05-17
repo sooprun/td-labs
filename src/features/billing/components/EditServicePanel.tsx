@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IconX, IconChevronDown, IconChevronRight, IconCirclePlus, IconSearch, IconTrash, IconCurrencyDollar, IconUsers, IconInfoCircle } from "@tabler/icons-react"
+import { IconX, IconChevronDown, IconChevronRight, IconCirclePlus, IconTrash, IconCurrencyDollar, IconUsers, IconInfoCircle } from "@tabler/icons-react"
 
 import {
   Sheet,
@@ -7,17 +7,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CurrencyInput, CurrencyCell } from "./RateInputs"
+import { AddClientModal } from "./AddClientModal"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -30,80 +24,6 @@ import {
 import type { ServiceItem, RateType, ClientOverride } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
 import type { RateGroup } from "@/mock/data/team-member-rates"
-
-// ─── AddClientModal ───────────────────────────────────────────────────────────
-
-function AddClientModal({
-  open,
-  onClose,
-  availableAccounts,
-  onAdd,
-}: {
-  open: boolean
-  onClose: () => void
-  availableAccounts: typeof accounts
-  onAdd: (ids: string[]) => void
-}) {
-  const [selected, setSelected] = React.useState<string[]>([])
-  const [search, setSearch] = React.useState("")
-
-  React.useEffect(() => {
-    if (open) { setSelected([]); setSearch("") }
-  }, [open])
-
-  const toggle = (id: string) =>
-    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
-
-  const filtered = availableAccounts
-    .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name))
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent className="flex max-w-sm flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="shrink-0 border-b px-4 pb-3 pt-4">
-          <DialogTitle>Choose client</DialogTitle>
-        </DialogHeader>
-        <div className="relative shrink-0 border-b px-3 py-2">
-          <IconSearch className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoFocus
-          />
-        </div>
-        <div className="max-h-64 overflow-y-auto py-1">
-          {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No clients found</p>
-          ) : filtered.map((acc) => (
-            <label key={acc.id} className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-accent">
-              <input
-                type="checkbox"
-                className="table-checkbox shrink-0"
-                checked={selected.includes(acc.id)}
-                onChange={() => toggle(acc.id)}
-              />
-              <span className="text-sm">{acc.name}</span>
-            </label>
-          ))}
-        </div>
-        <div className="flex shrink-0 gap-3 border-t px-4 py-3">
-          <Button
-            size="xl"
-            className="px-5"
-            disabled={selected.length === 0}
-            onClick={() => { onAdd(selected); onClose() }}
-          >
-            Add {selected.length > 0 ? selected.length : ""} client{selected.length !== 1 ? "s" : ""}
-          </Button>
-          <Button size="xl" className="px-5" variant="outline" onClick={onClose}>Cancel</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 const CATEGORIES = ["Advisory", "Bookkeeping", "Payroll", "Tax"]
 const MAX_DESCRIPTION = 4000
