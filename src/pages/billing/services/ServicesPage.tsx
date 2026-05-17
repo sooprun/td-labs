@@ -34,7 +34,6 @@ import { protoAction } from "@/lib/proto"
 import { toast } from "sonner"
 import type { ServiceItem } from "@/mock/services"
 import { ServicesBulkActionsBar } from "@/features/billing/components/ServicesBulkActionsBar"
-import { ClientRatesModal } from "@/features/billing/components/ClientRatesModal"
 import { EditServicePanel } from "@/features/billing/components/EditServicePanel"
 import { BulkUpdateRatesPanel } from "@/features/billing/components/BulkUpdateRatesPanel"
 
@@ -258,7 +257,7 @@ export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsCha
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [editingService, setEditingService] = React.useState<ServiceItem | null>(null)
   const [bulkUpdateOpen, setBulkUpdateOpen] = React.useState(false)
-  const [viewingRates, setViewingRates] = React.useState<ServiceItem | null>(null)
+
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -440,7 +439,7 @@ export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsCha
                       {svc.customRates > 0 ? (
                         <button
                           className="text-sm text-primary hover:underline underline-offset-2"
-                          onClick={() => setViewingRates(svc)}
+                          onClick={() => setEditingService(svc)}
                         >
                           {svc.customRates} {svc.customRates === 1 ? "client" : "clients"}
                         </button>
@@ -501,15 +500,6 @@ export function ServicesPage({ items, onItemsChange, rateGroups, onRateGroupsCha
           if (updatedRateGroups) onRateGroupsChange(updatedRateGroups)
           setSelectedIds([])
           setBulkUpdateOpen(false)
-        }}
-      />
-      <ClientRatesModal
-        service={viewingRates}
-        onClose={() => setViewingRates(null)}
-        onSave={(updated) => {
-          onItemsChange(items.map((s) => s.id === updated.id ? updated : s))
-          setViewingRates(null)
-          toast.success(`"${updated.name}" saved`)
         }}
       />
     </PageLayout>
