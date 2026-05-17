@@ -11,6 +11,7 @@ import {
   IconClockHour3,
   IconUser,
   IconClock,
+  IconPalette,
 } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +28,10 @@ import { accounts } from "@/mock/accounts"
 
 const RECENT_IDS = ["acct-andrew-lee", "acct-mary-murphy", "acct-acme-corp"]
 
+const SECRET_PAGES = [
+  { label: "UI Kit", path: "/app/ui-kit", keyword: "ui-kit", icon: IconPalette },
+]
+
 function GlobalSearch({ onNavigate }: { onNavigate: (path: string) => void }) {
   const [query, setQuery] = React.useState("")
   const [open, setOpen] = React.useState(false)
@@ -34,9 +39,13 @@ function GlobalSearch({ onNavigate }: { onNavigate: (path: string) => void }) {
 
   const recentAccounts = RECENT_IDS.map((id) => accounts.find((a) => a.id === id)).filter(Boolean) as typeof accounts
 
-  const results = query.trim().length > 0
-    ? accounts.filter((a) => a.name.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
+  const trimmed = query.trim().toLowerCase()
+  const accountResults = trimmed.length > 0
+    ? accounts.filter((a) => a.name.toLowerCase().includes(trimmed)).slice(0, 6)
     : recentAccounts
+
+  // Secret pages — only shown on exact full keyword match
+  const secretResults = SECRET_PAGES.filter((p) => p.keyword === trimmed)
 
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -72,10 +81,25 @@ function GlobalSearch({ onNavigate }: { onNavigate: (path: string) => void }) {
               Recent
             </div>
           )}
-          {results.length === 0 && (
+          {secretResults.map((page) => (
+            <button
+              key={page.path}
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-accent"
+              onMouseDown={(e) => { e.preventDefault(); onNavigate(page.path); setOpen(false); setQuery("") }}
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <page.icon className="size-3.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{page.label}</div>
+                <div className="text-xs text-muted-foreground">Page</div>
+              </div>
+            </button>
+          ))}
+          {accountResults.length === 0 && secretResults.length === 0 && (
             <p className="px-3 py-4 text-center text-sm text-muted-foreground">No results</p>
           )}
-          {results.map((acc) => (
+          {accountResults.map((acc) => (
             <button
               key={acc.id}
               className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-accent"

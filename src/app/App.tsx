@@ -13,6 +13,7 @@ import { serviceItems } from "@/mock/services"
 import type { ServiceItem } from "@/mock/services"
 import { accounts } from "@/mock/accounts"
 import { PrototypePage } from "@/pages/prototype/PrototypePage"
+import { UIKitPage } from "@/pages/ui-kit/UIKitPage"
 
 export function App() {
   const [services, setServices] = React.useState<ServiceItem[]>(serviceItems)
@@ -56,6 +57,15 @@ export function App() {
     setActivePath(path)
   }, [])
 
+  // Handle hidden routes (not in navigation) before resolveProductRoute
+  if (activePath === "/app/ui-kit") {
+    return (
+      <AppShell activePath="" onNavigate={handleNavigate}>
+        <UIKitPage />
+      </AppShell>
+    )
+  }
+
   // Handle dynamic account detail route before pageMap lookup
   const accountIdSegment = activePath.startsWith("/app/clients/")
     ? activePath.slice("/app/clients/".length)
@@ -89,6 +99,7 @@ export function App() {
     "/app/workflow/pipelines": <PipelinesPage />,
     "/app/billing": <InvoicesPage />,
     "/app/billing/services": <ServicesPage items={services} onItemsChange={setServices} />,
+    "/app/ui-kit": <UIKitPage />,
   }
 
   const page = pageMap[activeRoute.path] ?? (

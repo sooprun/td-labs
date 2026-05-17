@@ -122,6 +122,7 @@ type CurrencyCellProps = {
   suffix?: string       // e.g. "/hr"
   decimals?: number     // default 2
   className?: string    // override root width; default "w-full" fills the cell, pass "" to hug content
+  dollar?: "hug" | "left"  // "hug" (default): $ hugs the digits; "left": $ fixed at left edge
 }
 
 export function CurrencyCell({
@@ -132,6 +133,7 @@ export function CurrencyCell({
   suffix,
   decimals = 2,
   className = "w-full",
+  dollar = "hug",
 }: CurrencyCellProps) {
   // isTyping: true only after the first keystroke — until then we keep showing the formatted value
   const [isTyping, setIsTyping] = React.useState(false)
@@ -147,53 +149,69 @@ export function CurrencyCell({
   // Blurred → show formatted
   const displayVal = isTyping ? value : formatted
 
-  // Measure exact pixel width from a hidden mirror span — ch units are inaccurate for
-  // proportional fonts (commas and periods are narrower than "0", causing gaps before suffix)
+  // Measure exact pixel width from a hidden mirror span — only needed in "hug" mode
   React.useLayoutEffect(() => {
-    if (mirrorRef.current) {
+    if (dollar === "hug" && mirrorRef.current) {
       setInputWidth(mirrorRef.current.offsetWidth + 2)
     }
-  }, [displayVal])
+  }, [displayVal, dollar])
+
+  const sharedInputProps = {
+    ref: inputRef,
+    type: "text" as const,
+    inputMode: "decimal" as const,
+    placeholder,
+    value: displayVal,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsTyping(true)
+      onChange(e.target.value)
+    },
+    onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsTyping(false)
+      const t = e.target
+      requestAnimationFrame(() => t.select())
+    },
+    onBlur: () => {
+      setIsTyping(false)
+      if (!value.trim() && !placeholder) onChange("0")
+      onBlur?.()
+    },
+  }
 
   return (
     <div
       className={`group flex h-full cursor-text items-center justify-end gap-1.5 border-b-2 border-transparent pl-3 pr-4 py-2 transition-colors hover:border-primary hover:bg-primary/5 focus-within:border-primary focus-within:bg-transparent ${className}`}
       onClick={() => inputRef.current?.focus()}
     >
-      {/* $ + value grouped together, right-aligned */}
-      <div className="flex items-center gap-0.5">
-        {/* Hidden mirror — renders same text/font as input for exact width measurement */}
-        <span ref={mirrorRef} className="pointer-events-none invisible absolute whitespace-pre text-sm" aria-hidden>
-          {displayVal || formatCurrency(0, decimals)}
-        </span>
-        <span className="pointer-events-none text-sm text-muted-foreground">$</span>
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="decimal"
-          className="min-w-0 bg-transparent text-right text-sm outline-none"
-          style={{ width: inputWidth }}
-          placeholder={placeholder}
-          value={displayVal}
-          onChange={(e) => {
-            setIsTyping(true)
-            onChange(e.target.value)
-          }}
-          onFocus={(e) => {
-            setIsTyping(false)  // reset so we show formatted on each new focus
-            const t = e.target
-            requestAnimationFrame(() => t.select())
-          }}
-          onBlur={() => {
-            setIsTyping(false)
-            if (!value.trim() && !placeholder) onChange("0")
-            onBlur?.()
-          }}
-        />
-        {suffix && (
-          <span className="pointer-events-none text-xs text-muted-foreground">{suffix}</span>
-        )}
-      </div>
+      {dollar === "hug" ? (
+        /* $ hugs the digits — input sized to content via mirror span */
+        <div className="flex items-center gap-0.5">
+          <span ref={mirrorRef} className="pointer-events-none invisible absolute whitespace-pre text-sm" aria-hidden>
+            {displayVal || placeholder || formatCurrency(0, decimals)}
+          </span>
+          <span className="pointer-events-none text-sm text-muted-foreground">$</span>
+          <input
+            {...sharedInputProps}
+            className="min-w-0 bg-transparent text-right text-sm outline-none"
+            style={{ width: inputWidth }}
+          />
+          {suffix && (
+            <span className="pointer-events-none text-xs text-muted-foreground">{suffix}</span>
+          )}
+        </div>
+      ) : (
+        /* $ fixed at left edge — input fills remaining space */
+        <>
+          <span className="pointer-events-none shrink-0 text-sm text-muted-foreground">$</span>
+          <input
+            {...sharedInputProps}
+            className="min-w-0 flex-1 bg-transparent text-right text-sm outline-none"
+          />
+          {suffix && (
+            <span className="pointer-events-none shrink-0 text-xs text-muted-foreground">{suffix}</span>
+          )}
+        </>
+      )}
       <IconPencil className="size-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary group-focus-within:text-primary" />
     </div>
   )

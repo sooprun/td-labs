@@ -1085,7 +1085,7 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
                             value={inputVal}
                             onChange={(v) => handleOverrideChange(svc.id, v)}
                             onBlur={() => commitOverride(svc)}
-                            placeholder={svc.defaultRate > 0 ? String(svc.defaultRate) : "0.00"}
+                            placeholder={svc.defaultRate > 0 ? svc.defaultRate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
                             suffix={svc.rateType === "Hour" ? "/hr" : undefined}
                             className=""
                           />
