@@ -1165,7 +1165,20 @@ function CustomRatesTabContent({ accountId, services, onServicesChange }: { acco
           services={services}
           selectedIds={selectedIds}
           onClose={() => setSetOverridesOpen(false)}
-          onSave={(updated) => { onServicesChange(updated); setSetOverridesOpen(false); setSelectedIds([]) }}
+          onSave={(updated) => {
+            onServicesChange(updated)
+            setOverrideInputs((prev) => {
+              const next = { ...prev }
+              updated.forEach((svc) => {
+                const o = svc.clientOverridesList.find((o) => o.accountId === accountId)
+                if (o) next[svc.id] = String(o.rate)
+                else delete next[svc.id]
+              })
+              return next
+            })
+            setSetOverridesOpen(false)
+            setSelectedIds([])
+          }}
         />
       )}
 

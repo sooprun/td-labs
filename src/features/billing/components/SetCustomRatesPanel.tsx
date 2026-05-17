@@ -395,7 +395,7 @@ function Step2({
 
                       // Placeholder: calculated value if active, else baseline
                       const placeholder = calcVal !== undefined
-                        ? calcVal % 1 === 0 ? String(calcVal) : calcVal.toFixed(2)
+                        ? calcVal.toFixed(2)
                         : oldPrice > 0 ? oldPrice.toFixed(2) : "0.00"
 
                       return (
